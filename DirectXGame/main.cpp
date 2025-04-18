@@ -16,6 +16,9 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	GameScene* gameScene = new GameScene();
 	// ゲームシーンの初期化
 	gameScene->Initialize();
+	// ImGuiManagerインスタンスの取得
+	ImGuiManager* imguiManager = ImGuiManager::GetInstance();
+
 	// メインループ
 	while (true) {
 
@@ -24,8 +27,12 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 			break;
 		}
+		// ImGui受付開始
+		imguiManager->Begin();
 		// ゲームシーンの更新
 		gameScene->Update();
+		// ImGui受付終了
+		imguiManager->End();
 		// 確認//////
 		//  描画開始
 		dxComon->PreDraw();
@@ -33,13 +40,15 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 		// ゲームシーンの描画
 		gameScene->Draw();
-
+		// 軸表示の描画
+		AxisIndicator::GetInstance()->Draw();
+		// ImGui描画
+		imguiManager->Draw();
 		// 描画終了
 		dxComon->PostDraw();
-
-		// nullptrの代入
-		gameScene = nullptr;
 	}
+	// nullptrの代入
+	gameScene = nullptr; // 終了処理
 	// ゲームシーンの解放
 	delete gameScene;
 	// エンジンの終了処理
