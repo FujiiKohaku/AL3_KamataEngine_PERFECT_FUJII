@@ -36,11 +36,10 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 		// 描画終了
 		dxComon->PostDraw();
-
-		// nullptrの代入
-		gameScene = nullptr;
 	}
 	// ゲームシーンの解放
+	// nullptrの代入
+	gameScene = nullptr;
 	delete gameScene;
 	// エンジンの終了処理
 	KamataEngine::Finalize();
