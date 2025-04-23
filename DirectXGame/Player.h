@@ -3,7 +3,7 @@
 class Player {
 public:
 	// 初期化
-	void Initialize(KamataEngine::Model* model, uint32_t textureHandle);
+	void Initialize(KamataEngine::Model* model, uint32_t textureHandle, KamataEngine::Camera* camera);
 	// 更新
 	void Update();
 	// 描画
@@ -20,4 +20,6 @@ private: // C++ではメンバ変数は特別な理由がなければprivateに�
 	KamataEngine::Model* model_ = nullptr;
 	// テクスチャハンドル
 	uint32_t textureHandle_ = 0u;
+	// カメラ
+	KamataEngine::Camera* camera_ = nullptr;
 };
