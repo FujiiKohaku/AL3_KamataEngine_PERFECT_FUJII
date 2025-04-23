@@ -34,7 +34,7 @@ void GameScene::Initialize() {
 	// 音声再生
 	Audio::GetInstance()->PlayWave(soundDataHandle_);
 	// 音声再生
-	voiceHandle_ = Audio::GetInstance()->PlayWave(soundDataHandle_, false);
+	voiceHandle_ = Audio::GetInstance()->PlayWave(soundDataHandle_, true);
 
 	// ライン描画が参照カメラを指定する(アドレス渡し)
 	PrimitiveDrawer::GetInstance()->SetCamera(&camera_);
@@ -45,6 +45,8 @@ void GameScene::Initialize() {
 	AxisIndicator::GetInstance()->SetVisible(true);
 	//軸方向表示が参照するビュープロジェクションを指定する（アドレス渡し）
 	AxisIndicator::GetInstance()->SetTargetCamera(&debugCamera_->GetCamera());
+
+	Audio::GetInstance()->StopWave(voiceHandle_);
 }
 
 // 更新
@@ -58,7 +60,7 @@ void GameScene::Update() {
 	sprite_->SetPosition(position);
 
 	// スペースキーを推した瞬間
-	if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
+	if (Input::GetInstance()->PushKey(DIK_SPACE)) {
 		// 音声停止
 		Audio::GetInstance()->StopWave(voiceHandle_);
 	}
