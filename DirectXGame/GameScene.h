@@ -37,6 +37,8 @@ public:
 
 	// アフィン変換行列
 	KamataEngine::Matrix4x4 MakeAffineMatrix(const KamataEngine::Vector3& scale, const KamataEngine::Vector3& rotate, const KamataEngine::Vector3& translate);
+	//ビュー行列
+	Matrix4x4 MakeViewportMatrix(float left, float top, float width, float height, float minDepth, float maxDepth);
 
 private:
 	// テクスチャハンドル
@@ -50,5 +52,11 @@ private:
 	// 3Dモデルデータ(block)AL3_02_02
 	KamataEngine::Model* modelBlock = nullptr;
 	// ブロック用のワールドトランスフォームAL3_02_02
-	std::vector<std::vector<KamataEngine::WorldTransform*>>worldTransformBlocks_;
+	std::vector<std::vector<KamataEngine::WorldTransform*>> worldTransformBlocks_;
+
+	// デバックカメラ有効AL3_02_02
+	bool isDebugCameraActive = false;
+	// デバッグカメラAL3_02_02
+	DebugCamera* debugCamera_ = nullptr;
+	
 };

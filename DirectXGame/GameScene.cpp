@@ -35,12 +35,18 @@ void GameScene::Initialize() {
 	// キューブの生成AL3_02_02
 	for (uint32_t i = 0; i < kNumBlockVirtial; ++i) {
 		for (uint32_t j = 0; j < kNumBlockHorizontal; ++j) {
+			if ((i + j) % 2 == 0) {
+				continue;
+			}
 			worldTransformBlocks_[i][j] = new WorldTransform();
 			worldTransformBlocks_[i][j]->Initialize();
 			worldTransformBlocks_[i][j]->translation_.x = kBlockWidth * j;
 			worldTransformBlocks_[i][j]->translation_.y = kBlockHeight * i;
 		}
 	}
+
+	// デバッグカメラの生成
+	debugCamera_ = new DebugCamera(1280, 720);
 }
 
 // 更新
@@ -48,12 +54,28 @@ void GameScene::Update() {
 	// 自キャラの更新
 	player_->Update();
 	/* ブロックの更新AL3_02_02*/
-	for (const std::vector<WorldTransform*>& row : worldTransformBlocks_) {
-		for (WorldTransform* worldTransformBlock : row) {
+	for (const std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
+		for (WorldTransform* worldTransformBlock : worldTransformBlockLine) {
+			if (!worldTransformBlock)
+				continue;
 			worldTransformBlock->matWorld_ = MakeAffineMatrix(worldTransformBlock->scale_, worldTransformBlock->rotation_, worldTransformBlock->translation_);
 
 			worldTransformBlock->TransferMatrix();
 		}
+	}
+
+#ifdef _DEBUG
+	// デバックの時Cキーを押すと状態が反転する
+	if (Input::GetInstance()->TriggerKey(DIK_C)) {
+		isDebugCameraActive = !isDebugCameraActive;
+	}
+#endif // ! _DEBUG
+	// カメラの処理AL3_02_02*/
+	if (isDebugCameraActive) {
+		// デバッグカメラの更新AL3_02_02*/
+		debugCamera_->Update();
+		camera_->matView = MakeViewportMatrix(0.0f, 0.0f, 1280.0f, 720.0f, 0.0f, 1.0f);
+
 	}
 }
 // 描画
@@ -65,8 +87,11 @@ void GameScene::Draw() {
 	model_->PreDraw(dxCommon->GetCommandList());
 	player_->Draw();
 	// ブロックの描画AL3_02_02
-	for (const std::vector<WorldTransform*>& row : worldTransformBlocks_) {
-		for (WorldTransform* worldTransformBlock : row) {
+	for (const std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
+		for (WorldTransform* worldTransformBlock : worldTransformBlockLine) {
+			if (!worldTransformBlock)
+				continue;
+
 			modelBlock->Draw(*worldTransformBlock, *camera_, nullptr);
 		}
 	}
@@ -88,6 +113,8 @@ GameScene::~GameScene() {
 		}
 	}
 	worldTransformBlocks_.clear();
+	// デバッグカメラの解放
+	delete debugCamera_;
 }
 
 // 平行移動行列
@@ -195,4 +222,19 @@ KamataEngine::Matrix4x4 GameScene::MakeAffineMatrix(const KamataEngine::Vector3&
 	KamataEngine::Matrix4x4 matTransform = Multiply(Multiply(matScale, matRot), matTrans);
 
 	return matTransform;
+}
+
+Matrix4x4 GameScene::MakeViewportMatrix(float left, float top, float width, float height, float minDepth, float maxDepth) {
+	Matrix4x4 m = {};
+
+	// 行0：X方向スケーリングと移動
+	m.m[0][0] = width / 2.0f;
+	m.m[3][0] = left + width / 2.0f;
+	m.m[1][1] = -height / 2.0f;
+	m.m[3][1] = top + height / 2.0f;
+	m.m[2][2] = maxDepth - minDepth;
+	m.m[2][3] = minDepth;
+	m.m[3][3] = 1.0f;
+
+	return m;
 }
