@@ -17,6 +17,21 @@ void GameScene::Initialize() {
 	player_->Initialize(model_, textureHandle_, camera_);
 	// 3Dモデルデータの生成(block)AL3_02_02
 	modelBlock = Model::Create();
+
+	// 初期化AL3_02_02
+	// 要素数AL3_02_02
+	const uint32_t kNumBlockHorizontal = 20;
+	// ブロック１個文の横幅AL3_02_02
+	const float kBlockWidth = 2.0f;
+	// 要素数を変更するAL3_02_02
+	worldTransformBlocks_.resize(kNumBlockHorizontal);
+	// キューブの生成AL3_02_02
+	for (uint32_t i = 0; i < kNumBlockHorizontal; ++i) {
+		worldTransformBlocks_[i] = new WorldTransform();
+		worldTransformBlocks_[i]->Initialize();
+		worldTransformBlocks_[i]->translation_.x = kBlockWidth * i;
+		worldTransformBlocks_[i]->translation_.y = 0.0f;
+	}
 }
 // 更新
 void GameScene::Update() {
