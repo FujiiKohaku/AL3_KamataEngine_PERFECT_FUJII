@@ -15,6 +15,8 @@ void GameScene::Initialize() {
 	player_ = new Player();
 	// 自キャラの初期化
 	player_->Initialize(model_, textureHandle_, camera_);
+	// 3Dモデルデータの生成(block)AL3_02_02
+	modelBlock = Model::Create();
 }
 // 更新
 void GameScene::Update() {
@@ -23,7 +25,7 @@ void GameScene::Update() {
 }
 // 描画
 void GameScene::Draw() {
-	//DirectXCommonインスタンスの取得
+	// DirectXCommonインスタンスの取得
 	DirectXCommon* dxCommon = DirectXCommon::GetInstance();
 
 	// 自キャラの描画
@@ -39,4 +41,9 @@ GameScene::~GameScene() {
 	delete model_;
 	// 自キャラの解散
 	delete player_;
+	/* 3Dモデルデータの解放(block)AL3_02_02*/
+	for (WorldTransform* worldTransFormBlock : worldTransformBlocks_) {
+		delete worldTransFormBlock;
+	}
+	worldTransformBlocks_.clear();
 }
