@@ -2,8 +2,6 @@
 #include "KamataEngine.h"
 #include <Windows.h>
 
-using namespace KamataEngine; // これ書いておくとkamataEngine::書かなくてよい
-
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
@@ -11,7 +9,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	KamataEngine::Initialize();
 
 	// DirectXCommonインスタスの取得
-	DirectXCommon* dxComon = DirectXCommon::GetInstance();
+	KamataEngine::DirectXCommon* dxComon = KamataEngine::DirectXCommon::GetInstance();
 	// ゲームシーンのインスタンス生成//
 	GameScene* gameScene = new GameScene();
 	// ゲームシーンの初期化
