@@ -8,8 +8,8 @@ void GameScene::Initialize() {
 	textureHandle_ = TextureManager::Load("player.png");
 	// 3Dモデルデータの生成
 	model_ = Model::Create();
-	camera_ = new Camera();
 	// カメラの初期化
+	camera_ = new Camera();
 	camera_->Initialize();
 	// 自キャラの生成
 	player_ = new Player();
@@ -23,7 +23,7 @@ void GameScene::Update() {
 }
 // 描画
 void GameScene::Draw() {
-	//DirectXCommonインスタンスの取得
+	// DirectXCommonインスタンスの取得
 	DirectXCommon* dxCommon = DirectXCommon::GetInstance();
 
 	// 自キャラの描画
@@ -39,4 +39,6 @@ GameScene::~GameScene() {
 	delete model_;
 	// 自キャラの解散
 	delete player_;
+	//
+	delete camera_;
 }

@@ -23,4 +23,5 @@ public:
 	KamataEngine::Camera* camera_;
 	// 自キャラ
 	Player* player_ = nullptr;
+
 };
