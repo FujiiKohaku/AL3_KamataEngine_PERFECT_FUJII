@@ -20,7 +20,7 @@ public:
 	// 3Dモデルデータ
 	KamataEngine::Model* model_ = nullptr;
 	// カメラ
-	KamataEngine::Camera camera_;
+	KamataEngine::Camera* camera_;
 	// 自キャラ
 	Player* player_ = nullptr;
 };

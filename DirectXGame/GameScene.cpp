@@ -8,13 +8,13 @@ void GameScene::Initialize() {
 	textureHandle_ = TextureManager::Load("player.png");
 	// 3Dモデルデータの生成
 	model_ = Model::Create();
-
+	camera_ = new Camera();
 	// カメラの初期化
-	camera_.Initialize();
+	camera_->Initialize();
 	// 自キャラの生成
 	player_ = new Player();
 	// 自キャラの初期化
-	player_->Initialize(model_, textureHandle_);
+	player_->Initialize(model_, textureHandle_, camera_);
 }
 // 更新
 void GameScene::Update() {
@@ -23,8 +23,13 @@ void GameScene::Update() {
 }
 // 描画
 void GameScene::Draw() {
+	//DirectXCommonインスタンスの取得
+	DirectXCommon* dxCommon = DirectXCommon::GetInstance();
+
 	// 自キャラの描画
+	model_->PreDraw(dxCommon->GetCommandList());
 	player_->Draw();
+	model_->PostDraw();
 }
 // コンストラクタ
 GameScene::GameScene() {}
