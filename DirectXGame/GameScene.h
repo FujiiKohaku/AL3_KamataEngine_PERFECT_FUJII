@@ -23,7 +23,7 @@ public:
 
 	// 拡大縮小行列
 	KamataEngine::Matrix4x4 Matrix4x4MakeScaleMatrix(const KamataEngine::Vector3& scale);
-	
+
 	// 座標変換
 	KamataEngine::Vector3 Transform(const KamataEngine::Vector3& vector, const KamataEngine::Matrix4x4& matrix);
 
@@ -50,5 +50,5 @@ private:
 	// 3Dモデルデータ(block)AL3_02_02
 	KamataEngine::Model* modelBlock = nullptr;
 	// ブロック用のワールドトランスフォームAL3_02_02
-	std::vector<KamataEngine::WorldTransform*> worldTransformBlocks_;
+	std::vector<std::vector<KamataEngine::WorldTransform*>>worldTransformBlocks_;
 };

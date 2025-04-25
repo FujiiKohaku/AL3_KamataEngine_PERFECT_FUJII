@@ -20,29 +20,40 @@ void GameScene::Initialize() {
 
 	// 初期化AL3_02_02
 	// 要素数AL3_02_02
+	const uint32_t kNumBlockVirtial = 10;
 	const uint32_t kNumBlockHorizontal = 20;
 	// ブロック１個文の横幅AL3_02_02
 	const float kBlockWidth = 2.0f;
+	const float kBlockHeight = 2.0f;
 	// 要素数を変更するAL3_02_02
-	worldTransformBlocks_.resize(kNumBlockHorizontal);
+	// 列数の設定(縦方向のブロック数)
+	worldTransformBlocks_.resize(kNumBlockVirtial);
+	for (uint32_t i = 0; i < kNumBlockVirtial; ++i) {
+		// 一列の要素数を設定(縦方向のブロック数)
+		worldTransformBlocks_[i].resize(kNumBlockHorizontal);
+	}
 	// キューブの生成AL3_02_02
-	for (uint32_t i = 0; i < kNumBlockHorizontal; ++i) {
-		worldTransformBlocks_[i] = new WorldTransform();
-		worldTransformBlocks_[i]->Initialize();
-		worldTransformBlocks_[i]->translation_.x = kBlockWidth * i;
-		worldTransformBlocks_[i]->translation_.y = 0.0f;
+	for (uint32_t i = 0; i < kNumBlockVirtial; ++i) {
+		for (uint32_t j = 0; j < kNumBlockHorizontal; ++j) {
+			worldTransformBlocks_[i][j] = new WorldTransform();
+			worldTransformBlocks_[i][j]->Initialize();
+			worldTransformBlocks_[i][j]->translation_.x = kBlockWidth * j;
+			worldTransformBlocks_[i][j]->translation_.y = kBlockHeight * i;
+		}
 	}
 }
+
 // 更新
 void GameScene::Update() {
 	// 自キャラの更新
 	player_->Update();
 	/* ブロックの更新AL3_02_02*/
-	for (auto worldTransformBlock : worldTransformBlocks_) {
+	for (const std::vector<WorldTransform*>& row : worldTransformBlocks_) {
+		for (WorldTransform* worldTransformBlock : row) {
+			worldTransformBlock->matWorld_ = MakeAffineMatrix(worldTransformBlock->scale_, worldTransformBlock->rotation_, worldTransformBlock->translation_);
 
-		worldTransformBlock->matWorld_ = MakeAffineMatrix(worldTransformBlock->scale_, worldTransformBlock->rotation_, worldTransformBlock->translation_);
-
-		worldTransformBlock->TransferMatrix();
+			worldTransformBlock->TransferMatrix();
+		}
 	}
 }
 // 描画
@@ -53,10 +64,13 @@ void GameScene::Draw() {
 	// 自キャラの描画
 	model_->PreDraw(dxCommon->GetCommandList());
 	player_->Draw();
-	// ブロックの描画
-	for (WorldTransform* worldTransformBlock : worldTransformBlocks_) {
-		modelBlock->Draw(*worldTransformBlock, *camera_, nullptr);
+	// ブロックの描画AL3_02_02
+	for (const std::vector<WorldTransform*>& row : worldTransformBlocks_) {
+		for (WorldTransform* worldTransformBlock : row) {
+			modelBlock->Draw(*worldTransformBlock, *camera_, nullptr);
+		}
 	}
+
 	model_->PostDraw();
 }
 // コンストラクタ
@@ -68,8 +82,10 @@ GameScene::~GameScene() {
 	// 自キャラの解散
 	delete player_;
 	/* 3Dモデルデータの解放(block)AL3_02_02*/
-	for (auto worldTransFormBlock : worldTransformBlocks_) {
-		delete worldTransFormBlock;
+	for (std::vector<WorldTransform*>& worldTransformBkockLine : worldTransformBlocks_) {
+		for (WorldTransform* worldTransformBlock : worldTransformBkockLine) {
+			delete worldTransformBlock;
+		}
 	}
 	worldTransformBlocks_.clear();
 }
