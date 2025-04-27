@@ -74,8 +74,14 @@ void GameScene::Update() {
 	if (isDebugCameraActive) {
 		// デバッグカメラの更新AL3_02_02*/
 		debugCamera_->Update();
-		camera_->matView = MakeViewportMatrix(0.0f, 0.0f, 1280.0f, 720.0f, 0.0f, 1.0f);
+		camera_->matView = debugCamera_->GetCamera().matView;
+		camera_->matProjection = debugCamera_->GetCamera().matProjection;
+		// ビュープロジェクション行列の転送AL3_02_02*/
+		camera_->TransferMatrix();
+	} else {
+		// ビュープロジェクション行列の更新と転送AL3_02_02*/
 
+		camera_->UpdateMatrix();
 	}
 }
 // 描画

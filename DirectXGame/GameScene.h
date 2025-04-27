@@ -1,9 +1,7 @@
 #pragma once
 #include "KamataEngine.h"
 #include "Player.h"
-
 #include <vector>
-
 // ゲームシーン
 class GameScene {
 public:
@@ -37,8 +35,8 @@ public:
 
 	// アフィン変換行列
 	KamataEngine::Matrix4x4 MakeAffineMatrix(const KamataEngine::Vector3& scale, const KamataEngine::Vector3& rotate, const KamataEngine::Vector3& translate);
-	//ビュー行列
-	Matrix4x4 MakeViewportMatrix(float left, float top, float width, float height, float minDepth, float maxDepth);
+	// ビュー行列
+	KamataEngine::Matrix4x4 MakeViewportMatrix(float left, float top, float width, float height, float minDepth, float maxDepth);
 
 private:
 	// テクスチャハンドル
@@ -57,6 +55,5 @@ private:
 	// デバックカメラ有効AL3_02_02
 	bool isDebugCameraActive = false;
 	// デバッグカメラAL3_02_02
-	DebugCamera* debugCamera_ = nullptr;
-	
+	KamataEngine::DebugCamera* debugCamera_ = nullptr;
 };
