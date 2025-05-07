@@ -49,7 +49,7 @@ private:
 	Player* player_ = nullptr;
 	// 3Dモデルデータ(block)AL3_02_02
 	KamataEngine::Model* modelBlock = nullptr;
-	// ブロック用のワールドトランスフォームAL3_02_02
+	// ブロック用のワールドトランスフォーム//配列だって/AL3_02_02
 	std::vector<std::vector<KamataEngine::WorldTransform*>> worldTransformBlocks_;
 
 	// デバックカメラ有効AL3_02_02
