@@ -19,6 +19,7 @@ public:
 	// 平行移動行列
 	KamataEngine::Matrix4x4 MakeTranslateMatrix(const KamataEngine::Vector3& translate);
 
+
 	// 拡大縮小行列
 	KamataEngine::Matrix4x4 Matrix4x4MakeScaleMatrix(const KamataEngine::Vector3& scale);
 
