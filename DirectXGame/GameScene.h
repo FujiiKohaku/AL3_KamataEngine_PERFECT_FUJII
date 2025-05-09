@@ -1,6 +1,7 @@
 #pragma once
 #include "KamataEngine.h"
 #include "Player.h"
+#include "Skydome.h"
 #include <vector>
 // ゲームシーン
 class GameScene {
@@ -56,4 +57,8 @@ private:
 	bool isDebugCameraActive = false;
 	// デバッグカメラAL3_02_02
 	KamataEngine::DebugCamera* debugCamera_ = nullptr;
+	//スカイドームモデル
+	KamataEngine::Model* modelSkydome_ = nullptr;
+	//スカイドーム
+	Skydome* skydome_ = nullptr;
 };

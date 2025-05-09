@@ -47,6 +47,14 @@ void GameScene::Initialize() {
 
 	// デバッグカメラの生成
 	debugCamera_ = new DebugCamera(1280, 720);
+
+	/// ここから02_03
+	// skydomeを生成してモデルを渡して初期化
+	//
+	// 3Dモデルの生成
+	modelSkydome_ = Model::CreateFromOBJ("skydome", true);
+	skydome_ = new Skydome();
+	skydome_->Initialize(modelSkydome_,camera_);
 }
 
 // 更新
@@ -82,6 +90,7 @@ void GameScene::Update() {
 		// ビュープロジェクション行列の更新と転送AL3_02_02*/
 
 		camera_->UpdateMatrix();
+		skydome_->Update();
 	}
 }
 // 描画
@@ -101,7 +110,7 @@ void GameScene::Draw() {
 			modelBlock->Draw(*worldTransformBlock, *camera_, nullptr);
 		}
 	}
-
+	skydome_->Draw();
 	model_->PostDraw();
 }
 // コンストラクタ
@@ -121,6 +130,8 @@ GameScene::~GameScene() {
 	worldTransformBlocks_.clear();
 	// デバッグカメラの解放
 	delete debugCamera_;
+	// AL3_02_03
+	delete skydome_;
 }
 
 // 平行移動行列
