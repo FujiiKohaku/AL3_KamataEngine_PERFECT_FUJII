@@ -1,6 +1,7 @@
 #pragma once
 #include "KamataEngine.h"
 #include "Player.h"
+#include "Skydome.h"
 #include <vector>
 // ゲームシーン
 class GameScene {
@@ -10,7 +11,27 @@ public:
 	// 更新
 	void Update();
 	// 描画
-	void Draw();
+	// 描画
+	void Draw() {
+		// DirectXCommonインスタンスの取得
+		DirectXCommon* dxCommon = DirectXCommon::GetInstance();
+
+		// 自キャラの描画
+		model_->PreDraw(dxCommon->GetCommandList());
+		player_->Draw();
+		// ブロックの描画AL3_02_02
+		for (const std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
+			for (WorldTransform* worldTransformBlock : worldTransformBlockLine) {
+				if (!worldTransformBlock)
+					continue;
+
+				modelBlock->Draw(*worldTransformBlock, *camera_, nullptr);
+			}
+		}
+		// skydome描画02_03
+		skydome_->Draw();
+		model_->PostDraw();
+	}
 	//////////////////
 	// 関数AL3_02_02//
 	///////////////////
@@ -51,9 +72,13 @@ private:
 	KamataEngine::Model* modelBlock = nullptr;
 	// ブロック用のワールドトランスフォーム//配列だって/AL3_02_02
 	std::vector<std::vector<KamataEngine::WorldTransform*>> worldTransformBlocks_;
-
 	// デバックカメラ有効AL3_02_02
 	bool isDebugCameraActive = false;
 	// デバッグカメラAL3_02_02
 	KamataEngine::DebugCamera* debugCamera_ = nullptr;
+	
+	//02_03_天球
+	Skydome* skydome_ = nullptr;
+	// スカイドームの生成3Dモデル02_03
+	KamataEngine::Model* modelSkydome_ = nullptr;
 };

@@ -25,6 +25,9 @@ void GameScene::Initialize() {
 	// ブロック１個文の横幅AL3_02_02
 	const float kBlockWidth = 2.0f;
 	const float kBlockHeight = 2.0f;
+	// 画面幅
+	const int windowWidth = 1280;
+	const int windowHeight = 720;
 	// 要素数を変更するAL3_02_02
 	// 列数の設定(縦方向のブロック数)
 	worldTransformBlocks_.resize(kNumBlockVirtial);
@@ -46,7 +49,11 @@ void GameScene::Initialize() {
 	}
 
 	// デバッグカメラの生成
-	debugCamera_ = new DebugCamera(1280, 720);
+	debugCamera_ = new DebugCamera(windowWidth, windowHeight);
+
+	skydome = new Skydome();
+	// 3Dモデルの生成(skydome)02_03
+	modelSkydome_ = Model::CreateFromOBJ("skydome", true);
 }
 
 // 更新
@@ -69,7 +76,6 @@ void GameScene::Update() {
 	if (Input::GetInstance()->TriggerKey(DIK_C)) {
 		isDebugCameraActive = !isDebugCameraActive;
 	}
-#endif // ! _DEBUG
 	// カメラの処理AL3_02_02*/
 	if (isDebugCameraActive) {
 		// デバッグカメラの更新AL3_02_02*/
@@ -83,26 +89,10 @@ void GameScene::Update() {
 
 		camera_->UpdateMatrix();
 	}
-}
-// 描画
-void GameScene::Draw() {
-	// DirectXCommonインスタンスの取得
-	DirectXCommon* dxCommon = DirectXCommon::GetInstance();
+#endif _DEBUG
 
-	// 自キャラの描画
-	model_->PreDraw(dxCommon->GetCommandList());
-	player_->Draw();
-	// ブロックの描画AL3_02_02
-	for (const std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
-		for (WorldTransform* worldTransformBlock : worldTransformBlockLine) {
-			if (!worldTransformBlock)
-				continue;
-
-			modelBlock->Draw(*worldTransformBlock, *camera_, nullptr);
-		}
-	}
-
-	model_->PostDraw();
+	// スカイドームの更新
+	skydome_->Update();
 }
 // コンストラクタ
 GameScene::GameScene() {}
@@ -121,6 +111,8 @@ GameScene::~GameScene() {
 	worldTransformBlocks_.clear();
 	// デバッグカメラの解放
 	delete debugCamera_;
+	// スカイドーム解放02_03
+	delete modelSkydome_;
 }
 
 // 平行移動行列
