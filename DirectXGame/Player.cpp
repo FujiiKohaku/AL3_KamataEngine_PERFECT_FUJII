@@ -10,6 +10,7 @@ void Player::Initialize(KamataEngine::Model* model, uint32_t textureHandle, Kama
 	// 引数の内容を記録
 	camera_ = camera;
 
+
 	// テクスチャハンドル
 	textureHandle_ = textureHandle;
 	worldTransform_.Initialize();
