@@ -13,6 +13,7 @@ public:
 	// デストラクタ
 	~Player();
 
+
 private: // C++ではメンバ変数は特別な理由がなければprivateにする
 	// ワールド変換データ
 	KamataEngine::WorldTransform worldTransform_;
