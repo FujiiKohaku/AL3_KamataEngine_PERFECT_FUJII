@@ -1,4 +1,5 @@
 #pragma once
+#include "Function.h"
 #include "KamataEngine.h"
 class Player {
 public:
@@ -12,7 +13,6 @@ public:
 	Player();
 	// デストラクタ
 	~Player();
-
 
 private: // C++ではメンバ変数は特別な理由がなければprivateにする
 	// ワールド変換データ

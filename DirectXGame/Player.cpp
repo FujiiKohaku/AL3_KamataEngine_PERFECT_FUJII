@@ -1,4 +1,6 @@
 #include "Player.h"
+#include "WorldRowFunction.h"
+#include "imgui.h"
 #include <cassert>
 
 // 初期化
@@ -10,19 +12,18 @@ void Player::Initialize(KamataEngine::Model* model, uint32_t textureHandle, Kama
 	// 引数の内容を記録
 	camera_ = camera;
 
-
 	// テクスチャハンドル
 	textureHandle_ = textureHandle;
 	worldTransform_.Initialize();
 }
 // 更新
 void Player::Update() {
-	// 行列を定数バッファに転送
-	worldTransform_.TransferMatrix();
+
+	// ここより上に処理書いて―
+	WorldRowFunction::MakeAffinTransFerMatrix(worldTransform_);
 }
 // 描画
 void Player::Draw() {
-
 
 	model_->Draw(worldTransform_, *camera_, textureHandle_);
 
