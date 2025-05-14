@@ -4,7 +4,7 @@
 // マップチップ種別の定義
 enum class MapChipType {
 	kBlank, // 空白
-	kBlock, // ブロック
+	kBlock, // ブロッ
 };
 
 struct MapChipDate {
