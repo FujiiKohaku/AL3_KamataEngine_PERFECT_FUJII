@@ -1,6 +1,7 @@
 #pragma once
 #include "Function.h"
 #include "KamataEngine.h"
+#include "MapChipField.h"
 #include "Player.h"
 #include "Skydome.h"
 #include <vector>
@@ -18,6 +19,11 @@ public:
 	///////////////////
 	GameScene();
 	~GameScene();
+
+	// マップチップフィールド
+	MapChipField* mapChipField_;
+
+		void GenerateBlocks();
 
 private:
 	// テクスチャハンドル

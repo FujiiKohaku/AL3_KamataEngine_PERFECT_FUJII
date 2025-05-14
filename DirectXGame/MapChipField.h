@@ -29,6 +29,14 @@ public:
 
 	void LoadMapChipCsv(const std::string& filepath);
 
+	MapChipType GetMapChipTypeIndex(uint32_t xIndex, uint32_t yIndex);
+
+	KamataEngine::Vector3 GetMapChipPositionByIndex(uint32_t xIndex, uint32_t yIndex);
+
+	uint32_t GetBlockWidth() { return static_cast<uint32_t>(kBlockWidth); }
+
+	uint32_t GetBlockHeight() { return static_cast<uint32_t>(kBlockHeight); }
+
 private:
 	// 1ブロックのサイズ
 	static inline const float kBlockWidth = 1.0f;

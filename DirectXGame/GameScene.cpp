@@ -20,30 +20,11 @@ void GameScene::Initialize() {
 
 	// 初期化AL3_02_02
 	// 要素数AL3_02_02
-	const uint32_t kNumBlockVirtial = 10;
-	const uint32_t kNumBlockHorizontal = 20;
+	const uint32_t kNumBlockVirtial = mapChipField_->GetBlockWidth();
+	const uint32_t kNumBlockHorizontal = mapChipField_->GetBlockHeight();
 	// ブロック１個文の横幅AL3_02_02
-	const float kBlockWidth = 2.0f;
-	const float kBlockHeight = 2.0f;
-	// 要素数を変更するAL3_02_02
-	// 列数の設定(縦方向のブロック数)
-	worldTransformBlocks_.resize(kNumBlockVirtial);
-	for (uint32_t i = 0; i < kNumBlockVirtial; ++i) {
-		// 一列の要素数を設定(縦方向のブロック数)
-		worldTransformBlocks_[i].resize(kNumBlockHorizontal);
-	}
-	// キューブの生成AL3_02_02
-	for (uint32_t i = 0; i < kNumBlockVirtial; ++i) {
-		for (uint32_t j = 0; j < kNumBlockHorizontal; ++j) {
-			if ((i + j) % 2 == 0) {
-				continue;
-			}
-			worldTransformBlocks_[i][j] = new WorldTransform();
-			worldTransformBlocks_[i][j]->Initialize();
-			worldTransformBlocks_[i][j]->translation_.x = kBlockWidth * j;
-			worldTransformBlocks_[i][j]->translation_.y = kBlockHeight * i;
-		}
-	}
+	//const float kBlockWidth = 2.0f;
+	//const float kBlockHeight = 2.0f;
 
 	// デバッグカメラの生成
 	debugCamera_ = new DebugCamera(1280, 720);
@@ -54,7 +35,34 @@ void GameScene::Initialize() {
 	// 3Dモデルの生成
 	modelSkydome_ = Model::CreateFromOBJ("skydome", true);
 	skydome_ = new Skydome();
-	skydome_->Initialize(modelSkydome_,camera_);
+	skydome_->Initialize(modelSkydome_, camera_);
+
+	// マップチップをnewする
+	mapChipField_ = new MapChipField;
+	mapChipField_->LoadMapChipCsv("Resources/blocks.csv");
+
+	GameScene::GenerateBlocks();
+	{
+
+		// 要素数を変更するAL3_02_02
+		// 列数の設定(縦方向のブロック数)
+		worldTransformBlocks_.resize(kNumBlockVirtial);
+		for (uint32_t i = 0; i < kNumBlockVirtial; ++i) {
+			// 一列の要素数を設定(縦方向のブロック数)
+			worldTransformBlocks_[i].resize(kNumBlockHorizontal);
+		}
+		// キューブの生成AL3_02_02
+		for (uint32_t i = 0; i < kNumBlockVirtial; ++i) {
+			for (uint32_t j = 0; j < kNumBlockHorizontal; ++j) {
+				/*if ((i + j) % 2 == 0) {
+				    continue;
+				}*/
+				worldTransformBlocks_[i][j] = new WorldTransform();
+				worldTransformBlocks_[i][j]->Initialize();
+				worldTransformBlocks_[i][j]->translation_ = mapChipField_->GetMapChipPositionByIndex(j, i);
+			}
+		}
+	}
 }
 
 // 更新
@@ -132,6 +140,9 @@ GameScene::~GameScene() {
 	delete debugCamera_;
 	// AL3_02_03
 	delete skydome_;
+	// AL3_02_04
+	// マップチップフィールドの解放
+	delete mapChipField_;
 }
 
 
