@@ -37,6 +37,8 @@ public:
 
 	uint32_t GetBlockHeight() { return static_cast<uint32_t>(kBlockHeight); }
 
+	void GenerateBlocks();
+
 private:
 	// 1ブロックのサイズ
 	static inline const float kBlockWidth = 1.0f;
