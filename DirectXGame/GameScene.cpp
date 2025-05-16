@@ -144,5 +144,26 @@ GameScene::~GameScene() {
 void GameScene::GenerateBlocks() {
 	
 	
+	uint32_t numBlockVirtical = mapChipField_->GetBlockHeight();
+	uint32_t numBlockHorizontal = mapChipField_->GetBlockWidth();
+
+	worldTransformBlocks_.resize(numBlockVirtical);
+	for (uint32_t i = 0; i < numBlockVirtical; ++i) {
+		worldTransformBlocks_[i].resize(numBlockHorizontal);
+	}
+
+	// ブロックの生成
+	for (uint32_t i = 0; i < numBlockVirtical; ++i) {
+
+		for (uint32_t j = 0; j < numBlockHorizontal; ++j) {
+
+			if (mapChipField_->GetMapChipTypeByIndex(j, i) == MapChipType::kBlock) {
+				WorldTransform* worldTransform = new WorldTransform();
+				worldTransform->Initialize();
+				worldTransformBlocks_[i][j] = worldTransform;
+				worldTransformBlocks_[i][j]->translation_ = mapChipField_->GetMapChipPositionByIndex(j, i);
+			}
+		}
+	}
 	
 	}
