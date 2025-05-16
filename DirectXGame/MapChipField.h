@@ -22,7 +22,7 @@ public:
 
 	uint32_t GetBlockHeight() { return static_cast<uint32_t>(kBlockHeight); }
 
-	Vector3 GetMapChipPositionByIndex(uint32_t xIndex, uint32_t yIndex);
+	KamataEngine::Vector3 GetMapChipPositionByIndex(uint32_t xIndex, uint32_t yIndex);
 
 private:
 	// ブロックの個数
