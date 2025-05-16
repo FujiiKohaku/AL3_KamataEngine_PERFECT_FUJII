@@ -18,4 +18,6 @@ private:
 	// 1ブロックのサイズ
 	static inline const uint32_t kNumBlockVertical = 20;
 	static inline const uint32_t kNumBlockHorizontal = 100;
+	//
+	MapChipDate mapChipDate_;
 };
