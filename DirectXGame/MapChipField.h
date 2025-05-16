@@ -16,6 +16,12 @@ public:
 	void ResetMapChipData();
 	void LoadMapChipCsv(const std::string& filepath);
 	MapChipType GetMapChipTypeByIndex(uint32_t xIndex, uint32_t yIndex);
+	// ゲッター
+	uint32_t GetBlockWidth() { return static_cast<uint32_t>(kBlockWidth); }
+
+	uint32_t GetBlockHeight() { return static_cast<uint32_t>(kBlockHeight); }
+
+	Vector3 GetMapChipPositionByIndex(uint32_t xIndex, uint32_t yIndex);
 
 private:
 	// ブロックの個数
@@ -26,6 +32,4 @@ private:
 	static inline const uint32_t kNumBlockHorizontal = 100;
 	//
 	MapChipDate mapChipDate_;
-
-	
 };

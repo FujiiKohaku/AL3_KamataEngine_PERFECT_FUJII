@@ -62,3 +62,9 @@ MapChipType MapChipField::GetMapChipTypeByIndex(uint32_t xIndex, uint32_t yIndex
 	}
 	return mapChipDate_.data[yIndex][xIndex];
 }
+
+Vector3 MapChipField::GetMapChipPositionByIndex(uint32_t xIndex, uint32_t yIndex) {
+	
+	
+	
+	}
