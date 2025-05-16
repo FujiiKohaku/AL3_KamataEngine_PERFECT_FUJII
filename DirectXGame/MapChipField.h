@@ -1,5 +1,6 @@
 #pragma once
 #include "KamataEngine.h"
+#include <math/Vector3.h>
 
 // マップチップ種別の定義
 enum class MapChipType {
