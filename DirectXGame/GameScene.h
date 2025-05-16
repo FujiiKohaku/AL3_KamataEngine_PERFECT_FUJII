@@ -1,6 +1,7 @@
 #pragma once
 #include "Function.h"
 #include "KamataEngine.h"
+#include "MapChipField.h"
 #include "Player.h"
 #include "Skydome.h"
 #include <vector>
@@ -41,6 +42,6 @@ private:
 	KamataEngine::Model* modelSkydome_ = nullptr;
 	// スカイドーム
 	Skydome* skydome_ = nullptr;
-	//マップチップフィールド
-
+	// マップチップフィールド
+	MapChipField* mapChipField_;
 };
