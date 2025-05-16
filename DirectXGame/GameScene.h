@@ -41,4 +41,6 @@ private:
 	KamataEngine::Model* modelSkydome_ = nullptr;
 	// スカイドーム
 	Skydome* skydome_ = nullptr;
+	//マップチップフィールド
+
 };
