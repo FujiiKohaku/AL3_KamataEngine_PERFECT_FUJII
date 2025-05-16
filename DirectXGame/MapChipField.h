@@ -11,6 +11,8 @@ struct MapChipDate {
 };
 class MapChipField {
 public:
+	void ResetMapChipData();
+
 private:
 	// ブロックの個数
 	static inline const float kBlockWidth = 1.0f;
