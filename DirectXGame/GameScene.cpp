@@ -5,9 +5,10 @@ using namespace KamataEngine;
 void GameScene::Initialize() {
 
 	// ファイル名を指定してテクスチャを読み込む
-	textureHandle_ = TextureManager::Load("player.png");
+	//textureHandle_ = TextureManager::Load("player.png");
 	// 3Dモデルデータの生成
 	model_ = Model::Create();
+	model_ = Model::CreateFromOBJ("player", true);
 	camera_ = new Camera();
 	// カメラの初期化
 	camera_->Initialize();
@@ -16,7 +17,7 @@ void GameScene::Initialize() {
 	// 自キャラの初期化
 	player_->Initialize(model_, textureHandle_, camera_);
 	// 3Dモデルデータの生成(block)AL3_02_02
-	modelBlock = Model::CreateFromOBJ("block" ,true);
+	modelBlock = Model::CreateFromOBJ("block", true);
 	// マップチップをnewする
 	mapChipField_ = new MapChipField;
 	mapChipField_->LoadMapChipCsv("Resources/blocks.csv");
@@ -24,7 +25,6 @@ void GameScene::Initialize() {
 	;
 
 	// 初期化AL3_02_02
-	
 
 	// デバッグカメラの生成
 	debugCamera_ = new DebugCamera(1280, 720);
@@ -121,16 +121,16 @@ GameScene::~GameScene() {
 
 void GameScene::GenerateBlocks() {
 
-	 uint32_t numBlockVirtical = mapChipField_->GetBlockHeight();
-	 uint32_t numBlockHorizontal = mapChipField_->GetBlockWidth();
+	uint32_t numBlockVirtical = mapChipField_->GetBlockHeight();
+	uint32_t numBlockHorizontal = mapChipField_->GetBlockWidth();
 
-	 worldTransformBlocks_.resize(numBlockVirtical);
-	 for (uint32_t i = 0; i < numBlockVirtical; ++i) {
+	worldTransformBlocks_.resize(numBlockVirtical);
+	for (uint32_t i = 0; i < numBlockVirtical; ++i) {
 		worldTransformBlocks_[i].resize(numBlockHorizontal);
-	 }
+	}
 
 	// ブロックの生成
-	 for (uint32_t i = 0; i < numBlockVirtical; ++i) {
+	for (uint32_t i = 0; i < numBlockVirtical; ++i) {
 
 		for (uint32_t j = 0; j < numBlockHorizontal; ++j) {
 
