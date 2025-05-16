@@ -17,6 +17,9 @@ void GameScene::Initialize() {
 	player_->Initialize(model_, textureHandle_, camera_);
 	// 3Dモデルデータの生成(block)AL3_02_02
 	modelBlock = Model::Create();
+	// マップチップをnewする
+	mapChipField_ = new MapChipField;
+	mapChipField_->LoadMapChipCsv("Resources/blocks.csv");
 
 	// 初期化AL3_02_02
 	// 要素数AL3_02_02
@@ -54,7 +57,7 @@ void GameScene::Initialize() {
 	// 3Dモデルの生成
 	modelSkydome_ = Model::CreateFromOBJ("skydome", true);
 	skydome_ = new Skydome();
-	skydome_->Initialize(modelSkydome_,camera_);
+	skydome_->Initialize(modelSkydome_, camera_);
 }
 
 // 更新
@@ -132,6 +135,6 @@ GameScene::~GameScene() {
 	delete debugCamera_;
 	// AL3_02_03
 	delete skydome_;
+	// マップチップフィールドデリーと
+	delete mapChipField_;
 }
-
-
