@@ -1,5 +1,5 @@
 #include "GameScene.h"
-
+#include "Math.h"
 using namespace KamataEngine;
 // 初期化
 void GameScene::Initialize() {
@@ -20,14 +20,16 @@ void GameScene::Initialize() {
 	// マップチップをnewする
 	mapChipField_ = new MapChipField;
 	mapChipField_->LoadMapChipCsv("Resources/blocks.csv");
+	// ワールドトランスフォームの初期化
+	;
 
 	// 初期化AL3_02_02
 	// 要素数AL3_02_02
 	const uint32_t kNumBlockVirtial = 10;
 	const uint32_t kNumBlockHorizontal = 20;
 	// ブロック１個文の横幅AL3_02_02
-	const float kBlockWidth = 2.0f;
-	const float kBlockHeight = 2.0f;
+	const float kBlockWidth = 1.0f;
+	const float kBlockHeight = 1.0f;
 	// 要素数を変更するAL3_02_02
 	// 列数の設定(縦方向のブロック数)
 	worldTransformBlocks_.resize(kNumBlockVirtial);
@@ -96,6 +98,7 @@ void GameScene::Update() {
 
 		camera_->UpdateMatrix();
 		skydome_->Update();
+
 	}
 }
 // 描画
