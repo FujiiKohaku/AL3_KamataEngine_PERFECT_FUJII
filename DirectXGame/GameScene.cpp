@@ -16,7 +16,7 @@ void GameScene::Initialize() {
 	// 自キャラの初期化
 	player_->Initialize(model_, textureHandle_, camera_);
 	// 3Dモデルデータの生成(block)AL3_02_02
-	modelBlock = Model::Create();
+	modelBlock = Model::CreateFromOBJ("block" ,true);
 	// マップチップをnewする
 	mapChipField_ = new MapChipField;
 	mapChipField_->LoadMapChipCsv("Resources/blocks.csv");
@@ -24,31 +24,7 @@ void GameScene::Initialize() {
 	;
 
 	// 初期化AL3_02_02
-	// 要素数AL3_02_02
-	const uint32_t kNumBlockVirtial = 10;
-	const uint32_t kNumBlockHorizontal = 20;
-	// ブロック１個文の横幅AL3_02_02
-	const float kBlockWidth = 1.0f;
-	const float kBlockHeight = 1.0f;
-	// 要素数を変更するAL3_02_02
-	// 列数の設定(縦方向のブロック数)
-	worldTransformBlocks_.resize(kNumBlockVirtial);
-	for (uint32_t i = 0; i < kNumBlockVirtial; ++i) {
-		// 一列の要素数を設定(縦方向のブロック数)
-		worldTransformBlocks_[i].resize(kNumBlockHorizontal);
-	}
-	// キューブの生成AL3_02_02
-	for (uint32_t i = 0; i < kNumBlockVirtial; ++i) {
-		for (uint32_t j = 0; j < kNumBlockHorizontal; ++j) {
-			if ((i + j) % 2 == 0) {
-				continue;
-			}
-			worldTransformBlocks_[i][j] = new WorldTransform();
-			worldTransformBlocks_[i][j]->Initialize();
-			worldTransformBlocks_[i][j]->translation_.x = kBlockWidth * j;
-			worldTransformBlocks_[i][j]->translation_.y = kBlockHeight * i;
-		}
-	}
+	
 
 	// デバッグカメラの生成
 	debugCamera_ = new DebugCamera(1280, 720);
@@ -61,7 +37,7 @@ void GameScene::Initialize() {
 	skydome_ = new Skydome();
 	skydome_->Initialize(modelSkydome_, camera_);
 
-	void GenerateBlocks();
+	GenerateBlocks();
 }
 
 // 更新
@@ -98,7 +74,6 @@ void GameScene::Update() {
 
 		camera_->UpdateMatrix();
 		skydome_->Update();
-
 	}
 }
 // 描画
@@ -145,18 +120,17 @@ GameScene::~GameScene() {
 }
 
 void GameScene::GenerateBlocks() {
-	
-	
-	uint32_t numBlockVirtical = mapChipField_->GetBlockHeight();
-	uint32_t numBlockHorizontal = mapChipField_->GetBlockWidth();
 
-	worldTransformBlocks_.resize(numBlockVirtical);
-	for (uint32_t i = 0; i < numBlockVirtical; ++i) {
+	 uint32_t numBlockVirtical = mapChipField_->GetBlockHeight();
+	 uint32_t numBlockHorizontal = mapChipField_->GetBlockWidth();
+
+	 worldTransformBlocks_.resize(numBlockVirtical);
+	 for (uint32_t i = 0; i < numBlockVirtical; ++i) {
 		worldTransformBlocks_[i].resize(numBlockHorizontal);
-	}
+	 }
 
 	// ブロックの生成
-	for (uint32_t i = 0; i < numBlockVirtical; ++i) {
+	 for (uint32_t i = 0; i < numBlockVirtical; ++i) {
 
 		for (uint32_t j = 0; j < numBlockHorizontal; ++j) {
 
@@ -168,5 +142,4 @@ void GameScene::GenerateBlocks() {
 			}
 		}
 	}
-	
-	}
+}
