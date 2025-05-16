@@ -1,5 +1,11 @@
 #pragma once
 #include "KamataEngine.h"
+
+// マップチップ種別の定義
+enum class MapChipType {
+	kBlank, // 空白
+	kBlock, // ブロッ
+};
 class MapChipField {
 public:
 private:
