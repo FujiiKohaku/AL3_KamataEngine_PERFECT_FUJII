@@ -58,6 +58,8 @@ void GameScene::Initialize() {
 	modelSkydome_ = Model::CreateFromOBJ("skydome", true);
 	skydome_ = new Skydome();
 	skydome_->Initialize(modelSkydome_, camera_);
+
+	void GenerateBlocks();
 }
 
 // 更新
@@ -138,3 +140,9 @@ GameScene::~GameScene() {
 	// マップチップフィールドデリーと
 	delete mapChipField_;
 }
+
+void GameScene::GenerateBlocks() {
+	
+	
+	
+	}
