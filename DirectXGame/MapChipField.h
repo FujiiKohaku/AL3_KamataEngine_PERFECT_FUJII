@@ -9,9 +9,12 @@ enum class MapChipType {
 struct MapChipDate {
 	std::vector<std::vector<MapChipType>> data;
 };
+
+// クラス
 class MapChipField {
 public:
 	void ResetMapChipData();
+	void LoadMapChipCsv(const std::string& filepath);
 
 private:
 	// ブロックの個数
