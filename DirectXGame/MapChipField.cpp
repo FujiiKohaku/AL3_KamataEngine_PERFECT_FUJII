@@ -52,3 +52,13 @@ void MapChipField::LoadMapChipCsv(const std::string& filepath) {
 		}
 	}
 }
+
+MapChipType MapChipField::GetMapChipTypeByIndex(uint32_t xIndex, uint32_t yIndex) {
+	if (xIndex < 0 || kNumBlockHorizontal - 1 < xIndex) {
+		return MapChipType::kBlank;
+	}
+	if (yIndex < 0 || kNumBlockVertical - 1 < yIndex) {
+		return MapChipType::kBlank;
+	}
+	return mapChipDate_.data[yIndex][xIndex];
+}
