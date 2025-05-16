@@ -20,6 +20,8 @@ public:
 	GameScene();
 	~GameScene();
 
+	void GenerateBlocks();
+
 private:
 	// テクスチャハンドル
 	uint32_t textureHandle_ = 0;
