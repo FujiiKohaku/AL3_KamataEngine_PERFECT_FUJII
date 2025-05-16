@@ -6,6 +6,9 @@ enum class MapChipType {
 	kBlank, // 空白
 	kBlock, // ブロッ
 };
+struct MapChipDate {
+	std::vector<std::vector<MapChipType>> data;
+};
 class MapChipField {
 public:
 private:
