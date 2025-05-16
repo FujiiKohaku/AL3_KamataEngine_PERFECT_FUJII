@@ -15,6 +15,7 @@ class MapChipField {
 public:
 	void ResetMapChipData();
 	void LoadMapChipCsv(const std::string& filepath);
+	MapChipType GetMapChipTypeByIndex(uint32_t xIndex, uint32_t yIndex);
 
 private:
 	// ブロックの個数
