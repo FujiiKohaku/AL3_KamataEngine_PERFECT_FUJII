@@ -8,7 +8,10 @@ std::map<std::string, MapChipType> mapChipTable = {
 }
 
 void MapChipField::ResetMapChipData() {
-    
-    
-    
-    }
+	// マップチップデータをリセット
+	mapChipDate_.data.clear();
+	mapChipDate_.data.resize(kNumBlockVertical);
+	for (std::vector<MapChipType>& mapChipDateLine : mapChipDate_.data) {
+		mapChipDateLine.resize(kNumBlockHorizontal);
+	}
+}
