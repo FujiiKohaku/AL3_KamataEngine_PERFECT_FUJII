@@ -4,18 +4,19 @@ using namespace KamataEngine;
 // 初期化
 void GameScene::Initialize() {
 
+	//座標をマップチップ番号で指定
+	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(1, 1);
 	// ファイル名を指定してテクスチャを読み込む
 	//textureHandle_ = TextureManager::Load("player.png");
 	// 3Dモデルデータの生成
 	model_ = Model::Create();
 	model_ = Model::CreateFromOBJ("player", true);
-	camera_ = new Camera();
 	// カメラの初期化
-	camera_->Initialize();
+	camera_.Initialize();
 	// 自キャラの生成
 	player_ = new Player();
 	// 自キャラの初期化
-	player_->Initialize(model_, textureHandle_, camera_);
+	player_->Initialize(model_,&camera_,playerPosition);
 	// 3Dモデルデータの生成(block)AL3_02_02
 	modelBlock = Model::CreateFromOBJ("block", true);
 	// マップチップをnewする
@@ -35,7 +36,7 @@ void GameScene::Initialize() {
 	// 3Dモデルの生成
 	modelSkydome_ = Model::CreateFromOBJ("skydome", true);
 	skydome_ = new Skydome();
-	skydome_->Initialize(modelSkydome_, camera_);
+	skydome_->Initialize(modelSkydome_, &camera_);
 
 	GenerateBlocks();
 }
@@ -65,14 +66,14 @@ void GameScene::Update() {
 	if (isDebugCameraActive) {
 		// デバッグカメラの更新AL3_02_02*/
 		debugCamera_->Update();
-		camera_->matView = debugCamera_->GetCamera().matView;
-		camera_->matProjection = debugCamera_->GetCamera().matProjection;
+		camera_.matView = debugCamera_->GetCamera().matView;
+		camera_.matProjection = debugCamera_->GetCamera().matProjection;
 		// ビュープロジェクション行列の転送AL3_02_02*/
-		camera_->TransferMatrix();
+		camera_.TransferMatrix();
 	} else {
 		// ビュープロジェクション行列の更新と転送AL3_02_02*/
 
-		camera_->UpdateMatrix();
+		camera_.UpdateMatrix();
 		skydome_->Update();
 	}
 }
@@ -90,7 +91,7 @@ void GameScene::Draw() {
 			if (!worldTransformBlock)
 				continue;
 
-			modelBlock->Draw(*worldTransformBlock, *camera_, nullptr);
+			modelBlock->Draw(*worldTransformBlock, camera_, nullptr);
 		}
 	}
 	skydome_->Draw();

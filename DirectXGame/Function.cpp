@@ -1,11 +1,10 @@
 #include "Function.h"
 
-Function::Function() {
-	}
+using namespace KamataEngine; // クラスの中で作るな
+
+Function::Function() {}
 
 Function::~Function() {}
-
-
 
 // 平行移動行列
 KamataEngine::Matrix4x4 Function::MakeTranslateMatrix(const KamataEngine::Vector3& translate) {
@@ -115,7 +114,7 @@ KamataEngine::Matrix4x4 Function::MakeAffineMatrix(const KamataEngine::Vector3& 
 }
 
 KamataEngine::Matrix4x4 Function::MakeViewportMatrix(float left, float top, float width, float height, float minDepth, float maxDepth) {
-	KamataEngine::Matrix4x4  m = {};
+	KamataEngine::Matrix4x4 m = {};
 
 	// 行0：X方向スケーリングと移動
 	m.m[0][0] = width / 2.0f;
@@ -127,4 +126,18 @@ KamataEngine::Matrix4x4 Function::MakeViewportMatrix(float left, float top, floa
 	m.m[3][3] = 1.0f;
 
 	return m;
+}
+
+Vector3& operator+=(Vector3& lhv, const Vector3& rhv) {
+	lhv.x += rhv.x;
+	lhv.y += rhv.y;
+	lhv.z += rhv.z;
+	return lhv;
+}
+
+Vector3& operator-=(Vector3& lhv, const Vector3& rhv) {
+	lhv.x -= rhv.x;
+	lhv.y -= rhv.y;
+	lhv.z -= rhv.z;
+	return lhv;
 }

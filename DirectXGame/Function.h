@@ -1,10 +1,16 @@
 #pragma once
 #include "KamataEngine.h"
+
+// 代入演算子オーバーロード
+KamataEngine::Vector3& operator+=(KamataEngine::Vector3& lhs, const KamataEngine::Vector3& rhv);
+KamataEngine::Vector3& operator-=(KamataEngine::Vector3& lhs, const KamataEngine::Vector3& rhv);
+
 class Function {
 public:
 	// コンストラクタ
 	Function();
 	~Function();
+
 	// 平行移動行列
 	static KamataEngine::Matrix4x4 MakeTranslateMatrix(const KamataEngine::Vector3& translate);
 
@@ -27,5 +33,5 @@ public:
 	// ビュー行列
 	static KamataEngine::Matrix4x4 MakeViewportMatrix(float left, float top, float width, float height, float minDepth, float maxDepth);
 
-private:
+
 };

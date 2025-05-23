@@ -1,10 +1,11 @@
 #pragma once
 #include "Function.h"
 #include "KamataEngine.h"
+#include <numbers>
 class Player {
 public:
 	// 初期化
-	void Initialize(KamataEngine::Model* model, uint32_t textureHandle, KamataEngine::Camera* camera);
+	void Initialize(KamataEngine::Model* model, KamataEngine::Camera* camera, const KamataEngine::Vector3& position);
 	// 更新
 	void Update();
 	// 描画
@@ -23,4 +24,6 @@ private: // C++ではメンバ変数は特別な理由がなければprivateに�
 	uint32_t textureHandle_ = 0u;
 	// カメラ
 	KamataEngine::Camera* camera_ = nullptr;
+	// 速度
+	KamataEngine::Vector3 velocity_ = {};
 };

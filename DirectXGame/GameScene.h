@@ -28,7 +28,7 @@ private:
 	// 3Dモデルデータ
 	KamataEngine::Model* model_ = nullptr;
 	// カメラ
-	KamataEngine::Camera* camera_;
+	KamataEngine::Camera camera_;
 	// 自キャラ
 	Player* player_ = nullptr;
 	// 3Dモデルデータ(block)AL3_02_02
