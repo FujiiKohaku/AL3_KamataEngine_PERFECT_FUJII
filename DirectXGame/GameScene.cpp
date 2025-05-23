@@ -5,7 +5,7 @@ using namespace KamataEngine;
 void GameScene::Initialize() {
 
 	//座標をマップチップ番号で指定
-	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(1, 1);
+	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(1, 18);
 	// ファイル名を指定してテクスチャを読み込む
 	//textureHandle_ = TextureManager::Load("player.png");
 	// 3Dモデルデータの生成
