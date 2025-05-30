@@ -1,11 +1,10 @@
 #pragma once
-#include "Function.h"
+#include "Math.h"
 #include "KamataEngine.h"
 #include <algorithm>
 #include <numbers>
-float Lerp(float x1, float x2, float t);
 
-float EaseInOut(float x1, float x2, float t);
+
 class Player {
 public:
 	// 初期化
@@ -18,6 +17,8 @@ public:
 	Player();
 	// デストラクタ
 	~Player();
+	// getter(02_06スライド11枚目で追加)
+	const KamataEngine::WorldTransform& GetWorldTransform() const { return worldTransform_; }
 
 private: // C++ではメンバ変数は特別な理由がなければprivateにする
 	// ワールド変換データ

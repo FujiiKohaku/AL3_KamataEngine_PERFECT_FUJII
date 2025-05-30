@@ -1,6 +1,6 @@
 #pragma once
-#include "Function.h"
 #include "KamataEngine.h"
+#include "Math.h"
 class WorldRowFunction {
 public:
 	WorldRowFunction();

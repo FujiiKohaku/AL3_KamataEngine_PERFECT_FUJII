@@ -5,14 +5,6 @@
 #include <cassert>
 
 using namespace KamataEngine;
-
-float Lerp(float x1, float x2, float t) { return (1.0f - t) * x1 + t * x2; }
-
-float EaseInOut(float x1, float x2, float t) {
-	float easedT = -(std::cosf(std::numbers::pi_v<float> * t) - 1.0f) / 2.0f;
-
-	return Lerp(x1, x2, easedT);
-}
 // 初期化
 void Player::Initialize(KamataEngine::Model* model, KamataEngine::Camera* camera, const KamataEngine::Vector3& position) {
 	// NULLポインタチェック
@@ -126,12 +118,12 @@ void Player::Update() {
 			// タイマーを進める
 			turnTimer_ = std::max(turnTimer_ - (1.0f / 60.0f), 0.0f);
 
-			float destinationRotationYTable[] = {std::numbers::pi_v<float> * 3.0f / 2.0f, std::numbers::pi_v<float> / 2.0f};
+			float destinationRotationYTable[] = {std::numbers::pi_v<float> / 2.0f, std::numbers::pi_v<float> * 3.0f / 2.0f};
 
 			// 状況に応じた角度を取得する
 			float destinationRotationY = destinationRotationYTable[static_cast<uint32_t>(lrDirection_)];
 			// 自キャラの角度を設定する
-			worldTransform_.rotation_.y = EaseInOut(destinationRotationY, turnFirstRotationY_, turnTimer_ / kTimeTrun);
+			worldTransform_.rotation_.y = EaseInOut(turnFirstRotationY_, destinationRotationY, 1.0f - turnTimer_ / kTimeTrun);
 		}
 
 		// 行列更新

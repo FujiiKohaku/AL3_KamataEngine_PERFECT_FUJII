@@ -4,10 +4,10 @@ using namespace KamataEngine;
 // 初期化
 void GameScene::Initialize() {
 
-	//座標をマップチップ番号で指定
+	// 座標をマップチップ番号で指定
 	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(1, 18);
 	// ファイル名を指定してテクスチャを読み込む
-	//textureHandle_ = TextureManager::Load("player.png");
+	// textureHandle_ = TextureManager::Load("player.png");
 	// 3Dモデルデータの生成
 	model_ = Model::Create();
 	model_ = Model::CreateFromOBJ("player", true);
@@ -16,14 +16,19 @@ void GameScene::Initialize() {
 	// 自キャラの生成
 	player_ = new Player();
 	// 自キャラの初期化
-	player_->Initialize(model_,&camera_,playerPosition);
+	player_->Initialize(model_, &camera_, playerPosition);
 	// 3Dモデルデータの生成(block)AL3_02_02
 	modelBlock = Model::CreateFromOBJ("block", true);
 	// マップチップをnewする
 	mapChipField_ = new MapChipField;
 	mapChipField_->LoadMapChipCsv("Resources/blocks.csv");
 	// ワールドトランスフォームの初期化
-	;
+	//
+	// 02_06カメラコントローラ
+	cController_ = new CameraController(); // 生成
+	cController_->Initialize(&camera_);    // 初期化
+	cController_->SetTarget(player_);//02_06
+	cController_->Reset();//02_06
 
 	// 初期化AL3_02_02
 
@@ -39,6 +44,8 @@ void GameScene::Initialize() {
 	skydome_->Initialize(modelSkydome_, &camera_);
 
 	GenerateBlocks();
+	// Al2_02_06
+	cController_->Initialize(&camera_);
 }
 
 // 更新
@@ -50,7 +57,7 @@ void GameScene::Update() {
 		for (WorldTransform* worldTransformBlock : worldTransformBlockLine) {
 			if (!worldTransformBlock)
 				continue;
-			worldTransformBlock->matWorld_ = Function::MakeAffineMatrix(worldTransformBlock->scale_, worldTransformBlock->rotation_, worldTransformBlock->translation_);
+			worldTransformBlock->matWorld_ = MakeAffineMatrix(worldTransformBlock->scale_, worldTransformBlock->rotation_, worldTransformBlock->translation_);
 
 			worldTransformBlock->TransferMatrix();
 		}
@@ -75,6 +82,7 @@ void GameScene::Update() {
 
 		camera_.UpdateMatrix();
 		skydome_->Update();
+		cController_->Upadate();
 	}
 }
 // 描画
