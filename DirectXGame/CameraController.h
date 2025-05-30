@@ -42,4 +42,6 @@ private:
 	static inline const float kInterpolationRate = 0.1f;
 	// 速度掛け率AL3_02_06
 	static inline const float kVelocityBias = 30.0f;
+	// 02_06スライド33枚目 追従対象の各方向へのカメラ移動範囲
+	static inline const Rect targetMargin = {-9.0f, 9.0f, -5.0f, 5.0f};
 };

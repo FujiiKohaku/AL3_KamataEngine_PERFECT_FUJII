@@ -16,6 +16,11 @@ void CameraController::Upadate() {
 	// 座標保管によりゆったり追従
 	camera_->translation_ = Lerp(camera_->translation_, destination_, kInterpolationRate);
 
+	// 移動範囲制限 02_06 スライド34枚目
+	camera_->translation_.x = max(camera_->translation_.x, destination_.x + targetMargin.left);
+	camera_->translation_.x = min(camera_->translation_.x, destination_.x + targetMargin.right);
+	camera_->translation_.y = max(camera_->translation_.y, destination_.y + targetMargin.bottom);
+	camera_->translation_.y = min(camera_->translation_.y, destination_.y + targetMargin.top);
 	// 移動範囲制限02_06
 	// X軸の範囲制限
 	camera_->translation_.x = max(camera_->translation_.x, movableArea_.left);
