@@ -30,6 +30,7 @@ void GameScene::Initialize() {
 	cController_->SetTarget(player_);//02_06
 	cController_->Reset();//02_06
 
+
 	// 初期化AL3_02_02
 
 	// デバッグカメラの生成
@@ -45,7 +46,10 @@ void GameScene::Initialize() {
 
 	GenerateBlocks();
 	// Al2_02_06
-	cController_->Initialize(&camera_);
+
+	// 02_06カメラコントローラ スライド18枚目
+	CameraController::Rect cameraArea = {12.0f, 100 - 12.0f, 6.0f, 6.0f};
+	cController_->SetMoveableArea(cameraArea);
 }
 
 // 更新
