@@ -7,11 +7,14 @@ void CameraController::Initialize(KamataEngine::Camera* camera) { camera_ = came
 void CameraController::Upadate() {
 	// 追従対象のワールドトランスフォームを参照// Al3_02_06
 	const WorldTransform& targetWorldTransform = target_->GetWorldTransform();
-	// 追従対象とオフセットからカメラの目標座標を計算
-	destination_ = targetWorldTransform.translation_ + targetOffset_;
-	//座標保管によりゆったり追従
-	camera_->translation_ = Lerp(camera_->translation_, destination_, kInterpolationRate);
 
+	// 02_06　スライド29で追加（追従対象の速度からってところGEtVelocityを使えってやつ）
+	const Vector3& targetVelocity = target_->GetVelocity();
+
+	// 追従対象とオフセッと追従対象の速度からカメラの目標座標を計算
+	destination_ = targetWorldTransform.translation_ + targetOffset_ + targetVelocity * kVelocityBias;
+	// 座標保管によりゆったり追従
+	camera_->translation_ = Lerp(camera_->translation_, destination_, kInterpolationRate);
 
 	// 移動範囲制限02_06
 	// X軸の範囲制限

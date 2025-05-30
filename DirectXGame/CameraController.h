@@ -24,7 +24,8 @@ public:
 	void Reset();
 
 	void SetMoveableArea(Rect area) { movableArea_ = area; }
-	private:
+
+private:
 	// カメラAl2_02_06
 	KamataEngine::Camera* camera_ = nullptr;
 
@@ -35,10 +36,10 @@ public:
 	// カメラ移動範囲02_06
 	Rect movableArea_ = {0, 100, 0, 100};
 
-	
-    // 02_06スライド23枚目 目標座標
+	// 02_06スライド23枚目 目標座標
 	Vector3 destination_;
 	// 02_06スライド23枚目 座標補間割合
 	static inline const float kInterpolationRate = 0.1f;
-
+	// 速度掛け率AL3_02_06
+	static inline const float kVelocityBias = 30.0f;
 };

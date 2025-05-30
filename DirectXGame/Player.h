@@ -1,9 +1,8 @@
 #pragma once
-#include "Math.h"
 #include "KamataEngine.h"
+#include "Math.h"
 #include <algorithm>
 #include <numbers>
-
 
 class Player {
 public:
@@ -19,6 +18,9 @@ public:
 	~Player();
 	// getter(02_06スライド11枚目で追加)
 	const KamataEngine::WorldTransform& GetWorldTransform() const { return worldTransform_; }
+
+	// ベロシティのゲッター
+	const KamataEngine::Vector3& GetVelocity() const { return velocity_; }
 
 private: // C++ではメンバ変数は特別な理由がなければprivateにする
 	// ワールド変換データ
@@ -61,4 +63,6 @@ private: // C++ではメンバ変数は特別な理由がなければprivateに�
 	static inline const float kLimitFallSpeed = 0.5f;
 	// ジャンプ初速(上方向)
 	static inline const float kJumpAcceleration = 20.0f;
+
+	
 };
