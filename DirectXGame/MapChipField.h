@@ -30,7 +30,7 @@ public:
 		uint32_t yIndex;
 	};
 
-	//IndexSet GetMapChipIndexSetByPosition(const Vector3& position);
+	IndexSet GetMapChipIndexSetByPosition(const Vector3& position);
 
 
 private:
