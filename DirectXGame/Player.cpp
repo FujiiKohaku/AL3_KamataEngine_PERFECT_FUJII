@@ -91,7 +91,21 @@ void Player::CheckMapCollision(CollisionMapInfo& info) {
 	CheckMapCollisionLeft(info);
 }
 
-void Player::CheckMapCollisionUp(CollisionMapInfo& info) { info; }
+// マップ上方向衝突判定AL3_02_07_page19
+void Player::CheckMapCollisionUp(CollisionMapInfo& info) {
+	// 移動後の4つの角の座標AL3_02_07_page19
+	std::array<Vector3, kNumCorner> positionNew;
+
+	for (uint32_t i = 0; i < positionNew.size(); ++i) {
+		positionNew[i] = CornerPosition(worldTransform_.translation_ + info.move, static_cast<Corner>(i));
+	}
+	// マップ衝突上方向AL3_02_07_page20
+	// 上昇あり？
+	if (info.move.y <= 0) {
+		return;
+	}
+}
+
 void Player::CheckMapCollisionDown(CollisionMapInfo& info) { info; }
 void Player::CheckMapCollisionRight(CollisionMapInfo& info) { info; }
 void Player::CheckMapCollisionLeft(CollisionMapInfo& info) { info; }
