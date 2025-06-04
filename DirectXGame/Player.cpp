@@ -21,8 +21,9 @@ void Player::Initialize(KamataEngine::Model* model, KamataEngine::Camera* camera
 	worldTransform_.rotation_.y = std::numbers::pi_v<float> / 2.0f;
 }
 
-// 更新
-void Player::Update() {
+#pragma region 移動処理関数
+// 移動処理関数AL3_02_07　10ページ
+void Player::InputMove() {
 
 	// 移動入力（左右）
 	if (onGround_) {
@@ -78,6 +79,13 @@ void Player::Update() {
 		// 落下速度制限
 		velocity_.y = std::max(velocity_.y, -kLimitFallSpeed);
 	}
+}
+#pragma endregion
+
+// 更新
+void Player::Update() {
+	//移動処理が中に入っている関数AL3_02_07 p10
+	Player::InputMove();
 
 	// 位置に加算（移動）
 	worldTransform_.translation_ += velocity_;

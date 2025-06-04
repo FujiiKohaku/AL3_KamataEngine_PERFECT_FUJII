@@ -28,6 +28,9 @@ public:
 	// 外部からポインタをセットするためのセッター
 	void SetMapChipField(MapChipField* mapChipField) { mapChipField = mapChipField_; }
 
+	// 移動入力関数AL3_02_07スライド10枚目
+	void InputMove();
+
 private: // C++ではメンバ変数は特別な理由がなければprivateにする
 	// ワールド変換データ
 	KamataEngine::WorldTransform worldTransform_;
