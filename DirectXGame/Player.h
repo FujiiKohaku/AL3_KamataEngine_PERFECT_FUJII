@@ -1,9 +1,9 @@
 #pragma once
 #include "KamataEngine.h"
+#include "MapChipField.h"
 #include "Math.h"
 #include <algorithm>
 #include <numbers>
-
 // 前方宣言
 class MapChipField;
 
@@ -30,6 +30,14 @@ public:
 
 	// 移動入力関数AL3_02_07スライド10枚目
 	void InputMove();
+	// 角 02_07スライド16枚目
+	enum Corner {
+		kRightBottom, // 右下
+		kLeftBottom,  // 左下
+		kRightTop,    // 右上
+		kLeftTop,     // 左上
+		kNumCorner    // 要素数
+	};
 
 private: // C++ではメンバ変数は特別な理由がなければprivateにする
 	// ワールド変換データ
@@ -78,4 +86,22 @@ private: // C++ではメンバ変数は特別な理由がなければprivateに�
 	// キャラクターの当たり判定サイズAL3_02_07
 	static inline const float kWidth = 0.8f;
 	static inline const float kHeight = 0.8f;
+	// マップとの当たり判定情報AL3_02_07p12
+	struct CollisionMapInfo {
+		bool isHitCeiling = false;
+		bool isHitLanding = false;
+		bool isHitWall = false;
+		Vector3 move;
+	};
+
+	// map衝突判定AL3_02_07 p13
+	void CheckMapCollision(CollisionMapInfo& info);
+	// 02_07 スライド14枚目
+	void CheckMapCollisionUp(CollisionMapInfo& info);
+	void CheckMapCollisionDown(CollisionMapInfo& info);
+	void CheckMapCollisionRight(CollisionMapInfo& info);
+	void CheckMapCollisionLeft(CollisionMapInfo& info);
+
+	// 角を取る関数AL3_02_07_page17
+	Vector3 CornerPosition(const Vector3& center, Corner corner);
 };

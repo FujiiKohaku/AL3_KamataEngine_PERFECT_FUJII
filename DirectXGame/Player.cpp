@@ -82,9 +82,37 @@ void Player::InputMove() {
 }
 #pragma endregion
 
+#pragma region マップ衝突判定AL3_02_07
+// AL02_03_page14
+void Player::CheckMapCollision(CollisionMapInfo& info) {
+	CheckMapCollisionUp(info);
+	CheckMapCollisionDown(info);
+	CheckMapCollisionRight(info);
+	CheckMapCollisionLeft(info);
+}
+
+void Player::CheckMapCollisionUp(CollisionMapInfo& info) { info; }
+void Player::CheckMapCollisionDown(CollisionMapInfo& info) { info; }
+void Player::CheckMapCollisionRight(CollisionMapInfo& info) { info; }
+void Player::CheckMapCollisionLeft(CollisionMapInfo& info) { info; }
+
+// 中心座標 center を基準に、プレイヤーの四隅のどこかの位置を返す AL3_02_07_page18
+Vector3 Player::CornerPosition(const Vector3& center, Corner corner) {
+	Vector3 offsetTable[kNumCorner] = {
+	    {+kWidth / 2.0f, -kHeight / 2.0f, 0}, //  kRightBottom
+	    {-kWidth / 2.0f, -kHeight / 2.0f, 0}, //  kLeftBottom
+	    {+kWidth / 2.0f, +kHeight / 2.0f, 0}, //  kRightTop
+	    {-kWidth / 2.0f, +kHeight / 2.0f, 0}  //  kLeftTop
+	};
+
+	return center + offsetTable[static_cast<uint32_t>(corner)];
+}
+
+#pragma endregion
+
 // 更新
 void Player::Update() {
-	//移動処理が中に入っている関数AL3_02_07 p10
+	// 移動処理が中に入っている関数AL3_02_07 p10
 	Player::InputMove();
 
 	// 位置に加算（移動）
@@ -141,6 +169,13 @@ void Player::Update() {
 		// ここより上に処理書いて―
 		WorldRowFunction::MakeAffinTransFerMatrix(worldTransform_);
 	}
+
+	// 衝突判定を初期化AL3_02_07page13
+	CollisionMapInfo collisionMapInfo;
+	// 移動量に速度の値にコピーAL3_02_07page13
+	collisionMapInfo.move = velocity_;
+	// マップ衝突チェックAL3_02_07page13
+	CheckMapCollision(collisionMapInfo);
 }
 // 描画
 void Player::Draw() {
