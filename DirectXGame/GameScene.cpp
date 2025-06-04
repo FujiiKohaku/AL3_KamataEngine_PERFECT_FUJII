@@ -13,23 +13,25 @@ void GameScene::Initialize() {
 	model_ = Model::CreateFromOBJ("player", true);
 	// カメラの初期化
 	camera_.Initialize();
+	// マップチップをnewするマップチップフィールドの初期化
+	mapChipField_ = new MapChipField;
+	mapChipField_->LoadMapChipCsv("Resources/blocks.csv");
 	// 自キャラの生成
 	player_ = new Player();
 	// 自キャラの初期化
 	player_->Initialize(model_, &camera_, playerPosition);
 	// 3Dモデルデータの生成(block)AL3_02_02
 	modelBlock = Model::CreateFromOBJ("block", true);
-	// マップチップをnewする
-	mapChipField_ = new MapChipField;
-	mapChipField_->LoadMapChipCsv("Resources/blocks.csv");
+	// プレイヤーがマップチップの構造を知って、地形に応じた処理ができるようにするAL3_02_07
+	player_->SetMapChipField(mapChipField_);
+
 	// ワールドトランスフォームの初期化
 	//
 	// 02_06カメラコントローラ
 	cController_ = new CameraController(); // 生成
 	cController_->Initialize(&camera_);    // 初期化
-	cController_->SetTarget(player_);//02_06
-	cController_->Reset();//02_06
-
+	cController_->SetTarget(player_);      // 02_06
+	cController_->Reset();                 // 02_06
 
 	// 初期化AL3_02_02
 

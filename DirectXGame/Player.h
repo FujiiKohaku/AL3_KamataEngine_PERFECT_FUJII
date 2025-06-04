@@ -4,6 +4,9 @@
 #include <algorithm>
 #include <numbers>
 
+// 前方宣言
+class MapChipField;
+
 class Player {
 public:
 	// 初期化
@@ -21,6 +24,9 @@ public:
 
 	// ベロシティのゲッター
 	const KamataEngine::Vector3& GetVelocity() const { return velocity_; }
+
+	// 外部からポインタをセットするためのセッター
+	void SetMapChipField(MapChipField* mapChipField) { mapChipField = mapChipField_; }
 
 private: // C++ではメンバ変数は特別な理由がなければprivateにする
 	// ワールド変換データ
@@ -63,6 +69,10 @@ private: // C++ではメンバ変数は特別な理由がなければprivateに�
 	static inline const float kLimitFallSpeed = 0.5f;
 	// ジャンプ初速(上方向)
 	static inline const float kJumpAcceleration = 20.0f;
+	// マップチップフィールドAL3_02_07
+	MapChipField* mapChipField_ = nullptr;
 
-	
+	// キャラクターの当たり判定サイズAL3_02_07
+	static inline const float kWidth = 0.8f;
+	static inline const float kHeight = 0.8f;
 };
