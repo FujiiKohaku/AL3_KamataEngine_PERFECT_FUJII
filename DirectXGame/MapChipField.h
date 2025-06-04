@@ -24,14 +24,14 @@ public:
 
 	KamataEngine::Vector3 GetMapChipPositionByIndex(uint32_t xIndex, uint32_t yIndex);
 
-	//2Dマップのインデックス位置（列・行）を表すためのデータ型AL3_02_07page22
+	// 2Dマップのインデックス位置（列・行）を表すためのデータ型AL3_02_07page22
 	struct IndexSet {
 		uint32_t xIndex;
 		uint32_t yIndex;
 	};
 
-	IndexSet GetMapChipIndexSetByPosition(const Vector3& position);
-
+	// AL3_02_07_page22
+	IndexSet GetMapChipIndexSetByPosition(const KamataEngine::Vector3& position);
 
 private:
 	// ブロックの個数

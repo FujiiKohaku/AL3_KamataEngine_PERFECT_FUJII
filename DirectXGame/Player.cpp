@@ -104,6 +104,16 @@ void Player::CheckMapCollisionUp(CollisionMapInfo& info) {
 	if (info.move.y <= 0) {
 		return;
 	}
+	MapChipType mapChipType;
+	// 真上の当たり判定を行うAL3_02_07_page27
+	bool hit = false;
+	// 左上点の判定AL3_02_07_page28
+	MapChipField::IndexSet indexSet;
+	indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionNew[kLeftTop]);
+	mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
+	if (mapChipType == MapChipType::kBlock) {
+		hit = true;
+	}
 }
 
 void Player::CheckMapCollisionDown(CollisionMapInfo& info) { info; }
