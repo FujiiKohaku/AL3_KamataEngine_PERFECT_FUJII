@@ -14,6 +14,13 @@ struct MapChipDate {
 // クラス
 class MapChipField {
 public:
+	// 範囲矩形 02_07_page32
+	struct Rect {
+		float left;   // 左端
+		float right;  // 右端
+		float bottom; // 下端
+		float top;    // 上端
+	};
 	void ResetMapChipData();
 	void LoadMapChipCsv(const std::string& filepath);
 	MapChipType GetMapChipTypeByIndex(uint32_t xIndex, uint32_t yIndex);
@@ -32,6 +39,9 @@ public:
 
 	// AL3_02_07_page22
 	IndexSet GetMapChipIndexSetByPosition(const KamataEngine::Vector3& position);
+
+	// 02_07_page33
+	Rect GetRectByIndex(uint32_t xIndex, uint32_t yIndex);
 
 private:
 	// ブロックの個数
