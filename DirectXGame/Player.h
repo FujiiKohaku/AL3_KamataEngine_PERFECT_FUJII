@@ -106,4 +106,13 @@ private: // C++ではメンバ変数は特別な理由がなければprivateに�
 	Vector3 CornerPosition(const Vector3& center, Corner corner);
 	// AL3_02_07_page_34
 	static inline const float kBlank = 0.04f;
+
+	// 接地状態の切り替え処理02_08_page_14
+	void UpdateOnGround(const CollisionMapInfo& info);
+
+	// 接地時の速度減衰率
+	static inline const float kAttenuationLanding = 0.0f;
+
+	// 02_08_page_21 微小な数値
+	static inline const float kGroundSearchHeight = 0.06f;
 };

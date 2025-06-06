@@ -132,11 +132,105 @@ void Player::CheckMapCollisionUp(CollisionMapInfo& info) {
 		info.isHitCeiling = true;
 	}
 }
-
-void Player::CheckMapCollisionDown(CollisionMapInfo& info)
-	{ 
-	
+// マップ下当たり判定02_08
+void Player::CheckMapCollisionDown(CollisionMapInfo& info) {
+	// 下降あり02_08_page_7
+	if (info.move.y >= 0) {
+		return;
 	}
+	// 移動後の４つの過度の座標の計算02_08_page_7
+	std::array<Vector3, kNumCorner> positionsNew;
+	for (uint32_t i = 0; i < positionsNew.size(); ++i) {
+		positionsNew[i] = CornerPosition(worldTransform_.translation_ + info.move, static_cast<Corner>(i));
+	}
+	// MapChipType型の変数mapChipTypeを作る02_08_page_8
+	MapChipType mapChipType;
+	bool hit = false;
+	// 左下の判定
+	// どこのマスにいるかを記録するための変数を作る
+	MapChipField::IndexSet indexSet;
+	// positionsNew[kRightBottom] は「右下の座標（プレイヤーの右下の角）」
+	// それを渡して「右下の角が、マップのどのマスにいるか？」を indexSet に入れる
+	indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionsNew[kRightBottom]);
+	// indexSet でわかったマスの中身（タイプ）を調べます
+	mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
+	// 中身がブロックだったらぶつかったと判定してhitをtrueにする
+	if (mapChipType == MapChipType::kBlock) {
+		hit = true;
+	}
+
+	// 右下点の判定
+	indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionsNew[kLeftBottom]);
+	mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
+
+	if (mapChipType == MapChipType::kBlock) {
+		hit = true;
+	}
+
+	// 02_08_page_11ブロックにヒット?
+	if (hit) {
+		// めり込みを排除する方向に移動量を設定する
+		indexSet = mapChipField_->GetMapChipIndexSetByPosition(worldTransform_.translation_ + info.move + Vector3(0, -kHeight / 2.0f, 0));
+		// めり込み先ブロックの範囲矩形
+		MapChipField::Rect rect = mapChipField_->GetRectByIndex(indexSet.xIndex, indexSet.yIndex);
+		info.move.y = std::min(0.0f, rect.top - worldTransform_.translation_.y + (kHeight / 2.0f + kBlank));
+		// 地面に当たったことを記録する
+		info.isHitLanding = true;
+	}
+}
+
+// 接地状態の切り替え処理02_08_page_14
+void Player::UpdateOnGround(const CollisionMapInfo& info) {
+	// 自分キャラが接地状態？
+	if (onGround_) {
+		// 接地状態の処理
+		// ジャンプ開始02_08_page_18
+		if (velocity_.y > 0.0f) {
+			onGround_ = false;
+		} else {
+			// 落下判定
+			// 落下なら空中状態に切り替え
+			std::array<Vector3, kNumCorner> positionNew;
+
+			for (uint32_t i = 0; i < positionNew.size(); ++i) {
+				positionNew[i] = CornerPosition(worldTransform_.translation_ + info.move, static_cast<Corner>(i));
+			}
+			// 02_08_page_19
+			MapChipType mapChipType;
+			// 真下の当たり判定を行う
+			bool hit = false;
+			// 左下点の判定
+			MapChipField::IndexSet indexSet;
+			indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionNew[kLeftBottom] + Vector3(0, -kGroundSearchHeight, 0));
+			mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
+			if (mapChipType == MapChipType::kBlock) {
+				hit = true;
+			}
+			// 右下点の判定
+			indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionNew[kRightBottom] + Vector3(0, -kGroundSearchHeight, 0));
+			mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
+			if (mapChipType == MapChipType::kBlock) {
+				hit = true;
+			}
+			// 落下開始
+			if (!hit) {
+				// 空中状態に切り替える
+				onGround_ = false;
+			}
+		}
+	} else {
+		// 空中状態の処理
+		// 着地フラグ
+		if (info.isHitLanding) {
+			// 着地状態に切り替える(落下を止める)
+			onGround_ = true;
+			// 接地時にX速度を減衰
+			velocity_.x *= (1.0f, -kAttenuationLanding);
+			// Y速度をゼロにする
+			velocity_.y = 0.0f;
+		}
+	}
+}
 void Player::CheckMapCollisionRight(CollisionMapInfo& info) { info; }
 void Player::CheckMapCollisionLeft(CollisionMapInfo& info) { info; }
 
@@ -158,6 +252,21 @@ Vector3 Player::CornerPosition(const Vector3& center, Corner corner) {
 void Player::Update() {
 	// 移動処理が中に入っている関数AL3_02_07 p10
 	Player::InputMove();
+
+	// 衝突判定を初期化AL3_02_07page13
+	CollisionMapInfo collisionMapInfo;
+	// 移動量に速度の値にコピーAL3_02_07page13
+	collisionMapInfo.move = velocity_;
+	// マップ衝突チェックAL3_02_07page13
+	CheckMapCollision(collisionMapInfo);
+	// 移動02_07_page_36
+	worldTransform_.translation_ += collisionMapInfo.move;
+	// 天井接触による落下開始(02_07 スライド38枚目)
+	if (collisionMapInfo.isHitCeiling) {
+		velocity_.y = 0;
+	}
+	// 02_08_page?//ここでupdate関数を呼ぶ確定よべよべよべよべ
+	UpdateOnGround(collisionMapInfo);
 
 	// 位置に加算（移動）
 	worldTransform_.translation_ += velocity_;
@@ -213,20 +322,8 @@ void Player::Update() {
 		// ここより上に処理書いて―
 		WorldRowFunction::MakeAffinTransFerMatrix(worldTransform_);
 	}
-
-	// 衝突判定を初期化AL3_02_07page13
-	CollisionMapInfo collisionMapInfo;
-	// 移動量に速度の値にコピーAL3_02_07page13
-	collisionMapInfo.move = velocity_;
-	// マップ衝突チェックAL3_02_07page13
-	CheckMapCollision(collisionMapInfo);
-	// 移動02_07_page_36
-	worldTransform_.translation_ += collisionMapInfo.move;
-	// 天井接触による落下開始(02_07 スライド38枚目)
-	if (collisionMapInfo.isHitCeiling) {
-		velocity_.y = 0;
-	}
 }
+
 // 描画
 void Player::Draw() {
 
