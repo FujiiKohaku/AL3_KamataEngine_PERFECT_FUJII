@@ -26,7 +26,7 @@ public:
 	const KamataEngine::Vector3& GetVelocity() const { return velocity_; }
 
 	// 外部からポインタをセットするためのセッター
-	void SetMapChipField(MapChipField* mapChipField) { mapChipField = mapChipField_; }
+	void SetMapChipField(MapChipField* mapChipField) { mapChipField_ = mapChipField; }
 
 	// 移動入力関数AL3_02_07スライド10枚目
 	void InputMove();
@@ -104,4 +104,6 @@ private: // C++ではメンバ変数は特別な理由がなければprivateに�
 
 	// 角を取る関数AL3_02_07_page17
 	Vector3 CornerPosition(const Vector3& center, Corner corner);
+	// AL3_02_07_page_34
+	static inline const float kBlank = 0.04f;
 };

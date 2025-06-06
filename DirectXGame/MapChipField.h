@@ -42,7 +42,7 @@ public:
 
 	// 02_07_page33
 	Rect GetRectByIndex(uint32_t xIndex, uint32_t yIndex);
-
+	
 private:
 	// ブロックの個数
 	static inline const float kBlockWidth = 1.0f;

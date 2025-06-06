@@ -121,6 +121,16 @@ void Player::CheckMapCollisionUp(CollisionMapInfo& info) {
 	if (mapChipType == MapChipType::kBlock) {
 		hit = true;
 	}
+	// ブロックにヒットAL3_02_07_page_34
+	if (hit) {
+		// めり込みを排除する方向に移動量を設定する
+		indexSet = mapChipField_->GetMapChipIndexSetByPosition(worldTransform_.translation_ + Vector3(0, +kHeight / 2.0f, 0));
+		// めり込み先ブロックの範囲矩形
+		MapChipField::Rect rect = mapChipField_->GetRectByIndex(indexSet.xIndex, indexSet.yIndex);
+		info.move.y = std::max(0.0f, rect.bottom - worldTransform_.translation_.y - (kHeight / 2.0f + kBlank));
+		// 天井に当たったっことを記録する
+		info.isHitCeiling = true;
+	}
 }
 
 void Player::CheckMapCollisionDown(CollisionMapInfo& info) { info; }
@@ -207,6 +217,12 @@ void Player::Update() {
 	collisionMapInfo.move = velocity_;
 	// マップ衝突チェックAL3_02_07page13
 	CheckMapCollision(collisionMapInfo);
+	// 移動02_07_page_36
+	worldTransform_.translation_ += collisionMapInfo.move;
+	// 天井接触による落下開始(02_07 スライド38枚目)
+	if (collisionMapInfo.isHitCeiling) {
+		velocity_.y = 0;
+	}
 }
 // 描画
 void Player::Draw() {
