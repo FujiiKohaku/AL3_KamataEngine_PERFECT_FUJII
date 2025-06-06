@@ -133,7 +133,10 @@ void Player::CheckMapCollisionUp(CollisionMapInfo& info) {
 	}
 }
 
-void Player::CheckMapCollisionDown(CollisionMapInfo& info) { info; }
+void Player::CheckMapCollisionDown(CollisionMapInfo& info)
+	{ 
+	
+	}
 void Player::CheckMapCollisionRight(CollisionMapInfo& info) { info; }
 void Player::CheckMapCollisionLeft(CollisionMapInfo& info) { info; }
 
