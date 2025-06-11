@@ -113,6 +113,12 @@ private: // C++ではメンバ変数は特別な理由がなければprivateに�
 	// 接地時の速度減衰率
 	static inline const float kAttenuationLanding = 0.0f;
 
+	// 02_08_page_25着地時の速度減衰率
+	static inline const float kAttenuationWall = 0.2f;
+
 	// 02_08_page_21 微小な数値
 	static inline const float kGroundSearchHeight = 0.06f;
+
+	// 02_08_page_27　壁と接触している場合の処理
+	void UpdateOnWall(const CollisionMapInfo &info);
 };
