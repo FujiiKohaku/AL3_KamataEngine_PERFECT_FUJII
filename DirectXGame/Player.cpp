@@ -292,6 +292,7 @@ void Player::CheckMapCollisionRight(CollisionMapInfo& info) {
 }
 
 // 中身入れるのは02_08スライド25枚目
+//左当たり判定
 void Player::CheckMapCollisionLeft(CollisionMapInfo& info) {
 
 	if (info.move.x >= 0) {
@@ -332,7 +333,7 @@ void Player::CheckMapCollisionLeft(CollisionMapInfo& info) {
 		indexSetNow = mapChipField_->GetMapChipIndexSetByPosition(worldTransform_.translation_ + Vector3(-kWidth / 2.0f, 0, 0));
 
 		if (indexSetNow.xIndex != indexSet.xIndex) {
-			// めり込みを排除する方向に移動量を設定する
+			//// めり込みを排除する方向に移動量を設定する
 			indexSet = mapChipField_->GetMapChipIndexSetByPosition(worldTransform_.translation_ + info.move + Vector3(-kWidth / 2.0f, 0, 0));
 			MapChipField::Rect rect = mapChipField_->GetRectByIndex(indexSet.xIndex, indexSet.yIndex);
 			info.move.x = std::max(0.0f, rect.right - worldTransform_.translation_.x - (kWidth / 2.0f + kBlank));
@@ -383,9 +384,10 @@ void Player::Update() {
 	UpdateOnGround(collisionMapInfo);
 
 	// 位置に加算（移動）
-	worldTransform_.translation_ += velocity_;
+	//worldTransform_.translation_ += velocity_;
 
 	bool landing = false;
+
 	// 地面との当たり判定
 	// 下降中？
 	if (velocity_.y < 0) {
