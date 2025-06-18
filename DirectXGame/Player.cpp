@@ -118,11 +118,11 @@ void Player::CheckMapCollisionUp(CollisionMapInfo& info) {
 	if (mapChipType == MapChipType::kBlock && mapChipTypeNext != MapChipType::kBlock) {
 		hit = true;
 	}
-	//02_08_page_8
-	//if (mapChipType == MapChipType::kBlock) {
+	// 02_08_page_8
+	// if (mapChipType == MapChipType::kBlock) {
 	//	hit = true;
-	//}
-	// 右上点の判定AL3_02_-07_page_28
+	// }
+	//  右上点の判定AL3_02_-07_page_28
 	indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionNew[kRightTop]);
 	mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
 	// 今いるマスの1個下のマスが何か（ブロックかどうか）」を調べる02_08_page_8
@@ -132,12 +132,18 @@ void Player::CheckMapCollisionUp(CollisionMapInfo& info) {
 		hit = true;
 	}
 	/*if (mapChipType == MapChipType::kBlock) {
-		hit = true;
+	    hit = true;
 	}*/
+	// プレイヤーの上端（頭）の座標
+	Vector3 playerTopPos = worldTransform_.translation_ + Vector3(0, +kHeight / 2.0f, 0);
 	// ブロックにヒットAL3_02_07_page_34
 	if (hit) {
 		// めり込みを排除する方向に移動量を設定する
 		indexSet = mapChipField_->GetMapChipIndexSetByPosition(worldTransform_.translation_ + Vector3(0, +kHeight / 2.0f, 0));
+		// 現在座標が壁の外化判定
+		MapChipField::IndexSet indexSetNow;
+		indexSetNow = mapChipField_->GetMapChipIndexSetByPosition(playerTopPos);
+
 		// めり込み先ブロックの範囲矩形
 		MapChipField::Rect rect = mapChipField_->GetRectByIndex(indexSet.xIndex, indexSet.yIndex);
 		info.move.y = std::max(0.0f, rect.bottom - worldTransform_.translation_.y - (kHeight / 2.0f + kBlank));
@@ -188,22 +194,27 @@ void Player::CheckMapCollisionDown(CollisionMapInfo& info) {
 	// ブロックだったらhit=true
 	if (mapChipType == MapChipType::kBlock && mapChipTypeNext != MapChipType::kBlock) {
 		hit = true;
-
 	}
-	//02_08_page_32消しました
-	//if (mapChipType == MapChipType::kBlock) {
+	// 02_08_page_32消しました
+	// if (mapChipType == MapChipType::kBlock) {
 	//	hit = true;
-	//}
-
+	// }
+	// または、プレイヤーの下端（足元）の座標02_08_page39
+	Vector3 playerBottomPos = worldTransform_.translation_ + Vector3(0, -kHeight / 2.0f, 0);
 	// 02_08_page_11ブロックにヒット?
 	if (hit) {
 		// めり込みを排除する方向に移動量を設定する
 		indexSet = mapChipField_->GetMapChipIndexSetByPosition(worldTransform_.translation_ + info.move + Vector3(0, -kHeight / 2.0f, 0));
-		// めり込み先ブロックの範囲矩形
-		MapChipField::Rect rect = mapChipField_->GetRectByIndex(indexSet.xIndex, indexSet.yIndex);
-		info.move.y = std::min(0.0f, rect.top - worldTransform_.translation_.y + (kHeight / 2.0f + kBlank));
-		// 地面に当たったことを記録する
-		info.isHitLanding = true;
+		// 現在座標が壁の外か判定
+		MapChipField::IndexSet indexSetNow;
+		indexSetNow = mapChipField_->GetMapChipIndexSetByPosition(playerBottomPos);
+		if (indexSetNow.yIndex != indexSet.yIndex) {
+			// めり込み先ブロックの範囲矩形
+			MapChipField::Rect rect = mapChipField_->GetRectByIndex(indexSet.xIndex, indexSet.yIndex);
+			info.move.y = std::min(0.0f, rect.top - worldTransform_.translation_.y + (kHeight / 2.0f + kBlank));
+			// 地面に当たったことを記録する
+			info.isHitLanding = true;
+		}
 	}
 }
 
@@ -276,6 +287,7 @@ void Player::CheckMapCollisionRight(CollisionMapInfo& info) {
 		positionNew[i] = CornerPosition(worldTransform_.translation_ + info.move, static_cast<Corner>(i));
 	}
 	MapChipType mapChipType;
+	MapChipType mapChipTypeNext;
 	// 右側の当たり判定
 	bool hit = false;
 	// 右上点の判定
@@ -285,37 +297,58 @@ void Player::CheckMapCollisionRight(CollisionMapInfo& info) {
 	indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionNew[kRightTop]);
 	// 上で求めたマスがどのような地形なのかを調べてmapChipTypeに入れている
 	mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
-	// ブロックだったら当たり判定をtrueにする
-	if (mapChipType == MapChipType::kBlock) {
+	// 今いるマスの1個先のマスが何か（ブロックかどうか）」を調べる02_08_page_8
+	mapChipTypeNext = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex + 1, indexSet.yIndex);
+	// ブロックだったらhit=true02_08_page_8
+	if (mapChipType == MapChipType::kBlock && mapChipTypeNext != MapChipType::kBlock) {
 		hit = true;
 	}
-	// 右下点の判定
+	//// ブロックだったら当たり判定をtrueにする
+	// if (mapChipType == MapChipType::kBlock) {
+	//	hit = true;
+	// }
+	//  右下点の判定
 	indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionNew[kRightBottom]);
 	mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
-	if (mapChipType == MapChipType::kBlock) {
+	// 今いるマスの1個先のマスが何か（ブロックかどうか）」を調べる02_08_page_8
+	mapChipTypeNext = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex + 1, indexSet.yIndex);
+	// ブロックだったらhit=true02_08_page_8
+	if (mapChipType == MapChipType::kBlock && mapChipTypeNext != MapChipType::kBlock) {
 		hit = true;
 	}
-	// ブロックにヒット？
+	// 02_08_page_8
+	// if (mapChipType == MapChipType::kBlock) {
+	//	hit = true;
+	// }
+
+	// プレイヤーの右端の座標
+	Vector3 playerRightPos = worldTransform_.translation_ + Vector3(+kWidth / 2.0f, 0, 0);
+	//  ブロックにヒット？
 	if (hit) {
 		// 現在座標が壁の外か判定
-		MapChipField::IndexSet indexSetNow;
 		// worldTransform_.translation(今のキャラやオブジェクトの中心位置)
 		// Vector3(+kwidth/2.0f,0,0)(横に半分だけずらした位置を表している右方向に半分)
 		// GetMapChipIndexSetByPosition(その位置がマップのどのマスかを返す関数)
-		indexSetNow = mapChipField_->GetMapChipIndexSetByPosition(worldTransform_.translation_ + Vector3(+kWidth / 2.0f, 0, 0));
+		indexSet = mapChipField_->GetMapChipIndexSetByPosition(worldTransform_.translation_ + Vector3(+kWidth / 2.0f, 0, 0));
 		// indexSetNowとindexSetのX座標の番号が違ったら
 		// もし一緒なら壁なので壁に当たる判定を付ける
-		if (indexSetNow.xIndex != indexSet.xIndex) {
+		
 			// めり込みを排除する方向に移動量を設定する
 			indexSet = mapChipField_->GetMapChipIndexSetByPosition(worldTransform_.translation_ + info.move + Vector3(+kWidth / 2.0f, 0, 0));
-			// 壁があるマスの矩形を取得
-			MapChipField::Rect rect = mapChipField_->GetRectByIndex(indexSet.xIndex, indexSet.yIndex);
-			// 壁の左端から今のオブジェクトの右端と隙間を引いた値を計算
-			// この値が動ける最大の距離
-			// std::maxでマイナスにならないようにしている（後ろに戻らないように）
-			info.move.x = std::max(0.0f, rect.left - worldTransform_.translation_.x - (kWidth / 2.0f + kBlank));
-			info.isHitWall = true;
-		}
+			// 現在座標が壁の外か判定
+			MapChipField::IndexSet indexSetNow;
+			indexSetNow = mapChipField_->GetMapChipIndexSetByPosition(playerRightPos);
+			if (indexSetNow.xIndex != indexSet.xIndex) {
+
+				// 壁があるマスの矩形を取得
+				MapChipField::Rect rect = mapChipField_->GetRectByIndex(indexSet.xIndex, indexSet.yIndex);
+				// 壁の左端から今のオブジェクトの右端と隙間を引いた値を計算
+				// この値が動ける最大の距離
+				// std::maxでマイナスにならないようにしている（後ろに戻らないように）
+				info.move.x = std::max(0.0f, rect.left - worldTransform_.translation_.x - (kWidth / 2.0f + kBlank));
+				info.isHitWall = true;
+			}
+		
 	}
 }
 
@@ -334,31 +367,43 @@ void Player::CheckMapCollisionLeft(CollisionMapInfo& info) {
 	}
 
 	MapChipType mapChipType;
-	// 右側の当たり判定
+	MapChipType mapChipTypeNext;
+	// 左側の当たり判定
 	bool hit = false;
 
 	// 左上点の判定
 	MapChipField::IndexSet indexSet;
 	indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionsNew[kLeftTop]);
 	mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
-
-	if (mapChipType == MapChipType::kBlock) {
+	// 今いるマスの1個先のマスが何か（ブロックかどうか）」を調べる02_08_page_8
+	mapChipTypeNext = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex - 1, indexSet.yIndex);
+	// ブロックだったらhit=true02_08_page_8
+	if (mapChipType == MapChipType::kBlock && mapChipTypeNext != MapChipType::kBlock) {
 		hit = true;
 	}
+	/*if (mapChipType == MapChipType::kBlock) {
+	    hit = true;
+	}*/
 
 	// 左下点の判定
 	indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionsNew[kLeftBottom]);
 	mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
-
-	if (mapChipType == MapChipType::kBlock) {
+	// 今いるマスの1個先のマスが何か（ブロックかどうか）」を調べる02_08_page_8
+	mapChipTypeNext = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex - 1, indexSet.yIndex - 1);
+	// ブロックだったらhit=true02_08_page_8
+	if (mapChipType == MapChipType::kBlock && mapChipTypeNext != MapChipType::kBlock) {
 		hit = true;
 	}
-
+	// if (mapChipType == MapChipType::kBlock) {
+	//	hit = true;
+	// }
+	// プレイヤーの左端の座標
+	Vector3 playerLeftPos = worldTransform_.translation_ + Vector3(-kWidth / 2.0f, 0, 0);
 	// ブロックにヒット？
 	if (hit) {
 		// 現在座標が壁の外か判定
 		MapChipField::IndexSet indexSetNow;
-		indexSetNow = mapChipField_->GetMapChipIndexSetByPosition(worldTransform_.translation_ + Vector3(-kWidth / 2.0f, 0, 0));
+		indexSetNow = mapChipField_->GetMapChipIndexSetByPosition(playerLeftPos);
 
 		if (indexSetNow.xIndex != indexSet.xIndex) {
 			//// めり込みを排除する方向に移動量を設定する
