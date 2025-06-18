@@ -105,22 +105,35 @@ void Player::CheckMapCollisionUp(CollisionMapInfo& info) {
 		return;
 	}
 	MapChipType mapChipType;
+	MapChipType mapChipTypeNext;
 	// 真上の当たり判定を行うAL3_02_07_page27
 	bool hit = false;
 	// 左上点の判定AL3_02_07_page28
 	MapChipField::IndexSet indexSet;
 	indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionNew[kLeftTop]);
 	mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
-	if (mapChipType == MapChipType::kBlock) {
+	// 今いるマスの1個下のマスが何か（ブロックかどうか）」を調べる02_08_page_8
+	mapChipTypeNext = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex + 1);
+	// ブロックだったらhit=true02_08_page_8
+	if (mapChipType == MapChipType::kBlock && mapChipTypeNext != MapChipType::kBlock) {
 		hit = true;
 	}
+	//02_08_page_8
+	//if (mapChipType == MapChipType::kBlock) {
+	//	hit = true;
+	//}
 	// 右上点の判定AL3_02_-07_page_28
 	indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionNew[kRightTop]);
 	mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
-
-	if (mapChipType == MapChipType::kBlock) {
+	// 今いるマスの1個下のマスが何か（ブロックかどうか）」を調べる02_08_page_8
+	mapChipTypeNext = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex + 1);
+	// ブロックだったらhit=true02_08_page_8
+	if (mapChipType == MapChipType::kBlock && mapChipTypeNext != MapChipType::kBlock) {
 		hit = true;
 	}
+	/*if (mapChipType == MapChipType::kBlock) {
+		hit = true;
+	}*/
 	// ブロックにヒットAL3_02_07_page_34
 	if (hit) {
 		// めり込みを排除する方向に移動量を設定する
@@ -145,27 +158,42 @@ void Player::CheckMapCollisionDown(CollisionMapInfo& info) {
 	}
 	// MapChipType型の変数mapChipTypeを作る02_08_page_8
 	MapChipType mapChipType;
+	MapChipType mapChipTypeNext;
 	bool hit = false;
 	// 左下の判定
 	// どこのマスにいるかを記録するための変数を作る
 	MapChipField::IndexSet indexSet;
-	// positionsNew[kRightBottom] は「右下の座標（プレイヤーの右下の角）」
-	// それを渡して「右下の角が、マップのどのマスにいるか？」を indexSet に入れる
-	indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionsNew[kRightBottom]);
+	// positionsNew[kRightBottom] は「左下の座標（プレイヤーの右下の角）」
+	// それを渡して「左下の角が、マップのどのマスにいるか？」を indexSet に入れる
+	indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionsNew[kLeftBottom]);
 	// indexSet でわかったマスの中身（タイプ）を調べます
 	mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
-	// 中身がブロックだったらぶつかったと判定してhitをtrueにする
-	if (mapChipType == MapChipType::kBlock) {
+	// 今いるマスの1個上のマスが何か（ブロックかどうか）」を調べる02_08_page_8
+	mapChipTypeNext = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex - 1);
+	// ブロックだったらhit=true02_08_page_8
+	if (mapChipType == MapChipType::kBlock && mapChipTypeNext != MapChipType::kBlock) {
 		hit = true;
 	}
+
+	// 中身がブロックだったらぶつかったと判定してhitをtrueにする//02_08_page_32消しました
+	// if (mapChipType == MapChipType::kBlock) {
+	//	hit = true;
+	//}
 
 	// 右下点の判定
-	indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionsNew[kLeftBottom]);
+	indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionsNew[kRightBottom]);
 	mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
-
-	if (mapChipType == MapChipType::kBlock) {
+	// 今いるマスの1個上のマスが何か（ブロックかどうか）」を調べる
+	mapChipTypeNext = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex - 1);
+	// ブロックだったらhit=true
+	if (mapChipType == MapChipType::kBlock && mapChipTypeNext != MapChipType::kBlock) {
 		hit = true;
+
 	}
+	//02_08_page_32消しました
+	//if (mapChipType == MapChipType::kBlock) {
+	//	hit = true;
+	//}
 
 	// 02_08_page_11ブロックにヒット?
 	if (hit) {
@@ -292,7 +320,7 @@ void Player::CheckMapCollisionRight(CollisionMapInfo& info) {
 }
 
 // 中身入れるのは02_08スライド25枚目
-//左当たり判定
+// 左当たり判定
 void Player::CheckMapCollisionLeft(CollisionMapInfo& info) {
 
 	if (info.move.x >= 0) {
@@ -384,7 +412,7 @@ void Player::Update() {
 	UpdateOnGround(collisionMapInfo);
 
 	// 位置に加算（移動）
-	//worldTransform_.translation_ += velocity_;
+	// worldTransform_.translation_ += velocity_;
 
 	bool landing = false;
 
@@ -398,13 +426,13 @@ void Player::Update() {
 	}
 
 	//// 接地判定
-	//if (onGround_) {
+	// if (onGround_) {
 	//	// ジャンプ開始
 	//	if (velocity_.y > 0.0f) {
 	//		// 空中状態に以降
 	//		onGround_ = false;
 	//	}
-	//} else {
+	// } else {
 	//	// 着地
 	//	if (landing) {
 	//		// めり込み排斥
@@ -416,8 +444,8 @@ void Player::Update() {
 	//		// 接地状態に以降
 	//		onGround_ = true;
 	//	}
-	//}
-	// 旋回制御
+	// }
+	//  旋回制御
 	{
 		if (turnTimer_ > 0.0f) {
 			// タイマーを進める
