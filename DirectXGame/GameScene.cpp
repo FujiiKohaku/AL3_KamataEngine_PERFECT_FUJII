@@ -52,12 +52,23 @@ void GameScene::Initialize() {
 	// 02_06カメラコントローラ スライド18枚目
 	CameraController::Rect cameraArea = {12.0f, 100 - 12.0f, 6.0f, 6.0f};
 	cController_->SetMoveableArea(cameraArea);
+
+	// 02_09 10枚目 敵クラス
+	enemy_ = new Enemy();
+	// 02_09 10枚目 敵モデル
+	enemy_model_ = Model::CreateFromOBJ("enemy");
+	// 02_09 10枚目 敵位置決めて敵クラス初期化
+	Vector3 enemyPosition = mapChipField_->GetMapChipPositionByIndex(14, 18);
+	enemy_->Initialize(enemy_model_, &camera_, enemyPosition);
 }
 
 // 更新
 void GameScene::Update() {
 	// 自キャラの更新
 	player_->Update();
+	skydome_->Update();
+	cController_->Upadate();
+	enemy_->UpDate();
 	/* ブロックの更新AL3_02_02*/
 	for (const std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
 		for (WorldTransform* worldTransformBlock : worldTransformBlockLine) {
@@ -87,8 +98,6 @@ void GameScene::Update() {
 		// ビュープロジェクション行列の更新と転送AL3_02_02*/
 
 		camera_.UpdateMatrix();
-		skydome_->Update();
-		cController_->Upadate();
 	}
 }
 // 描画
@@ -109,6 +118,7 @@ void GameScene::Draw() {
 		}
 	}
 	skydome_->Draw();
+	enemy_->Draw();
 	model_->PostDraw();
 }
 // コンストラクタ
@@ -132,6 +142,8 @@ GameScene::~GameScene() {
 	delete skydome_;
 	// マップチップフィールドデリーと
 	delete mapChipField_;
+	// 2_09 敵クラス削除
+	delete enemy_;
 }
 
 void GameScene::GenerateBlocks() {
