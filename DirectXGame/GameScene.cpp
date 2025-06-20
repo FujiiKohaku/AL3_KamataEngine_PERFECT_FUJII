@@ -54,12 +54,23 @@ void GameScene::Initialize() {
 	cController_->SetMoveableArea(cameraArea);
 
 	// 02_09 10枚目 敵クラス
-	enemy_ = new Enemy();
+	/*enemy_ = new Enemy();*/
 	// 02_09 10枚目 敵モデル
 	enemy_model_ = Model::CreateFromOBJ("enemy");
 	// 02_09 10枚目 敵位置決めて敵クラス初期化
-	Vector3 enemyPosition = mapChipField_->GetMapChipPositionByIndex(14, 18);
-	enemy_->Initialize(enemy_model_, &camera_, enemyPosition);
+	/*Vector3 enemyPosition = mapChipField_->GetMapChipPositionByIndex(14, 18);
+	enemy_->Initialize(enemy_model_, &camera_, enemyPosition);*/
+
+	// 02_10 5枚目（for文の中身全部）
+	for (int32_t i = 0; i < 2; ++i) {
+		Enemy* newEnemy = new Enemy();
+
+		Vector3 enemyPosition = mapChipField_->GetMapChipPositionByIndex(14 + i * 2, 18);
+
+		newEnemy->Initialize(enemy_model_, &camera_, enemyPosition);
+
+		enemies_.push_back(newEnemy);
+	}
 }
 
 // 更新
@@ -68,7 +79,11 @@ void GameScene::Update() {
 	player_->Update();
 	skydome_->Update();
 	cController_->Upadate();
-	enemy_->UpDate();
+	// 02_09 12枚目 敵更新 → 02_10 7枚目で更新
+	//	enemy_->Update();
+	for (Enemy* enemy : enemies_) {
+		enemy->UpDate();
+	}
 	/* ブロックの更新AL3_02_02*/
 	for (const std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
 		for (WorldTransform* worldTransformBlock : worldTransformBlockLine) {
@@ -118,8 +133,39 @@ void GameScene::Draw() {
 		}
 	}
 	skydome_->Draw();
-	enemy_->Draw();
+	// 02_09 12枚目 敵更新 → 02_10 7枚目で更新
+	//	enemy_->Draw();
+	for (Enemy* enemy : enemies_) {
+		enemy->Draw();
+	}
 	model_->PostDraw();
+}
+// 02_10 16枚目
+void GameScene::CheckAllCollisions() {
+
+	// 判定対象1と2の座標
+	AABB aabb1, aabb2;
+
+#pragma region 自キャラと敵キャラの当たり判定
+	{
+		// 自キャラの座標
+		aabb1 = player_->GetAABB();
+
+		// 自キャラと敵弾全ての当たり判定
+		for (Enemy* enemy : enemies_) {
+			// 敵弾の座標
+			aabb2 = enemy->GetAABB();
+
+			// AABB同士の交差判定
+			if (IsCollision(aabb1, aabb2)) {
+				// 自キャラの衝突時コールバックを呼び出す
+				player_->OnCollision(enemy);
+				// 敵弾の衝突時コールバックを呼び出す
+				enemy->OnCollision(player_);
+			}
+		}
+	}
+#pragma endregion
 }
 // コンストラクタ
 GameScene::GameScene() {}
@@ -142,8 +188,11 @@ GameScene::~GameScene() {
 	delete skydome_;
 	// マップチップフィールドデリーと
 	delete mapChipField_;
-	// 2_09 敵クラス削除
-	delete enemy_;
+
+	// 02_10 6枚目 敵クラス削除
+	for (Enemy* enemy : enemies_) {
+		delete enemy;
+	}
 }
 
 void GameScene::GenerateBlocks() {

@@ -7,6 +7,10 @@
 // 前方宣言
 class MapChipField;
 
+
+// 02_10 21枚目
+class Enemy;
+
 class Player {
 public:
 	// 初期化
@@ -38,6 +42,14 @@ public:
 		kLeftTop,     // 左上
 		kNumCorner    // 要素数
 	};
+	// 02_10 10枚目 ワールド座標を取得
+	Vector3 GetWorldPosition();
+
+	// 02_10 13枚目
+	AABB GetAABB();
+
+	// 02_10 21枚目 衝突応答
+	void OnCollision(const Enemy* enemy);
 
 private: // C++ではメンバ変数は特別な理由がなければprivateにする
 	// ワールド変換データ

@@ -6,6 +6,11 @@ public:
 	void UpDate();
 
 	void Draw();
+	// 02_10 13枚目
+	AABB GetAABB();
+
+	// 02_10 スライド20枚目 衝突応答
+	void OnCollision(const Player* player);
 
 	void Initialize(Model* model, Camera* camera, const Vector3& position);
 
