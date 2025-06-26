@@ -234,7 +234,7 @@ void Player::CheckMapCollisionRight(CollisionMapInfo& info) {
 	// 右上・右下の1マス右側をチェック
 	for (Corner corner : {kRightTop, kRightBottom}) {
 		auto index = mapChipField_->GetMapChipIndexSetByPosition(positionsNew[corner]);
-		auto mapChip = mapChipField_->GetMapChipTypeByIndex(index.xIndex , index.yIndex);
+		auto mapChip = mapChipField_->GetMapChipTypeByIndex(index.xIndex, index.yIndex);
 		if (mapChip == MapChipType::kBlock) {
 			hit = true;
 			break;
@@ -256,7 +256,6 @@ void Player::CheckMapCollisionRight(CollisionMapInfo& info) {
 		}
 	}
 }
-
 
 // 中身入れるのは02_08スライド25枚目
 // 左当たり判定
@@ -305,8 +304,6 @@ void Player::CheckMapCollisionLeft(CollisionMapInfo& info) {
 		info.isHitWall = true;
 	}
 }
-
-
 
 // 接地状態の切り替え処理02_08_page_14
 void Player::UpdateOnGround(const CollisionMapInfo& info) {
@@ -360,10 +357,6 @@ void Player::UpdateOnGround(const CollisionMapInfo& info) {
 		}
 	}
 }
-
-
-
-
 
 // 中心座標 center を基準に、プレイヤーの四隅のどこかの位置を返す AL3_02_07_page18
 Vector3 Player::CornerPosition(const Vector3& center, Corner corner) {
@@ -457,12 +450,7 @@ void Player::Update() {
 }
 
 // 描画
-void Player::Draw() {
-
-	model_->Draw(worldTransform_, *camera_);
-
-	
-}
+void Player::Draw() { model_->Draw(worldTransform_, *camera_); }
 // 02_10 10枚目
 Vector3 Player::GetWorldPosition() {
 
@@ -486,10 +474,13 @@ AABB Player::GetAABB() {
 	return aabb;
 }
 
-void Player::OnCollision(const Enemy* enemy) { (void)enemy;
-//ジャンプ開始(仮処理)
-	velocity_ += Vector3(0, kJumpAcceleration / 60.0f, 0);
-	}
+void Player::OnCollision(const Enemy* enemy) {
+	(void)enemy;
+	// ジャンプ開始(仮処理)
+	//velocity_ += Vector3(0, kJumpAcceleration / 60.0f, 0);
+	//
+	isDead_ = true;
+}
 
 // コンストラクタ
 Player::Player() {}

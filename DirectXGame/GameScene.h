@@ -1,5 +1,6 @@
 #pragma once
 #include "CameraController.h"
+#include "DeathParticles.h"
 #include "Enemy.h"
 #include "KamataEngine.h"
 #include "MapChipField.h"
@@ -62,4 +63,20 @@ private:
 
 	// 02_10
 	std::list<Enemy*> enemies_;
+
+	// 02_11_page_15
+	DeathParticles* deathParticles_ = nullptr;
+	// 02_11_page_16
+	Model* dethParticleModel = nullptr;
+
+	// ゲームのフェーズ型
+	// classは名前被りがないためだって鍵付きロッカーみたいな
+	enum class Phase {
+		kPlay,  // ゲームプレイ
+		kDeath, // デス演出
+	};
+	// ゲームの現在フェーズの変数
+	Phase phase_;
+
+	void ChangePhese();
 };

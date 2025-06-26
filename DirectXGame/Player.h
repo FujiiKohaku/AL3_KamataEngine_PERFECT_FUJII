@@ -7,7 +7,6 @@
 // 前方宣言
 class MapChipField;
 
-
 // 02_10 21枚目
 class Enemy;
 
@@ -50,6 +49,9 @@ public:
 
 	// 02_10 21枚目 衝突応答
 	void OnCollision(const Enemy* enemy);
+
+	// 02_12_page11
+	bool IsDead() const { return isDead_; }
 
 private: // C++ではメンバ変数は特別な理由がなければprivateにする
 	// ワールド変換データ
@@ -132,5 +134,8 @@ private: // C++ではメンバ変数は特別な理由がなければprivateに�
 	static inline const float kGroundSearchHeight = 0.06f;
 
 	// 02_08_page_27　壁と接触している場合の処理
-	void UpdateOnWall(const CollisionMapInfo &info);
+	void UpdateOnWall(const CollisionMapInfo& info);
+
+	// デスフラグ02_12_page11
+	bool isDead_ = false;
 };

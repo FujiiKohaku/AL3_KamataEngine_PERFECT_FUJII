@@ -71,10 +71,34 @@ void GameScene::Initialize() {
 
 		enemies_.push_back(newEnemy);
 	}
+
+	dethParticleModel = Model::CreateFromOBJ("deathParticle");
+
+	// 仮の生成処理
+	// deathParticles_ = new DeathParticles;
+	// deathParticles_->Initialize(dethParticleModel, &camera_, playerPosition);
+	// ゲームプレイフェーズから始めます
+	phase_ = Phase::kPlay;
 }
 
+//-------------------------------------
 // 更新
+//-------------------------------------
 void GameScene::Update() {
+
+	// 02_12_page_5,6
+	switch (phase_) {
+	case GameScene::Phase::kPlay:
+		// ゲームプレイフェーズの処理
+		ChangePhese();
+		break;
+	case GameScene::Phase::kDeath:
+		// デス演出フェーズの処理
+		break;
+	default:
+		break;
+	}
+
 	// 自キャラの更新
 	player_->Update();
 	skydome_->Update();
@@ -114,15 +138,26 @@ void GameScene::Update() {
 
 		camera_.UpdateMatrix();
 	}
+	// UPdateに関数呼べ！
+	CheckAllCollisions();
+	// 02_11_page18
+	if (deathParticles_) {
+		deathParticles_->Update();
+	}
 }
+//-------------------------------------
 // 描画
+//-------------------------------------
 void GameScene::Draw() {
 	// DirectXCommonインスタンスの取得
 	DirectXCommon* dxCommon = DirectXCommon::GetInstance();
 
 	// 自キャラの描画
 	model_->PreDraw(dxCommon->GetCommandList());
-	player_->Draw();
+
+	if (!player_->IsDead()) {
+		player_->Draw();
+	}
 	// ブロックの描画AL3_02_02
 	for (const std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
 		for (WorldTransform* worldTransformBlock : worldTransformBlockLine) {
@@ -138,9 +173,15 @@ void GameScene::Draw() {
 	for (Enemy* enemy : enemies_) {
 		enemy->Draw();
 	}
+	// 02_11_page18
+	if (deathParticles_) {
+		deathParticles_->Draw();
+	}
+
+	//======//
+	// 最後  //
+	//======//
 	model_->PostDraw();
-	//UPdateに関数呼べ！
-	CheckAllCollisions();
 }
 // 02_10 16枚目
 void GameScene::CheckAllCollisions() {
@@ -169,6 +210,30 @@ void GameScene::CheckAllCollisions() {
 	}
 #pragma endregion
 }
+// 02_12_10page
+void GameScene::ChangePhese() {
+	switch (phase_) {
+	case GameScene::Phase::kPlay:
+		// 02_12_page13
+		// 死んだ場合
+		if (player_->IsDead()) {
+			// フェーズを切り替える
+			phase_ = Phase::kDeath;
+			// 変数を作成してそこにプレイヤーの位置情報を入れる
+			const Vector3& deathParticlesPosition = player_->GetWorldPosition();
+			deathParticles_ = new DeathParticles;
+			deathParticles_->Initialize(dethParticleModel, &camera_, deathParticlesPosition);
+		}
+		// ゲームプレイフェーズの処理
+		break;
+	case GameScene::Phase::kDeath:
+		// デス演出フェーズの処理
+
+		break;
+	default:
+		break;
+	}
+}
 // コンストラクタ
 GameScene::GameScene() {}
 // デストラクタ
@@ -195,6 +260,9 @@ GameScene::~GameScene() {
 	for (Enemy* enemy : enemies_) {
 		delete enemy;
 	}
+	delete deathParticles_;
+
+	delete dethParticleModel;
 }
 
 void GameScene::GenerateBlocks() {
