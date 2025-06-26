@@ -139,6 +139,8 @@ void GameScene::Draw() {
 		enemy->Draw();
 	}
 	model_->PostDraw();
+	//UPdateに関数呼べ！
+	CheckAllCollisions();
 }
 // 02_10 16枚目
 void GameScene::CheckAllCollisions() {

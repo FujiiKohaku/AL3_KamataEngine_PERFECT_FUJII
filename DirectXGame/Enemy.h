@@ -1,12 +1,16 @@
 #pragma once
 #include "KamataEngine.h"
 #include "Math.h"
+
+// 02_10_20枚
+class Player;
+
 class Enemy {
 public:
 	void UpDate();
 
 	void Draw();
-	// 02_10 13枚目
+	// 02_10 14枚目
 	AABB GetAABB();
 
 	// 02_10 スライド20枚目 衝突応答
@@ -16,6 +20,8 @@ public:
 
 	// モデルのセット関数（モデルを記録）
 	void SetModel(Model* model) { model_ = model; }
+	// 02_10 スライド14枚目 ワールド座標を取得
+	Vector3 GetWorldPosition();
 
 private:
 	// メンバ変数の追加
@@ -38,4 +44,7 @@ private:
 	static inline const float kWalkMotionTime = 1.0f;
 	// 02_09 20枚目
 	float walkTimer = 0.0f;
+	// 02_10 14枚目 当たり判定サイズ
+	static inline const float kWidth = 0.8f;
+	static inline const float kHeight = 0.8f;
 };
