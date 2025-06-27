@@ -89,34 +89,75 @@ void GameScene::Update() {
 	// 02_12_page_5,6
 	switch (phase_) {
 	case GameScene::Phase::kPlay:
+
+		//--------------------------
 		// ゲームプレイフェーズの処理
+		// -------------------------
+
 		ChangePhese();
+		// 自キャラの更新
+		player_->Update();       // 自キャラの更新
+		skydome_->Update();      // 天球の更新
+		cController_->Upadate(); // カメラコントローラ―の更新
+		// 02_09 12枚目 敵更新 → 02_10 7枚目で更新
+		//	enemy_->Update();
+		for (Enemy* enemy : enemies_) { // 敵の更新（複数）
+			enemy->UpDate();
+		}
+
+		/* ブロックの更新AL3_02_02*/
+		for (const std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
+			for (WorldTransform* worldTransformBlock : worldTransformBlockLine) {
+				if (!worldTransformBlock)
+					continue;
+				worldTransformBlock->matWorld_ = MakeAffineMatrix(worldTransformBlock->scale_, worldTransformBlock->rotation_, worldTransformBlock->translation_);
+
+				worldTransformBlock->TransferMatrix();
+			}
+		}
+		// UPdateに関数呼べ！
+		CheckAllCollisions(); // 全ての当たり判定
+		// 02_11_page18
+	
+
+		//-----------------------------
+		// ゲームプレイフェーズの処理ここまで
+		// ----------------------------
+
 		break;
 	case GameScene::Phase::kDeath:
+		//-------------------------
 		// デス演出フェーズの処理
+		//-------------------------
+
+			skydome_->Update();      // 天球の更新
+		cController_->Upadate(); // カメラコントローラ―の更新
+		// 02_09 12枚目 敵更新 → 02_10 7枚目で更新
+		//	enemy_->Update();
+		for (Enemy* enemy : enemies_) { // 敵の更新（複数）
+			enemy->UpDate();
+		}
+		/* ブロックの更新AL3_02_02*/
+		for (const std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
+			for (WorldTransform* worldTransformBlock : worldTransformBlockLine) {
+				if (!worldTransformBlock)
+					continue;
+				worldTransformBlock->matWorld_ = MakeAffineMatrix(worldTransformBlock->scale_, worldTransformBlock->rotation_, worldTransformBlock->translation_);
+
+				worldTransformBlock->TransferMatrix();
+			}
+		}
+		if (deathParticles_) {
+			deathParticles_->Update();
+		}
+
+
+
+
+
 		break;
 	default:
 		break;
-	}
-
-	// 自キャラの更新
-	player_->Update();
-	skydome_->Update();
-	cController_->Upadate();
-	// 02_09 12枚目 敵更新 → 02_10 7枚目で更新
-	//	enemy_->Update();
-	for (Enemy* enemy : enemies_) {
-		enemy->UpDate();
-	}
-	/* ブロックの更新AL3_02_02*/
-	for (const std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
-		for (WorldTransform* worldTransformBlock : worldTransformBlockLine) {
-			if (!worldTransformBlock)
-				continue;
-			worldTransformBlock->matWorld_ = MakeAffineMatrix(worldTransformBlock->scale_, worldTransformBlock->rotation_, worldTransformBlock->translation_);
-
-			worldTransformBlock->TransferMatrix();
-		}
 	}
 
 #ifdef _DEBUG
@@ -138,12 +179,6 @@ void GameScene::Update() {
 
 		camera_.UpdateMatrix();
 	}
-	// UPdateに関数呼べ！
-	CheckAllCollisions();
-	// 02_11_page18
-	if (deathParticles_) {
-		deathParticles_->Update();
-	}
 }
 //-------------------------------------
 // 描画
@@ -158,6 +193,7 @@ void GameScene::Draw() {
 	if (!player_->IsDead()) {
 		player_->Draw();
 	}
+
 	// ブロックの描画AL3_02_02
 	for (const std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
 		for (WorldTransform* worldTransformBlock : worldTransformBlockLine) {
