@@ -28,8 +28,21 @@ public:
 
 	// 02_10 16枚目 衝突判定と応答
 	void CheckAllCollisions();
+	// デスフラグのgetter
+	bool IsFinished() const { return finished_;}
 
 private:
+	// 02_12 4枚目 ゲームのフェーズ（型）
+	enum class Phase {
+		kPlay,  // ゲームプレイ
+		kDeath, // デス演出
+	};
+
+	// 02_12 4枚目 ゲームの現在フェーズ（変数）
+	Phase phase_;
+
+	// 02_12 9枚目
+	void ChangePhase();
 	// テクスチャハンドル
 	uint32_t textureHandle_ = 0;
 	// 3Dモデルデータ
@@ -67,16 +80,18 @@ private:
 	// 02_11_page_15
 	DeathParticles* deathParticles_ = nullptr;
 	// 02_11_page_16
-	Model* dethParticleModel = nullptr;
+	Model* deathParticleModel = nullptr;
 
 	// ゲームのフェーズ型
 	// classは名前被りがないためだって鍵付きロッカーみたいな
-	enum class Phase {
-		kPlay,  // ゲームプレイ
-		kDeath, // デス演出
-	};
+	//enum class Phase {
+	//	kPlay,  // ゲームプレイ
+	//	kDeath, // デス演出
+	//};
 	// ゲームの現在フェーズの変数
-	Phase phase_;
+	//Phase phase_;
 
 	void ChangePhese();
+	// 終了フラグ
+	bool finished_ = false;
 };

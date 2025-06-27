@@ -13,6 +13,8 @@ public:
 	void Initialize(Model* model, Camera* camera, const Vector3& position);
 	void Update();
 	void Draw();
+	// 02_12 34枚目で実装
+	bool IsFinished() { return isFinished_; }
 
 private:
 	// 02_11_9page モデル(ポインタ)
@@ -47,4 +49,5 @@ private:
 
 	// 02_11_30page 色の数値
 	Vector4 color_;
+
 };

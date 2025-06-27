@@ -72,7 +72,7 @@ void GameScene::Initialize() {
 		enemies_.push_back(newEnemy);
 	}
 
-	dethParticleModel = Model::CreateFromOBJ("deathParticle");
+	deathParticleModel = Model::CreateFromOBJ("deathParticle");
 
 	// 仮の生成処理
 	// deathParticles_ = new DeathParticles;
@@ -80,12 +80,34 @@ void GameScene::Initialize() {
 	// ゲームプレイフェーズから始めます
 	phase_ = Phase::kPlay;
 }
+// 02_12 10枚目 GameScene::Update関数で呼び出しておく
+// player->draw();をif(!player_->IsDead()){}で囲む
+void GameScene::ChangePhase() {
 
+	switch (phase_) {
+	case Phase::kPlay:
+		// 02_12 13枚目 if文から中身まで全部実装
+		// Initialize関数のいきなりパーティクル発生処理は消す
+		if (player_->IsDead()) {
+			// 死亡演出
+			phase_ = Phase::kDeath;
+
+			const Vector3& deathParticlesPosition = player_->GetWorldPosition();
+
+			deathParticles_ = new DeathParticles;
+			deathParticles_->Initialize(deathParticleModel, &camera_, deathParticlesPosition);
+
+		}
+		break;
+	case Phase::kDeath:
+		break;
+	}
+}
 //-------------------------------------
 // 更新
 //-------------------------------------
 void GameScene::Update() {
-
+	ChangePhase();
 	// 02_12_page_5,6
 	switch (phase_) {
 	case GameScene::Phase::kPlay:
@@ -130,7 +152,7 @@ void GameScene::Update() {
 		// デス演出フェーズの処理
 		//-------------------------
 
-			skydome_->Update();      // 天球の更新
+		skydome_->Update();      // 天球の更新
 		cController_->Upadate(); // カメラコントローラ―の更新
 		// 02_09 12枚目 敵更新 → 02_10 7枚目で更新
 		//	enemy_->Update();
@@ -150,7 +172,11 @@ void GameScene::Update() {
 		if (deathParticles_) {
 			deathParticles_->Update();
 		}
-
+		
+		// deathParticles_->IsFinished関数をDeathParticles.hに実装
+		if (deathParticles_ && deathParticles_->IsFinished()) {
+			finished_ = true;
+		}
 
 
 
@@ -258,7 +284,7 @@ void GameScene::ChangePhese() {
 			// 変数を作成してそこにプレイヤーの位置情報を入れる
 			const Vector3& deathParticlesPosition = player_->GetWorldPosition();
 			deathParticles_ = new DeathParticles;
-			deathParticles_->Initialize(dethParticleModel, &camera_, deathParticlesPosition);
+			deathParticles_->Initialize(deathParticleModel, &camera_, deathParticlesPosition);
 		}
 		// ゲームプレイフェーズの処理
 		break;
@@ -298,7 +324,7 @@ GameScene::~GameScene() {
 	}
 	delete deathParticles_;
 
-	delete dethParticleModel;
+	delete deathParticleModel;
 }
 
 void GameScene::GenerateBlocks() {
