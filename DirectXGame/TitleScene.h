@@ -1,6 +1,6 @@
 #pragma once
+#include "Fade.h"
 #include "KamataEngine.h"
-
 using namespace KamataEngine;
 
 // 02_12 19枚目 タイトルシーン
@@ -31,5 +31,6 @@ private:
 	float counter_ = 0.0f;
 	// 02_12 26枚目
 	bool finished_ = false;
-	//float counter_ = 0.0f;
+	// float counter_ = 0.0f;
+	Fade* fade_ = nullptr;
 };
