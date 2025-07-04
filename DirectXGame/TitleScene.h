@@ -17,6 +17,13 @@ public:
 	// 02_12 26枚目
 	bool IsFinished() const { return finished_; }
 
+	// 02_12 27枚目 シーンのフェーズ
+	enum class Phase {
+		kFadeIn,  // フェードイン
+		kMain,    // メイン部
+		kFadeOut, // フェードアウト
+	};
+
 private:
 	static inline const float kTimeTitleMove = 2.0f;
 
@@ -33,4 +40,6 @@ private:
 	bool finished_ = false;
 	// float counter_ = 0.0f;
 	Fade* fade_ = nullptr;
+	// 02_13 27枚目 現在のフェーズ
+	Phase phase_ = Phase::kFadeIn;
 };

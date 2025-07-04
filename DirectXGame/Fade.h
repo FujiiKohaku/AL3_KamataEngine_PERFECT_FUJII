@@ -17,6 +17,11 @@ public:
 
 	// フェード開始関数
 	void Start(Status status, float duratiom);
+	// フェード終了関数
+	void Stop();
+
+	// フェード終了判定
+	bool IsFinished() const;
 
 private:
 	// Spriteの生成タイミング制御のためポインタで保持

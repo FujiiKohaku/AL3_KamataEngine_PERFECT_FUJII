@@ -48,6 +48,10 @@ void Fade::Update() {
 
 void Fade::Draw() {
 
+	// 02_13 24枚目
+	if (status_ == Status::None) {
+		return;
+	}
 	// よくわからんがなんかPSOセットしてシグネチャセットして設定をコマンドリストに反映
 	KamataEngine::Sprite::PreDraw(KamataEngine::DirectXCommon::GetInstance()->GetCommandList());
 
@@ -59,4 +63,23 @@ void Fade::Start(Status status, float duration) {
 	status_ = status;
 	duration_ = duration;
 	counter_ = 0.0f;
+}
+// フェード停止関数
+void Fade::Stop() { status_ = Status::None; }
+
+bool Fade::IsFinished() const {
+
+	switch (status_) {
+	case Status::FadeIn:
+	case Fade::Status::FadeOut:
+
+		if (counter_ >= duration_) {
+			return true;
+		} else {
+
+			return false;
+		}
+	}
+
+	return true;
 }

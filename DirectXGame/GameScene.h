@@ -8,6 +8,7 @@
 #include "Player.h"
 #include "Skydome.h"
 #include <vector>
+#include "Fade.h"
 
 // ゲームシーン
 class GameScene {
@@ -29,13 +30,15 @@ public:
 	// 02_10 16枚目 衝突判定と応答
 	void CheckAllCollisions();
 	// デスフラグのgetter
-	bool IsFinished() const { return finished_;}
+	bool IsFinished() const { return finished_; }
 
 private:
 	// 02_12 4枚目 ゲームのフェーズ（型）
 	enum class Phase {
-		kPlay,  // ゲームプレイ
-		kDeath, // デス演出
+		kFadeIn, // フェードイン
+		kPlay,   // ゲームプレイ
+		kDeath,  // デス演出
+		kFadeOut // フェードアウト
 	};
 
 	// 02_12 4枚目 ゲームの現在フェーズ（変数）
@@ -84,14 +87,15 @@ private:
 
 	// ゲームのフェーズ型
 	// classは名前被りがないためだって鍵付きロッカーみたいな
-	//enum class Phase {
+	// enum class Phase {
 	//	kPlay,  // ゲームプレイ
 	//	kDeath, // デス演出
 	//};
 	// ゲームの現在フェーズの変数
-	//Phase phase_;
+	// Phase phase_;
 
 	void ChangePhese();
 	// 終了フラグ
 	bool finished_ = false;
+	Fade* fade_ = nullptr;
 };
