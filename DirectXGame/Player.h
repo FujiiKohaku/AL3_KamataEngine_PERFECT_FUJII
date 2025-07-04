@@ -54,7 +54,29 @@ public:
 	bool IsDead() const { return isDead_; }
 
 	// 通常行動更新
-	void BehabiorRootUpdate();
+	void BehaviorRootUpdate();
+
+	// 02_14 8枚目 攻撃行動更新
+	void BehaviorAttackUpdate();
+	// 02_14 16枚目 通常行動初期化
+	void BehaviorRootInitialize();
+
+	// 02_14 16枚目 攻撃行動初期化
+	void BehaviorAttackInitialize();
+	// 振る舞い
+	//   02_14 11枚目 振るまい
+	enum class Behavior {
+		kUnknown,
+		kRoot,   // 通常状態
+		kAttack, // 攻撃中
+	};
+	// 攻撃フェーズ
+	enum class AttackPhase {
+		kUnknown,      // 未定義
+		kAnticipation, // 予備動作
+		kAction,       // 攻撃開始
+		kRecovery,     // 攻撃終了
+	};
 
 private: // C++ではメンバ変数は特別な理由がなければprivateにする
 	// ワールド変換データ
@@ -141,4 +163,22 @@ private: // C++ではメンバ変数は特別な理由がなければprivateに�
 
 	// デスフラグ02_12_page11
 	bool isDead_ = false;
+
+	// 02_14 11枚目 振るまい
+	Behavior behavior_ = Behavior::kRoot;
+	// 次のふるまいリクエスト
+	Behavior behaviorRequest_ = Behavior::kUnknown;
+	// 攻撃ギミックの経過カウンター
+	uint32_t attackParameter_ = 0;
+
+	// 攻撃フェーズ
+	AttackPhase attackPhase_ = AttackPhase::kUnknown;
+	// 02_14 26枚目 予備動作の時間
+	static inline const uint32_t kAnticipationTime = 8;
+	// 02_14 26枚目 前進動作の時間
+	static inline const uint32_t kActionTime = 5;
+	// 02_14 26枚目 余韻動作の時間
+	static inline const uint32_t kRecoveryTime = 12;
+	WorldTransform worldTransformAttack_;
+
 };

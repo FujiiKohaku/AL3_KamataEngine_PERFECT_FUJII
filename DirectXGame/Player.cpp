@@ -373,7 +373,20 @@ Vector3 Player::CornerPosition(const Vector3& center, Corner corner) {
 #pragma endregion
 
 // 更新
-void Player::Update() { BehabiorRootUpdate(); }
+void Player::Update() {
+
+	// 現在のビヘイビアに応じた更新処理を行う
+	// 02_14 17枚目
+	switch (behavior_) {
+	case Behavior::kRoot:
+	default:
+		BehaviorRootUpdate();
+		break;
+	case Behavior::kAttack:
+		BehaviorAttackUpdate();
+		break;
+	}
+}
 
 // 描画
 void Player::Draw() { model_->Draw(worldTransform_, *camera_); }
@@ -408,7 +421,10 @@ void Player::OnCollision(const Enemy* enemy) {
 	isDead_ = true;
 }
 // AL3_02_14
-void Player::BehabiorRootUpdate() {
+//==============================
+// ヘイビアの更新処理
+//==============================
+void Player::BehaviorRootUpdate() {
 
 	// 移動処理が中に入っている関数AL3_02_07 p10
 	Player::InputMove();
@@ -442,27 +458,78 @@ void Player::BehabiorRootUpdate() {
 		}
 	}
 
-	{
-		if (turnTimer_ > 0.0f) {
-			// タイマーを進める
-			turnTimer_ = std::max(turnTimer_ - (1.0f / 60.0f), 0.0f);
+	if (turnTimer_ > 0.0f) {
+		// タイマーを進める
+		turnTimer_ = std::max(turnTimer_ - (1.0f / 60.0f), 0.0f);
 
-			float destinationRotationYTable[] = {std::numbers::pi_v<float> / 2.0f, std::numbers::pi_v<float> * 3.0f / 2.0f};
+		float destinationRotationYTable[] = {std::numbers::pi_v<float> / 2.0f, std::numbers::pi_v<float> * 3.0f / 2.0f};
 
-			// 状況に応じた角度を取得する
-			float destinationRotationY = destinationRotationYTable[static_cast<uint32_t>(lrDirection_)];
-			// 自キャラの角度を設定する
-			worldTransform_.rotation_.y = EaseInOut(turnFirstRotationY_, destinationRotationY, 1.0f - turnTimer_ / kTimeTrun);
+		// 状況に応じた角度を取得する
+		float destinationRotationY = destinationRotationYTable[static_cast<uint32_t>(lrDirection_)];
+		// 自キャラの角度を設定する
+		worldTransform_.rotation_.y = EaseInOut(turnFirstRotationY_, destinationRotationY, 1.0f - turnTimer_ / kTimeTrun);
+	}
+	// AL3_02_14_page_18
+	if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
+		// 攻撃ヘイビアをリクエスト
+		behaviorRequest_ = Behavior::kAttack;
+	}
+	// 行列更新
+	//
+	//
+	//
+	// ここより上に処理書いて―
+	WorldRowFunction::MakeAffinTransFerMatrix(worldTransform_);
+}
+//==============================
+// ヘイビアの攻撃更新処理
+//==============================
+void Player::BehaviorAttackUpdate() {
+
+	// カウンター初期化
+	attackParameter_ = 0;
+	// 予備動作
+	attackParameter_++;
+	// 規定の時間経過で攻撃終了して通常状態に戻す
+	if (attackParameter_ > 20.0f) {
+		// ヘイビアを通常状態に戻す
+		behaviorRequest_ = Behavior::kRoot;
+	}
+
+	switch (attackPhase_) {
+		// 溜め動作
+	case AttackPhase::kAnticipation:
+	default: {
+
+		float t = static_cast<float>(attackParameter_) / kAnticipationTime;
+		worldTransform_.scale_.z = EaseOut(1.0f, 0.3f, t);
+		worldTransform_.scale_.x = EaseOut(1.0f, 1.6f, t);
+		// 前進移動へ移行
+		if (attackParameter_ >= kAnticipationTime) {
+			attackPhase_ = AttackPhase::kAction;
+			attackParameter_ = 0;
 		}
 
-		// 行列更新
-		//
-		//
-		//
-		// ここより上に処理書いて―
-		WorldRowFunction::MakeAffinTransFerMatrix(worldTransform_);
+	} break;
+		// 突進動作
+		float t = static_cast<float>(attackParameter_) / kActionTime;
+		worldTransform_.scale_.z = EaseOut(0.3f, 1.3f, t);
+		worldTransform_.scale_.x = EaseIn(1.6f, 0.7f, t);
+		// 余韻動作へ移行
+		if (attackParameter_ >= kAnticipationTime) {
+			attackPhase_ = AttackPhase::kRecovery;
+			attackParameter_ = 0;
+		}
+	case AttackPhase::kAction:
+		break;
+	case AttackPhase::kRecovery:
+		break;
 	}
 }
+// ヘイビアの初期化処理
+void Player::BehaviorRootInitialize() {}
+// 攻撃ヘイビアの初期化処理
+void Player::BehaviorAttackInitialize() {}
 
 // コンストラクタ
 Player::Player() {}
