@@ -373,7 +373,43 @@ Vector3 Player::CornerPosition(const Vector3& center, Corner corner) {
 #pragma endregion
 
 // 更新
-void Player::Update() {
+void Player::Update() { BehabiorRootUpdate(); }
+
+// 描画
+void Player::Draw() { model_->Draw(worldTransform_, *camera_); }
+// 02_10 10枚目
+Vector3 Player::GetWorldPosition() {
+
+	Vector3 worldPos;
+	// ワールド行列の平行移動成分を取得（ワールド座標）
+	worldPos.x = worldTransform_.matWorld_.m[3][0];
+	worldPos.y = worldTransform_.matWorld_.m[3][1];
+	worldPos.z = worldTransform_.matWorld_.m[3][2];
+	return worldPos;
+}
+// 02_10 14枚目
+AABB Player::GetAABB() {
+
+	Vector3 worldPos = GetWorldPosition();
+
+	AABB aabb;
+
+	aabb.min = {worldPos.x - kWidth / 2.0f, worldPos.y - kHeight / 2.0f, worldPos.z - kWidth / 2.0f};
+	aabb.max = {worldPos.x + kWidth / 2.0f, worldPos.y + kHeight / 2.0f, worldPos.z + kWidth / 2.0f};
+
+	return aabb;
+}
+
+void Player::OnCollision(const Enemy* enemy) {
+	(void)enemy;
+	// ジャンプ開始(仮処理)
+	// velocity_ += Vector3(0, kJumpAcceleration / 60.0f, 0);
+	//
+	isDead_ = true;
+}
+// AL3_02_14
+void Player::BehabiorRootUpdate() {
+
 	// 移動処理が中に入っている関数AL3_02_07 p10
 	Player::InputMove();
 
@@ -406,27 +442,6 @@ void Player::Update() {
 		}
 	}
 
-	//// 接地判定
-	// if (onGround_) {
-	//	// ジャンプ開始
-	//	if (velocity_.y > 0.0f) {
-	//		// 空中状態に以降
-	//		onGround_ = false;
-	//	}
-	// } else {
-	//	// 着地
-	//	if (landing) {
-	//		// めり込み排斥
-	//		worldTransform_.translation_.y = 1.0f;
-	//		// 摩擦で横方向速度が減衰する
-	//		velocity_.x *= (1.0f - kAttenuation);
-	//		// 下方向速度をリセット
-	//		velocity_.y = 0.0f;
-	//		// 接地状態に以降
-	//		onGround_ = true;
-	//	}
-	// }
-	//  旋回制御
 	{
 		if (turnTimer_ > 0.0f) {
 			// タイマーを進める
@@ -447,39 +462,6 @@ void Player::Update() {
 		// ここより上に処理書いて―
 		WorldRowFunction::MakeAffinTransFerMatrix(worldTransform_);
 	}
-}
-
-// 描画
-void Player::Draw() { model_->Draw(worldTransform_, *camera_); }
-// 02_10 10枚目
-Vector3 Player::GetWorldPosition() {
-
-	Vector3 worldPos;
-	// ワールド行列の平行移動成分を取得（ワールド座標）
-	worldPos.x = worldTransform_.matWorld_.m[3][0];
-	worldPos.y = worldTransform_.matWorld_.m[3][1];
-	worldPos.z = worldTransform_.matWorld_.m[3][2];
-	return worldPos;
-}
-// 02_10 14枚目
-AABB Player::GetAABB() {
-
-	Vector3 worldPos = GetWorldPosition();
-
-	AABB aabb;
-
-	aabb.min = {worldPos.x - kWidth / 2.0f, worldPos.y - kHeight / 2.0f, worldPos.z - kWidth / 2.0f};
-	aabb.max = {worldPos.x + kWidth / 2.0f, worldPos.y + kHeight / 2.0f, worldPos.z + kWidth / 2.0f};
-
-	return aabb;
-}
-
-void Player::OnCollision(const Enemy* enemy) {
-	(void)enemy;
-	// ジャンプ開始(仮処理)
-	//velocity_ += Vector3(0, kJumpAcceleration / 60.0f, 0);
-	//
-	isDead_ = true;
 }
 
 // コンストラクタ

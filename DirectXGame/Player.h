@@ -53,6 +53,9 @@ public:
 	// 02_12_page11
 	bool IsDead() const { return isDead_; }
 
+	// 通常行動更新
+	void BehabiorRootUpdate();
+
 private: // C++ではメンバ変数は特別な理由がなければprivateにする
 	// ワールド変換データ
 	KamataEngine::WorldTransform worldTransform_;
