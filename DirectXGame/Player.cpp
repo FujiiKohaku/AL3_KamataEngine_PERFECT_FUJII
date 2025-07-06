@@ -375,7 +375,26 @@ Vector3 Player::CornerPosition(const Vector3& center, Corner corner) {
 // 更新
 void Player::Update() {
 
-	// 現在のビヘイビアに応じた更新処理を行う
+	// 02_14 15枚目
+	if (behaviorRequest_ != Behavior::kUnknown) {
+		// 振るまいを変更する
+		behavior_ = behaviorRequest_;
+
+		// 各振るまいごとの初期化を実行
+		switch (behavior_) {
+		case Behavior::kRoot:
+		default:
+			BehaviorRootInitialize();
+			break;
+		case Behavior::kAttack:
+			BehaviorAttackInitialize();
+			break;
+		}
+
+		// 振るまいリクエストをリセット
+		behaviorRequest_ = Behavior::kUnknown;
+	}
+
 	// 02_14 17枚目
 	switch (behavior_) {
 	case Behavior::kRoot:
@@ -386,6 +405,11 @@ void Player::Update() {
 		BehaviorAttackUpdate();
 		break;
 	}
+	worldTransform_.Initialize();
+	worldTransformAttack_.Initialize(); // ←これが必要
+	// 02_14 8枚目 行列計算
+	WorldTransformUpdate(worldTransform_);
+	WorldTransformUpdate(worldTransformAttack_);
 }
 
 // 描画
@@ -486,15 +510,13 @@ void Player::BehaviorRootUpdate() {
 //==============================
 void Player::BehaviorAttackUpdate() {
 
+	// 攻撃動作用の速度
+	const Vector3 attackVelocity = {0.4f, 0.0f, 0.0f};
+	Vector3 Velocity = {};
+
+	CollisionMapInfo collisionMapInfo;
 	// カウンター初期化
-	attackParameter_ = 0;
-	// 予備動作
 	attackParameter_++;
-	// 規定の時間経過で攻撃終了して通常状態に戻す
-	if (attackParameter_ > 20.0f) {
-		// ヘイビアを通常状態に戻す
-		behaviorRequest_ = Behavior::kRoot;
-	}
 
 	switch (attackPhase_) {
 		// 溜め動作
@@ -509,9 +531,18 @@ void Player::BehaviorAttackUpdate() {
 			attackPhase_ = AttackPhase::kAction;
 			attackParameter_ = 0;
 		}
+		break;
+	}
 
-	} break;
+	case AttackPhase::kAction: {
+
 		// 突進動作
+		if (lrDirection_ == LRDorection::kRight) {
+			velocity_ = +attackVelocity;
+		} else {
+			velocity_ = -attackVelocity;
+		}
+
 		float t = static_cast<float>(attackParameter_) / kActionTime;
 		worldTransform_.scale_.z = EaseOut(0.3f, 1.3f, t);
 		worldTransform_.scale_.x = EaseIn(1.6f, 0.7f, t);
@@ -520,16 +551,34 @@ void Player::BehaviorAttackUpdate() {
 			attackPhase_ = AttackPhase::kRecovery;
 			attackParameter_ = 0;
 		}
-	case AttackPhase::kAction:
-		break;
-	case AttackPhase::kRecovery:
+	} break;
+	case AttackPhase::kRecovery: {
+
+		// 余韻動作
+		float t = static_cast<float>(attackParameter_) / kRecoveryTime;
+		worldTransform_.scale_.z = EaseOut(1.3f, 1.0f, t);
+		worldTransform_.scale_.x = EaseOut(0.7f, 1.0f, t);
+	}
+		// 通常行動に戻る
+		if (attackParameter_ >= kRecoveryTime) {
+			behaviorRequest_ = Behavior::kRoot;
+		}
 		break;
 	}
 }
 // ヘイビアの初期化処理
 void Player::BehaviorRootInitialize() {}
 // 攻撃ヘイビアの初期化処理
-void Player::BehaviorAttackInitialize() {}
+void Player::BehaviorAttackInitialize() {
+
+	// 02_14 19枚目 カウンター初期化
+	attackParameter_ = 0;
+
+	velocity_ = {};
+
+	// 溜めフェーズから始める
+	attackPhase_ = AttackPhase::kAnticipation;
+}
 
 // コンストラクタ
 Player::Player() {}

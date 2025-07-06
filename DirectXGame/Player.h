@@ -118,7 +118,7 @@ private: // C++ではメンバ変数は特別な理由がなければprivateに�
 	// 最大落下速度(下方向)
 	static inline const float kLimitFallSpeed = 0.5f;
 	// ジャンプ初速(上方向)
-	static inline const float kJumpAcceleration = 20.0f;
+	static inline const float kJumpAcceleration = 40.0f;
 	// マップチップフィールドAL3_02_07
 	MapChipField* mapChipField_ = nullptr;
 
@@ -180,5 +180,6 @@ private: // C++ではメンバ変数は特別な理由がなければprivateに�
 	// 02_14 26枚目 余韻動作の時間
 	static inline const uint32_t kRecoveryTime = 12;
 	WorldTransform worldTransformAttack_;
+	
 
 };

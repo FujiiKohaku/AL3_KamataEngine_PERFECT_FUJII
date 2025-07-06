@@ -36,6 +36,10 @@ struct AABB {
 	Vector3 max;
 };
 
+// 02_14 29枚目 単項演算子オーバーロード
+Vector3 operator+(const Vector3& v);
+Vector3 operator-(const Vector3& v);
+
 // 02_06のCameraControllerのUpdate/Reset関数で必要
 const Vector3 operator+(const Vector3& lhv, const Vector3& rhv);
 
