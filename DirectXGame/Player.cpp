@@ -513,101 +513,63 @@ void Player::BehaviorRootUpdate() {
 //==============================
 // ヘイビアの攻撃更新処理
 //==============================
-// 02_14 8枚目 攻撃行動更新
-// 02_14 8枚目 攻撃行動更新
-void Player::BehaviorAttackUpdate() {
+void Player::BehaviorAttackUpdate() {//アタックアップデートが少しおかしいのでよくみろ
 
-	// 02_14 19枚目 予備動作 → 25枚目で削除
-	//	attackParameter_++;
-
-	// 02_14 19枚目 既定の時間経過で攻撃終了して通常状態に戻す → 25枚目で削除
-	//	if (attackParameter_ >= 20.0f) {
-	//		behaviorRequest_ = Behavior::kRoot;
-	//	}
-
-	// 02_14 29枚目
+	// 攻撃動作用の速度
 	const Vector3 attackVelocity = {0.8f, 0.0f, 0.0f};
+	Vector3 Velocity = {};
 
-	// 02_14 291枚目 攻撃動作用の速度
-	Vector3 velocity{};
-
-	// 02_14 19枚目 予備動作
+	CollisionMapInfo collisionMapInfo;
+	// カウンター初期化
 	attackParameter_++;
 
 	switch (attackPhase_) {
-	case AttackPhase::kAnticipation: // 溜め動作
-	// 02_14 26枚目
+		// 溜め動作
+	case AttackPhase::kAnticipation:
 	default: {
-		velocity = {};
+
 		float t = static_cast<float>(attackParameter_) / kAnticipationTime;
 		worldTransform_.scale_.z = EaseOut(1.0f, 0.3f, t);
-		worldTransform_.scale_.y = EaseOut(1.0f, 1.6f, t);
-
-		// 前進動作へ移行
+		worldTransform_.scale_.x = EaseOut(1.0f, 1.6f, t);
+		// 前進移動へ移行
 		if (attackParameter_ >= kAnticipationTime) {
 			attackPhase_ = AttackPhase::kAction;
-			attackParameter_ = 0; // カウンターをリセット
+			attackParameter_ = 0;
 		}
 		break;
 	}
-	// 02_14 27枚目
-	case AttackPhase::kAction: { // 突進動作
+
+	case AttackPhase::kAction: {
+
+		// 突進動作
 		if (lrDirection_ == LRDorection::kRight) {
-			velocity = +attackVelocity;
+			velocity_ = +attackVelocity;
 		} else {
-			velocity = -attackVelocity;
+			velocity_ = -attackVelocity;
 		}
 
 		float t = static_cast<float>(attackParameter_) / kActionTime;
 		worldTransform_.scale_.z = EaseOut(0.3f, 1.3f, t);
-		worldTransform_.scale_.y = EaseIn(1.6f, 0.7f, t);
-
+		worldTransform_.scale_.x = EaseIn(1.6f, 0.7f, t);
 		// 余韻動作へ移行
-		if (attackParameter_ >= kActionTime) {
+		if (attackParameter_ >= kAnticipationTime) {
 			attackPhase_ = AttackPhase::kRecovery;
-			attackParameter_ = 0; // パラメータをリセット
+			attackParameter_ = 0;
 		}
 	} break;
-	// 02_14 28枚目
-	case AttackPhase::kRecovery: { // 余韻動作
-		velocity = {};
+	case AttackPhase::kRecovery: {
+
+		// 余韻動作
 		float t = static_cast<float>(attackParameter_) / kRecoveryTime;
 		worldTransform_.scale_.z = EaseOut(1.3f, 1.0f, t);
-		worldTransform_.scale_.y = EaseOut(0.7f, 1.0f, t);
-
+		worldTransform_.scale_.x = EaseOut(0.7f, 1.0f, t);
+	}
 		// 通常行動に戻る
 		if (attackParameter_ >= kRecoveryTime) {
 			behaviorRequest_ = Behavior::kRoot;
 		}
 		break;
 	}
-	}
-
-	// 衝突情報を初期化
-	CollisionMapInfo collisionMapInfo = {};
-	collisionMapInfo.move = velocity;
-	collisionMapInfo.isHitLanding = false;
-	collisionMapInfo.isHitWall = false;
-
-	// マップ衝突チェック
-	CheckMapCollision(collisionMapInfo);
-
-	// 移動
-	worldTransform_.translation_ += collisionMapInfo.move;
-
-	if (turnTimer_ > 0.0f) {
-		// タイマーを進める
-		turnTimer_ = std::max(turnTimer_ - (1.0f / 60.0f), 0.0f);
-
-		float destinationRotationYTable[] = {std::numbers::pi_v<float> / 2.0f, std::numbers::pi_v<float> * 3.0f / 2.0f};
-
-		float destinationRotationY = destinationRotationYTable[static_cast<uint32_t>(lrDirection_)];
-
-		worldTransform_.rotation_.y = EaseInOut(destinationRotationY, turnFirstRotationY_, turnTimer_ / kTimeTrun);
-	}
-
-	worldTransformAttack_.translation_ = worldTransform_.translation_;
-	worldTransformAttack_.rotation_ = worldTransform_.rotation_;
 }
 
 // ヘイビアの初期化処理
