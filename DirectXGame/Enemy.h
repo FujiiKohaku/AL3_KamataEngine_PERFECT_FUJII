@@ -23,6 +23,15 @@ public:
 	// 02_10 スライド14枚目 ワールド座標を取得
 	Vector3 GetWorldPosition();
 
+	bool IsDead() const { return isDead_; } // これゲッター
+
+	enum class Behavior {
+		kUnnown,  // 無効
+		kWalk,    // 歩行
+		kDefeated // 敗北
+
+	};
+
 private:
 	// メンバ変数の追加
 	// ワールドトランスフォーム（所有）
@@ -48,5 +57,11 @@ private:
 	static inline const float kWidth = 0.8f;
 	static inline const float kHeight = 0.8f;
 	// 死亡フラグ_02_15_6枚目
+
 	bool isDead_ = false;
+
+	// 02_15_13枚目
+	Behavior behavior_ = Behavior::kWalk;
+	Behavior behaviorRequest_ = Behavior::kUnnown;
+	float counter_ = 0.0f; // カウンター
 };

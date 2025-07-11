@@ -35,26 +35,58 @@ void Enemy::Initialize(Model* model, Camera* camera, const Vector3& position) {
 	walkTimer = 0.0f;
 }
 void Enemy::UpDate() {
-	// 02_09 16枚目 移動
-	worldTransform_.translation_ += velocity_;
-	// 02_09
-	walkTimer += 1.0f / 60.0f;
-	// 02_09 23枚目 回転アニメーション
-	// --- 回転アニメーション（X軸）---
-	float param = std::sin(std::numbers::pi_v<float> * 2.0f * walkTimer / kWalkMotionTime); // -1〜1 の周期波
-	float startDegree = -15.0f;                                                             // 最初の角度（度）
-	float endDegree = +15.0f;                                                               // 最後の角度（度）
+	// 変更リクエストがあったら
+	// リクエストがアンノウン以外になったら
+	// 行動変更のリクエストが来ていたら、
+	// 安全なタイミングで実際の行動を切り替える（状態遷移制御）
+	if (behaviorRequest_ != Behavior::kUnnown) {
 
-	// 補間（-1～1 → 0～1 にして線形補間）
-	float degree = startDegree + (endDegree - startDegree) * (param + 1.0f) / 2.0f;
+		// ふるまい変更
+		behavior_ = behaviorRequest_;
 
-	// 度をラジアンに変換
-	float radian = degree * (std::numbers::pi_v<float> / 180.0f);
+		// 各振る舞いごとの初期化を実行
+		switch (behavior_) {
 
-	// X軸の回転に適用（アニメーション）
-	worldTransform_.rotation_.x = radian;
-	// ワールド行列更新
-	WorldTransformUpdate(worldTransform_);
+		case Enemy::Behavior::kDefeated:
+		default:
+			// 何のカウンターだよ
+			counter_ = 0;
+			break;
+		}
+		//ふるまいリクエストをリセット
+		behaviorRequest_ = Behavior::kUnnown;
+	}
+
+
+	switch (behavior_) {
+	case Enemy::Behavior::kWalk:
+		break;
+	case Enemy::Behavior::kDefeated:
+		break;
+	default:
+		break;
+	}
+		// 02_09 16枚目 移動
+		worldTransform_.translation_ += velocity_;
+		// 02_09
+		walkTimer += 1.0f / 60.0f;
+		// 02_09 23枚目 回転アニメーション
+		// --- 回転アニメーション（X軸）---
+		float param = std::sin(std::numbers::pi_v<float> * 2.0f * walkTimer / kWalkMotionTime); // -1〜1 の周期波
+		float startDegree = -15.0f;                                                             // 最初の角度（度）
+		float endDegree = +15.0f;                                                               // 最後の角度（度）
+
+		// 補間（-1～1 → 0～1 にして線形補間）
+		float degree = startDegree + (endDegree - startDegree) * (param + 1.0f) / 2.0f;
+
+		// 度をラジアンに変換
+		float radian = degree * (std::numbers::pi_v<float> / 180.0f);
+
+		// X軸の回転に適用（アニメーション）
+		worldTransform_.rotation_.x = radian;
+		// ワールド行列更新
+		WorldTransformUpdate(worldTransform_);
+	
 }
 // モデル描画
 void Enemy::Draw() { model_->Draw(worldTransform_, *camera_); }

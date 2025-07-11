@@ -77,6 +77,9 @@ public:
 		kAction,       // 攻撃開始
 		kRecovery,     // 攻撃終了
 	};
+	// 02_15 14枚目
+	//プレイヤーが攻撃中かつ突進フェーズにある時
+	bool IsAttack() const { return behavior_ == Behavior::kAttack && attackPhase_ == AttackPhase::kAction; }
 
 private: // C++ではメンバ変数は特別な理由がなければprivateにする
 	// ワールド変換データ
@@ -183,5 +186,5 @@ private: // C++ではメンバ変数は特別な理由がなければprivateに�
 	static inline const uint32_t kActionTime = 5;
 	// 02_14 26枚目 余韻動作の時間
 	static inline const uint32_t kRecoveryTime = 12;
-	//WorldTransform worldTransformAttack_;
+	// WorldTransform worldTransformAttack_;
 };

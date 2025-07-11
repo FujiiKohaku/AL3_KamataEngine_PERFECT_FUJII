@@ -51,7 +51,7 @@ void GameScene::Initialize() {
 	mapChipField_->LoadMapChipCsv("Resources/blocks.csv");
 	// 自キャラの生成
 	player_ = new Player();
-	player_->Initialize(model_, modelAttack_,&camera_, playerPosition);
+	player_->Initialize(model_, modelAttack_, &camera_, playerPosition);
 	modelBlock = Model::CreateFromOBJ("block", true);
 	player_->SetMapChipField(mapChipField_);
 
@@ -89,7 +89,7 @@ void GameScene::Initialize() {
 	fade_->Start(Fade::Status::FadeIn, 1.0f);
 }
 
-//void GameScene::ChangePhase() {
+// void GameScene::ChangePhase() {
 //	switch (phase_) {
 //	case Phase::kPlay:
 //		if (player_->IsDead()) {
@@ -101,7 +101,7 @@ void GameScene::Initialize() {
 //
 //			break;
 //	}
-//}
+// }
 
 void GameScene::GenerateBlocks() {
 
@@ -254,8 +254,13 @@ void GameScene::Update() {
 		break;
 	}
 
-
-
+	enemies_.remove_if([](Enemy* enemy) {
+		if (enemy->IsDead()) {
+			delete enemy;
+			return true; // 削除対象
+		}
+		return false; // 削除しない
+	});
 }
 
 // 当たり判定
@@ -279,7 +284,7 @@ void GameScene::CheckAllCollisions() {
 }
 
 // フェーズ切り替え関数（重複）
-//void GameScene::ChangePhese() {
+// void GameScene::ChangePhese() {
 //	switch (phase_) {
 //	case GameScene::Phase::kPlay:
 //		if (player_->IsDead()) {

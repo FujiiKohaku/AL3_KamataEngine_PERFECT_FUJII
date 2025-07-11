@@ -466,6 +466,10 @@ void Player::OnCollision(const Enemy* enemy) {
 	// ジャンプ開始(仮処理)
 	// velocity_ += Vector3(0, kJumpAcceleration / 60.0f, 0);
 	//
+	if (IsAttack()) {
+		return; // 攻撃中は無敵
+	}
+	// 敵の死亡フラグ
 	isDead_ = true;
 }
 // AL3_02_14
