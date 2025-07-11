@@ -5,7 +5,13 @@
 #include <numbers>
 
 // 02_10 スライド20枚目
-void Enemy::OnCollision(const Player* player) { (void)player; }
+void Enemy::OnCollision(const Player* player) {
+	// 02_15 スライド6枚目　デスフラグを立てる
+
+	isDead_ = true;
+
+	(void)player;
+}
 
 void Enemy::Initialize(Model* model, Camera* camera, const Vector3& position) {
 	// NULLチェック

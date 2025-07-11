@@ -47,4 +47,6 @@ private:
 	// 02_10 14枚目 当たり判定サイズ
 	static inline const float kWidth = 0.8f;
 	static inline const float kHeight = 0.8f;
+	// 死亡フラグ_02_15_6枚目
+	bool isDead_ = false;
 };

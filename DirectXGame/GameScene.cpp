@@ -40,6 +40,10 @@ void GameScene::Initialize() {
 	// 3Dモデルデータの生成
 	model_ = Model::Create();
 	model_ = Model::CreateFromOBJ("player", true);
+	//  攻撃モデルデータの生成
+	modelAttack_ = Model::Create();
+	modelAttack_ = Model::CreateFromOBJ("attack_effect", true);
+
 	// カメラの初期化
 	camera_.Initialize();
 	// マップチップをnewするマップチップフィールドの初期化
@@ -47,7 +51,7 @@ void GameScene::Initialize() {
 	mapChipField_->LoadMapChipCsv("Resources/blocks.csv");
 	// 自キャラの生成
 	player_ = new Player();
-	player_->Initialize(model_, &camera_, playerPosition);
+	player_->Initialize(model_, modelAttack_,&camera_, playerPosition);
 	modelBlock = Model::CreateFromOBJ("block", true);
 	player_->SetMapChipField(mapChipField_);
 
@@ -249,6 +253,9 @@ void GameScene::Update() {
 		}
 		break;
 	}
+
+
+
 }
 
 // 当たり判定

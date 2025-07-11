@@ -13,7 +13,7 @@ class Enemy;
 class Player {
 public:
 	// 初期化
-	void Initialize(KamataEngine::Model* model, KamataEngine::Camera* camera, const KamataEngine::Vector3& position);
+	void Initialize(KamataEngine::Model* model, KamataEngine::Model* modelAttack, KamataEngine::Camera* camera, const KamataEngine::Vector3& position);
 	// 更新
 	void Update();
 	// 描画
@@ -83,6 +83,10 @@ private: // C++ではメンバ変数は特別な理由がなければprivateに�
 	KamataEngine::WorldTransform worldTransform_;
 	// モデル
 	KamataEngine::Model* model_ = nullptr;
+
+	KamataEngine::Model* modelAttack_ = nullptr;
+	KamataEngine::WorldTransform worldTransformAttack_;
+
 	// テクスチャハンドル
 	uint32_t textureHandle_ = 0u;
 	// カメラ
@@ -179,7 +183,5 @@ private: // C++ではメンバ変数は特別な理由がなければprivateに�
 	static inline const uint32_t kActionTime = 5;
 	// 02_14 26枚目 余韻動作の時間
 	static inline const uint32_t kRecoveryTime = 12;
-	WorldTransform worldTransformAttack_;
-	
-
+	//WorldTransform worldTransformAttack_;
 };

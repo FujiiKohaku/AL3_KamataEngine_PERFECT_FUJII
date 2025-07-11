@@ -6,11 +6,14 @@
 
 using namespace KamataEngine;
 // 初期化
-void Player::Initialize(KamataEngine::Model* model, KamataEngine::Camera* camera, const KamataEngine::Vector3& position) {
+void Player::Initialize(KamataEngine::Model* model, KamataEngine::Model* modelAttack, KamataEngine::Camera* camera, const KamataEngine::Vector3& position) {
 	// NULLポインタチェック
 	assert(model);
 
 	model_ = model;
+
+	modelAttack_ = modelAttack;
+
 	// 引数の内容を記録
 	camera_ = camera;
 
@@ -418,7 +421,23 @@ void Player::Update() {
 }
 
 // 描画
-void Player::Draw() { model_->Draw(worldTransform_, *camera_); }
+void Player::Draw() {
+	model_->Draw(worldTransform_, *camera_);
+	// 描画処理（フェーズによる切り替え）
+	switch (attackPhase_) {
+	case AttackPhase::kUnknown:
+		break;
+	case AttackPhase::kAnticipation:
+		break;
+	case AttackPhase::kAction:
+
+	case AttackPhase::kRecovery:
+
+		modelAttack_->Draw(worldTransformAttack_, *camera_);
+		break;
+	}
+}
+
 // 02_10 10枚目
 Vector3 Player::GetWorldPosition() {
 
@@ -513,25 +532,25 @@ void Player::BehaviorRootUpdate() {
 //==============================
 // ヘイビアの攻撃更新処理
 //==============================
-void Player::BehaviorAttackUpdate() {//アタックアップデートが少しおかしいのでよくみろ
-
-	// 攻撃動作用の速度
+void Player::BehaviorAttackUpdate() {
+	// 攻撃移動のベース速度
 	const Vector3 attackVelocity = {0.8f, 0.0f, 0.0f};
-	Vector3 Velocity = {};
 
-	CollisionMapInfo collisionMapInfo;
-	// カウンター初期化
+	// 実際に使う速度
+	Vector3 velocity{};
+
+	// フェーズごとの時間管理
 	attackParameter_++;
 
+	// 攻撃フェーズごとの処理
 	switch (attackPhase_) {
-		// 溜め動作
-	case AttackPhase::kAnticipation:
+	case AttackPhase::kAnticipation: // 溜め動作
 	default: {
-
+		velocity = {};
 		float t = static_cast<float>(attackParameter_) / kAnticipationTime;
 		worldTransform_.scale_.z = EaseOut(1.0f, 0.3f, t);
-		worldTransform_.scale_.x = EaseOut(1.0f, 1.6f, t);
-		// 前進移動へ移行
+		worldTransform_.scale_.y = EaseOut(1.0f, 1.6f, t);
+
 		if (attackParameter_ >= kAnticipationTime) {
 			attackPhase_ = AttackPhase::kAction;
 			attackParameter_ = 0;
@@ -539,37 +558,61 @@ void Player::BehaviorAttackUpdate() {//アタックアップデートが少し�
 		break;
 	}
 
-	case AttackPhase::kAction: {
-
-		// 突進動作
+	case AttackPhase::kAction: { // 突進動作
 		if (lrDirection_ == LRDorection::kRight) {
-			velocity_ = +attackVelocity;
+			velocity = +attackVelocity;
 		} else {
-			velocity_ = -attackVelocity;
+			velocity = -attackVelocity;
 		}
 
 		float t = static_cast<float>(attackParameter_) / kActionTime;
 		worldTransform_.scale_.z = EaseOut(0.3f, 1.3f, t);
-		worldTransform_.scale_.x = EaseIn(1.6f, 0.7f, t);
-		// 余韻動作へ移行
-		if (attackParameter_ >= kAnticipationTime) {
+		worldTransform_.scale_.y = EaseIn(1.6f, 0.7f, t);
+
+		if (attackParameter_ >= kActionTime) {
 			attackPhase_ = AttackPhase::kRecovery;
 			attackParameter_ = 0;
 		}
-	} break;
-	case AttackPhase::kRecovery: {
+		break;
+	}
 
-		// 余韻動作
+	case AttackPhase::kRecovery: { // 余韻動作
+		velocity = {};
 		float t = static_cast<float>(attackParameter_) / kRecoveryTime;
 		worldTransform_.scale_.z = EaseOut(1.3f, 1.0f, t);
-		worldTransform_.scale_.x = EaseOut(0.7f, 1.0f, t);
-	}
-		// 通常行動に戻る
+		worldTransform_.scale_.y = EaseOut(0.7f, 1.0f, t);
+
 		if (attackParameter_ >= kRecoveryTime) {
 			behaviorRequest_ = Behavior::kRoot;
+			attackPhase_ = AttackPhase::kUnknown;
 		}
 		break;
 	}
+	}
+
+	// 衝突情報の準備
+	CollisionMapInfo collisionMapInfo = {};
+	collisionMapInfo.move = velocity;
+	collisionMapInfo.isHitLanding = false;
+	collisionMapInfo.isHitWall = false;
+
+	// 衝突チェックと移動
+	CheckMapCollision(collisionMapInfo);
+	worldTransform_.translation_ += collisionMapInfo.move;
+
+	// 回転補間（方向転換中）
+	if (turnTimer_ > 0.0f) {
+		turnTimer_ = std::max(turnTimer_ - (1.0f / 60.0f), 0.0f);
+
+		float destinationRotationYTable[] = {std::numbers::pi_v<float> / 2.0f, std::numbers::pi_v<float> * 3.0f / 2.0f};
+
+		float destinationRotationY = destinationRotationYTable[static_cast<uint32_t>(lrDirection_)];
+		worldTransform_.rotation_.y = EaseInOut(destinationRotationY, turnFirstRotationY_, turnTimer_ / kTimeTrun);
+	}
+
+	// 攻撃モデルのワールドトランスフォーム追従
+	worldTransformAttack_.translation_ = worldTransform_.translation_;
+	worldTransformAttack_.rotation_ = worldTransform_.rotation_;
 }
 
 // ヘイビアの初期化処理

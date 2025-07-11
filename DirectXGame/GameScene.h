@@ -50,6 +50,8 @@ private:
 	uint32_t textureHandle_ = 0;
 	// 3Dモデルデータ
 	KamataEngine::Model* model_ = nullptr;
+	//攻撃モデルデータ
+	KamataEngine ::Model* modelAttack_ = nullptr;
 	// カメラ
 	KamataEngine::Camera camera_;
 	// 自キャラ
