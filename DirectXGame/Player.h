@@ -47,6 +47,7 @@ public:
 	// 02_10 13枚目
 	AABB GetAABB();
 
+
 	// 02_10 21枚目 衝突応答
 	void OnCollision(const Enemy* enemy);
 
