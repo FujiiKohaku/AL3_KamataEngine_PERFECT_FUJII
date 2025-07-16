@@ -1,5 +1,6 @@
 #define _USE_MATH_DEFINES
 #include "Enemy.h"
+#include "Player.h"
 #include <cassert>
 #include <cmath>
 #include <numbers>
@@ -8,7 +9,16 @@
 void Enemy::OnCollision(const Player* player) {
 	// 02_15 スライド6枚目　デスフラグを立てる
 
-	isDead_ = true;
+	if (behavior_ == Behavior::kDefeated) {
+		return; // 既に敗北しているので何もしない
+	}
+
+	// プレイヤーが攻撃中なら敵が死ぬ
+	if (player->IsAttack()) {
+		// 敵のふるまいを敗北に変更
+		behaviorRequest_ = Behavior::kDefeated;
+		isCollisionDisabled_ = true;
+	}
 
 	(void)player;
 }
@@ -53,40 +63,44 @@ void Enemy::UpDate() {
 			counter_ = 0;
 			break;
 		}
-		//ふるまいリクエストをリセット
+		// ふるまいリクエストをリセット
 		behaviorRequest_ = Behavior::kUnnown;
 	}
 
-
 	switch (behavior_) {
 	case Enemy::Behavior::kWalk:
-		break;
-	case Enemy::Behavior::kDefeated:
-		break;
-	default:
-		break;
-	}
 		// 02_09 16枚目 移動
 		worldTransform_.translation_ += velocity_;
 		// 02_09
 		walkTimer += 1.0f / 60.0f;
 		// 02_09 23枚目 回転アニメーション
-		// --- 回転アニメーション（X軸）---
-		float param = std::sin(std::numbers::pi_v<float> * 2.0f * walkTimer / kWalkMotionTime); // -1〜1 の周期波
-		float startDegree = -15.0f;                                                             // 最初の角度（度）
-		float endDegree = +15.0f;                                                               // 最後の角度（度）
+		worldTransform_.rotation_.x = std::sin(std::numbers::pi_v<float> * 2.0f * walkTimer / kWalkMotionTime);
 
-		// 補間（-1～1 → 0～1 にして線形補間）
-		float degree = startDegree + (endDegree - startDegree) * (param + 1.0f) / 2.0f;
-
-		// 度をラジアンに変換
-		float radian = degree * (std::numbers::pi_v<float> / 180.0f);
-
-		// X軸の回転に適用（アニメーション）
-		worldTransform_.rotation_.x = radian;
-		// ワールド行列更新
+		// 02_09 スライド8枚目 ワールド行列更新
 		WorldTransformUpdate(worldTransform_);
-	
+		break;
+	case Enemy::Behavior::kDefeated:
+		// 02_15 15枚目
+		counter_ += 1.0f / 60.0f;
+
+		worldTransform_.rotation_.y += 0.3f;
+		worldTransform_.rotation_.x = EaseOut(ToRadians(kDefeatedMotionAngleStart), ToRadians(kDefeatedMotionAngleEnd), counter_ / kDefeatedTime);
+
+		WorldTransformUpdate(worldTransform_);
+
+		if (counter_ >= kDefeatedTime) {
+			isDead_ = true;
+		}
+
+		break;
+	default:
+		break;
+	}
+
+	// 最後の角度（度）
+
+	// ワールド行列更新
+	WorldTransformUpdate(worldTransform_);
 }
 // モデル描画
 void Enemy::Draw() { model_->Draw(worldTransform_, *camera_); }

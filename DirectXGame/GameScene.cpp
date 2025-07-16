@@ -273,7 +273,9 @@ void GameScene::CheckAllCollisions() {
 
 		for (Enemy* enemy : enemies_) {
 			aabb2 = enemy->GetAABB();
-
+			if (enemy->IsCollisionDisabled()) {
+				continue; // 衝突無効の敵はスキップ
+			}
 			if (IsCollision(aabb1, aabb2)) {
 				player_->OnCollision(enemy);
 				enemy->OnCollision(player_);

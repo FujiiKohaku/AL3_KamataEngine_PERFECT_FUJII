@@ -31,6 +31,7 @@ public:
 		kDefeated // 敗北
 
 	};
+	bool IsCollisionDisabled() const { return isCollisionDisabled_; }
 
 private:
 	// メンバ変数の追加
@@ -64,4 +65,13 @@ private:
 	Behavior behavior_ = Behavior::kWalk;
 	Behavior behaviorRequest_ = Behavior::kUnnown;
 	float counter_ = 0.0f; // カウンター
+	                       // 02_15 15枚目
+	static inline const float kDefeatedTime = 0.6f;
+	static inline const float kDefeatedMotionAngleStart = 0.0f;
+	static inline const float kDefeatedMotionAngleEnd = -60.0f;
+
+	bool isCollisionDisabled_ = false; // 02_15 
+
+
+
 };
