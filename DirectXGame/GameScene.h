@@ -2,13 +2,14 @@
 #include "CameraController.h"
 #include "DeathParticles.h"
 #include "Enemy.h"
+#include "Fade.h"
+#include "HitEffect.h"
 #include "KamataEngine.h"
 #include "MapChipField.h"
 #include "Math.h"
 #include "Player.h"
 #include "Skydome.h"
 #include <vector>
-#include "Fade.h"
 
 // ゲームシーン
 class GameScene {
@@ -32,6 +33,9 @@ public:
 	// デスフラグのgetter
 	bool IsFinished() const { return finished_; }
 
+		// エフェクトを生成
+	void CreateHitEffect(const KamataEngine::Vector3& position);
+
 private:
 	// 02_12 4枚目 ゲームのフェーズ（型）
 	enum class Phase {
@@ -50,7 +54,7 @@ private:
 	uint32_t textureHandle_ = 0;
 	// 3Dモデルデータ
 	KamataEngine::Model* model_ = nullptr;
-	//攻撃モデルデータ
+	// 攻撃モデルデータ
 	KamataEngine ::Model* modelAttack_ = nullptr;
 	// カメラ
 	KamataEngine::Camera camera_;
@@ -78,10 +82,12 @@ private:
 	/*Enemy* enemy_ = nullptr;*/ // 02_10で削除
 	// 02_09 10枚目 エネミーモデル
 	KamataEngine::Model* enemy_model_ = nullptr;
-
+	KamataEngine::Model* modelPlayerHit_ = nullptr;
+	KamataEngine::Model* modelParticle_ = nullptr;
 	// 02_10
 	std::list<Enemy*> enemies_;
 
+	std::list<HitEffect*> hitEffects_;
 	// 02_11_page_15
 	DeathParticles* deathParticles_ = nullptr;
 	// 02_11_page_16
@@ -96,8 +102,10 @@ private:
 	// ゲームの現在フェーズの変数
 	// Phase phase_;
 
-	void ChangePhese();
+
 	// 終了フラグ
 	bool finished_ = false;
 	Fade* fade_ = nullptr;
+
+
 };

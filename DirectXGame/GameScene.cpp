@@ -1,4 +1,5 @@
 #include "GameScene.h"
+
 #include "Math.h"
 #include "TitleScene.h"
 using namespace KamataEngine;
@@ -15,6 +16,7 @@ GameScene::~GameScene() {
 			delete worldTransformBlock;
 		}
 	}
+
 	worldTransformBlocks_.clear();
 	// デバッグカメラの解放
 	delete debugCamera_;
@@ -26,6 +28,11 @@ GameScene::~GameScene() {
 	// 02_10 6枚目 敵クラス削除
 	for (Enemy* enemy : enemies_) {
 		delete enemy;
+	}
+
+	// ヒットエフェクト削除
+	for (HitEffect* hitEffect : hitEffects_) {
+		delete hitEffect;
 	}
 	delete deathParticles_;
 
@@ -87,6 +94,10 @@ void GameScene::Initialize() {
 	fade_ = new Fade();
 	fade_->Initialize();
 	fade_->Start(Fade::Status::FadeIn, 1.0f);
+
+	modelPlayerHit_ = Model::CreateFromOBJ("hit_effect");
+	HitEffect::SetModel(modelPlayerHit_);
+	HitEffect::SetCamera(&camera_);
 }
 
 // void GameScene::ChangePhase() {
@@ -166,6 +177,10 @@ void GameScene::Update() {
 			enemy->UpDate();
 		}
 
+		for (HitEffect* hitEffect : hitEffects_) {
+			hitEffect->Update();
+		}
+
 #ifdef _DEBUG
 		if (Input::GetInstance()->TriggerKey(DIK_C)) {
 			isDebugCameraActive = !isDebugCameraActive;
@@ -197,7 +212,9 @@ void GameScene::Update() {
 		for (Enemy* enemy : enemies_) {
 			enemy->UpDate();
 		}
-
+		for (HitEffect* hitEffect : hitEffects_) {
+			hitEffect->Update();
+		}
 #ifdef _DEBUG
 		if (Input::GetInstance()->TriggerKey(DIK_C)) {
 			isDebugCameraActive = !isDebugCameraActive;
@@ -234,7 +251,9 @@ void GameScene::Update() {
 		for (Enemy* enemy : enemies_) {
 			enemy->UpDate();
 		}
-
+		for (HitEffect* hitEffect : hitEffects_) {
+			hitEffect->Update();
+		}
 		if (deathParticles_) {
 			deathParticles_->Update();
 		}
@@ -250,6 +269,9 @@ void GameScene::Update() {
 
 		for (Enemy* enemy : enemies_) {
 			enemy->UpDate();
+		}
+		for (HitEffect* hitEffect : hitEffects_) {
+			hitEffect->Update();
 		}
 		break;
 	}
@@ -285,23 +307,11 @@ void GameScene::CheckAllCollisions() {
 #pragma endregion
 }
 
-// フェーズ切り替え関数（重複）
-// void GameScene::ChangePhese() {
-//	switch (phase_) {
-//	case GameScene::Phase::kPlay:
-//		if (player_->IsDead()) {
-//			phase_ = Phase::kDeath;
-//			const Vector3& deathParticlesPosition = player_->GetWorldPosition();
-//			deathParticles_ = new DeathParticles;
-//			deathParticles_->Initialize(deathParticleModel, &camera_, deathParticlesPosition);
-//		}
-//		break;
-//	case GameScene::Phase::kDeath:
-//		break;
-//	default:
-//		break;
-//	}
-//}
+void GameScene::CreateHitEffect(const KamataEngine::Vector3& position) {
+	HitEffect* newHitEffect = HitEffect::Create(position);
+	hitEffects_.push_back(newHitEffect);
+}
+
 void GameScene::Draw() {
 
 	// DirectXCommonインスタンスの取得
@@ -332,7 +342,9 @@ void GameScene::Draw() {
 	for (Enemy* enemy : enemies_) {
 		enemy->Draw();
 	}
-
+	for (HitEffect* hitEffect : hitEffects_) {
+		hitEffect->Draw();
+	}
 	// 02_11 18枚目 デスパーティクルあれば描画
 	if (deathParticles_) {
 		deathParticles_->Draw();

@@ -72,6 +72,6 @@ private:
 
 	bool isCollisionDisabled_ = false; // 02_15 
 
-
+	GameScene* gameScene_ = nullptr;
 
 };

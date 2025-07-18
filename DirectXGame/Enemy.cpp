@@ -20,6 +20,12 @@ void Enemy::OnCollision(const Player* player) {
 		isCollisionDisabled_ = true;
 	}
 
+	// --- エフェクト生成 ---
+	Vector3 effectPos = GetWorldPosition();
+	effectPos.y += 2.0f; // 少し上にずらす
+
+	// ゲームシーンにエフェクト生成を依頼（※この gameScene_ はどこかに定義されている必要あり）
+	gameScene_->CreateEffect(effectPos); // ← この関数が必要！
 	(void)player;
 }
 
