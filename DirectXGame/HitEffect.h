@@ -1,6 +1,7 @@
 #pragma once
 #include "KamataEngine.h"
 #include "Math.h"
+#include "Random.h"
 class HitEffect {
 public:
 	// 初期化
@@ -20,6 +21,7 @@ public:
 	static HitEffect* Create(const KamataEngine::Vector3& position);
 
 	KamataEngine::Vector3 postion;
+	
 
 private:
 	// モデル(借りてくる用)
@@ -28,4 +30,7 @@ private:
 	static KamataEngine::Camera* camera_;
 	// 円のワールドトランスフォーム
 	KamataEngine::WorldTransform circleWorldTransform_;
+
+	std::array<KamataEngine::WorldTransform, 2> elllipseWorldTransforms_;
+
 };

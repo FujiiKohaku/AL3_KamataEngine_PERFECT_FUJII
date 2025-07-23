@@ -1,165 +1,152 @@
 #include "GameScene.h"
-
 #include "Math.h"
 #include "TitleScene.h"
+
 using namespace KamataEngine;
+
+// コンストラクタ
+GameScene::GameScene()
+    : model_(nullptr), modelAttack_(nullptr), player_(nullptr), mapChipField_(nullptr), debugCamera_(nullptr), skydome_(nullptr), cController_(nullptr), modelSkydome_(nullptr), modelBlock(nullptr),
+      enemy_model_(nullptr), deathParticleModel(nullptr), deathParticles_(nullptr), modelPlayerHit_(nullptr), fade_(nullptr), isDebugCameraActive(false), finished_(false), phase_(Phase::kFadeIn) {}
 
 // デストラクタ
 GameScene::~GameScene() {
-	// 3Dモデルデータの解散
 	delete model_;
-	// 自キャラの解散
+	delete modelAttack_;
 	delete player_;
-	/* 3Dモデルデータの解放(block)AL3_02_02*/
-	for (std::vector<WorldTransform*>& worldTransformBkockLine : worldTransformBlocks_) {
-		for (WorldTransform* worldTransformBlock : worldTransformBkockLine) {
-			delete worldTransformBlock;
+
+	for (std::vector<WorldTransform*>& line : worldTransformBlocks_) {
+		for (WorldTransform* block : line) {
+			delete block;
 		}
 	}
-
 	worldTransformBlocks_.clear();
-	// デバッグカメラの解放
-	delete debugCamera_;
-	// AL3_02_03
-	delete skydome_;
-	// マップチップフィールドデリーと
-	delete mapChipField_;
 
-	// 02_10 6枚目 敵クラス削除
+	delete debugCamera_;
+	delete skydome_;
+	delete mapChipField_;
+	delete cController_;
+
 	for (Enemy* enemy : enemies_) {
 		delete enemy;
 	}
+	enemies_.clear();
 
-	// ヒットエフェクト削除
-	for (HitEffect* hitEffect : hitEffects_) {
-		delete hitEffect;
+	for (HitEffect* effect : hitEffects_) {
+		delete effect;
 	}
-	delete deathParticles_;
+	hitEffects_.clear();
 
+	delete deathParticles_;
 	delete deathParticleModel;
+	delete fade_;
 }
 
 // 初期化
 void GameScene::Initialize() {
+	// マップとプレイヤー初期位置
+	mapChipField_ = new MapChipField();
+	mapChipField_->LoadMapChipCsv("Resources/blocks.csv");
 
-	// 座標をマップチップ番号で指定
 	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(1, 18);
-	// 3Dモデルデータの生成
-	model_ = Model::Create();
+
+	// モデル読み込み
 	model_ = Model::CreateFromOBJ("player", true);
-	//  攻撃モデルデータの生成
-	modelAttack_ = Model::Create();
 	modelAttack_ = Model::CreateFromOBJ("attack_effect", true);
 
-	// カメラの初期化
-	camera_.Initialize();
-	// マップチップをnewするマップチップフィールドの初期化
-	mapChipField_ = new MapChipField;
-	mapChipField_->LoadMapChipCsv("Resources/blocks.csv");
-	// 自キャラの生成
+	// プレイヤー生成
 	player_ = new Player();
 	player_->Initialize(model_, modelAttack_, &camera_, playerPosition);
-	modelBlock = Model::CreateFromOBJ("block", true);
 	player_->SetMapChipField(mapChipField_);
+
+	// カメラ制御
+	camera_.Initialize();
 
 	cController_ = new CameraController();
 	cController_->Initialize(&camera_);
 	cController_->SetTarget(player_);
 	cController_->Reset();
 
+	// デバッグカメラ
 	debugCamera_ = new DebugCamera(1280, 720);
 
+	// スカイドーム
 	modelSkydome_ = Model::CreateFromOBJ("skydome", true);
 	skydome_ = new Skydome();
 	skydome_->Initialize(modelSkydome_, &camera_);
 
+	// ブロック生成
+	modelBlock = Model::CreateFromOBJ("block", true);
 	GenerateBlocks();
 
-	CameraController::Rect cameraArea = {12.0f, 100 - 12.0f, 6.0f, 6.0f};
+	// カメラの移動範囲設定
+	CameraController::Rect cameraArea = {12.0f, 88.0f, 6.0f, 6.0f};
 	cController_->SetMoveableArea(cameraArea);
 
-	enemy_model_ = Model::CreateFromOBJ("enemy");
-
-	for (int32_t i = 0; i < 2; ++i) {
-		Enemy* newEnemy = new Enemy();
-		Vector3 enemyPosition = mapChipField_->GetMapChipPositionByIndex(14 + i * 2, 18);
-		newEnemy->Initialize(enemy_model_, &camera_, enemyPosition);
-		enemies_.push_back(newEnemy);
+	// 敵の初期化
+	enemy_model_ = Model::CreateFromOBJ("enemy", true);
+	for (int i = 0; i < 2; ++i) {
+		Enemy* enemy = new Enemy();
+		Vector3 pos = mapChipField_->GetMapChipPositionByIndex(14 + i * 2, 18);
+		enemy->Initialize(enemy_model_, &camera_, pos);
+		//ここでセットゲームシーン
+		enemy->SetGameScene(this);
+		enemies_.push_back(enemy);
 	}
 
-	deathParticleModel = Model::CreateFromOBJ("deathParticle");
+	// デスパーティクルモデル
+	deathParticleModel = Model::CreateFromOBJ("deathParticle", true);
 
-	phase_ = Phase::kFadeIn;
-
+	// フェード初期化
 	fade_ = new Fade();
 	fade_->Initialize();
 	fade_->Start(Fade::Status::FadeIn, 1.0f);
 
-	modelPlayerHit_ = Model::CreateFromOBJ("hit_effect");
+	// ヒットエフェクト共有設定
+	modelPlayerHit_ = Model::CreateFromOBJ("particle", true);
 	HitEffect::SetModel(modelPlayerHit_);
 	HitEffect::SetCamera(&camera_);
 }
 
-// void GameScene::ChangePhase() {
-//	switch (phase_) {
-//	case Phase::kPlay:
-//		if (player_->IsDead()) {
-//			phase_ = Phase::kDeath;
-//			const Vector3& deathParticlesPosition = player_->GetWorldPosition();
-//		}
-//		break;
-//	case Phase::kDeath:
-//
-//			break;
-//	}
-// }
-
+// ブロック生成処理
 void GameScene::GenerateBlocks() {
+	uint32_t height = mapChipField_->GetBlockHeight();
+	uint32_t width = mapChipField_->GetBlockWidth();
 
-	uint32_t numBlockVirtical = mapChipField_->GetBlockHeight();
-	uint32_t numBlockHorizontal = mapChipField_->GetBlockWidth();
-
-	worldTransformBlocks_.resize(numBlockVirtical);
-	for (uint32_t i = 0; i < numBlockVirtical; ++i) {
-		worldTransformBlocks_[i].resize(numBlockHorizontal);
-	}
-
-	for (uint32_t i = 0; i < numBlockVirtical; ++i) {
-		for (uint32_t j = 0; j < numBlockHorizontal; ++j) {
+	worldTransformBlocks_.resize(height);
+	for (uint32_t i = 0; i < height; ++i) {
+		worldTransformBlocks_[i].resize(width, nullptr);
+		for (uint32_t j = 0; j < width; ++j) {
 			if (mapChipField_->GetMapChipTypeByIndex(j, i) == MapChipType::kBlock) {
-				WorldTransform* worldTransform = new WorldTransform();
-				worldTransform->Initialize();
-				worldTransformBlocks_[i][j] = worldTransform;
-				worldTransformBlocks_[i][j]->translation_ = mapChipField_->GetMapChipPositionByIndex(j, i);
+				WorldTransform* wt = new WorldTransform();
+				wt->Initialize();
+				wt->translation_ = mapChipField_->GetMapChipPositionByIndex(j, i);
+				worldTransformBlocks_[i][j] = wt;
 			}
 		}
 	}
 }
-// 02_12 10枚目 GameScene::Update関数で呼び出しておく
-// player->draw();をif(!player_->IsDead()){}で囲む
-void GameScene::ChangePhase() {
 
+// フェーズ遷移
+void GameScene::ChangePhase() {
 	switch (phase_) {
 	case Phase::kPlay:
-		// 02_12 13枚目 if文から中身まで全部実装
-		// Initialize関数のいきなりパーティクル発生処理は消す
 		if (player_->IsDead()) {
-			// 死亡演出
 			phase_ = Phase::kDeath;
-
-			const Vector3& deathParticlesPosition = player_->GetWorldPosition();
-
-			deathParticles_ = new DeathParticles;
-			deathParticles_->Initialize(deathParticleModel, &camera_, deathParticlesPosition);
+			const Vector3& deathPos = player_->GetWorldPosition();
+			deathParticles_ = new DeathParticles();
+			deathParticles_->Initialize(deathParticleModel, &camera_, deathPos);
 		}
 		break;
 	case Phase::kDeath:
 		break;
+	default:
+		break;
 	}
 }
+
 // 更新
 void GameScene::Update() {
-
 	ChangePhase();
 
 	switch (phase_) {
@@ -169,58 +156,44 @@ void GameScene::Update() {
 			fade_->Start(Fade::Status::FadeOut, 1.0f);
 			phase_ = Phase::kPlay;
 		}
-		skydome_->Update();
-		cController_->Upadate();
-		player_->Update();
-
-		for (Enemy* enemy : enemies_) {
-			enemy->UpDate();
-		}
-
-		for (HitEffect* hitEffect : hitEffects_) {
-			hitEffect->Update();
-		}
-
-#ifdef _DEBUG
-		if (Input::GetInstance()->TriggerKey(DIK_C)) {
-			isDebugCameraActive = !isDebugCameraActive;
-		}
-#endif
-
-		if (isDebugCameraActive) {
-			debugCamera_->Update();
-			camera_.matView = debugCamera_->GetCamera().matView;
-			camera_.matProjection = debugCamera_->GetCamera().matProjection;
-			camera_.TransferMatrix();
-		} else {
-			camera_.UpdateMatrix();
-		}
-
-		for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
-			for (WorldTransform*& worldTransformBlock : worldTransformBlockLine) {
-				if (!worldTransformBlock)
-					continue;
-				WorldTransformUpdate(*worldTransformBlock);
-			}
-		}
-		break;
+		[[fallthrough]];
 	case Phase::kPlay:
+	case Phase::kDeath:
+	case Phase::kFadeOut:
 		skydome_->Update();
 		cController_->Upadate();
-		player_->Update();
+
+		if (!player_->IsDead()) {
+			player_->Update();
+		}
 
 		for (Enemy* enemy : enemies_) {
 			enemy->UpDate();
 		}
-		for (HitEffect* hitEffect : hitEffects_) {
-			hitEffect->Update();
+
+		for (HitEffect* effect : hitEffects_) {
+			effect->Update();
 		}
+
+		if (phase_ == Phase::kDeath && deathParticles_) {
+			deathParticles_->Update();
+			if (deathParticles_->IsFinished()) {
+				phase_ = Phase::kFadeOut;
+			}
+		}
+
+		if (phase_ == Phase::kFadeOut && fade_) {
+			fade_->Update();
+			if (fade_->IsFinished()) {
+				finished_ = true;
+			}
+		}
+
 #ifdef _DEBUG
 		if (Input::GetInstance()->TriggerKey(DIK_C)) {
 			isDebugCameraActive = !isDebugCameraActive;
 		}
 #endif
-
 		if (isDebugCameraActive) {
 			debugCamera_->Update();
 			camera_.matView = debugCamera_->GetCamera().matView;
@@ -230,136 +203,88 @@ void GameScene::Update() {
 			camera_.UpdateMatrix();
 		}
 
-		for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
-			for (WorldTransform*& worldTransformBlock : worldTransformBlockLine) {
-				if (!worldTransformBlock)
-					continue;
-				WorldTransformUpdate(*worldTransformBlock);
+		for (auto& line : worldTransformBlocks_) {
+			for (WorldTransform*& block : line) {
+				if (block) {
+					WorldTransformUpdate(*block);
+				}
 			}
 		}
 
-		CheckAllCollisions();
-		break;
-	case Phase::kDeath:
-		if (deathParticles_ && deathParticles_->IsFinished()) {
-			phase_ = Phase::kFadeOut;
-		}
-
-		skydome_->Update();
-		cController_->Upadate();
-
-		for (Enemy* enemy : enemies_) {
-			enemy->UpDate();
-		}
-		for (HitEffect* hitEffect : hitEffects_) {
-			hitEffect->Update();
-		}
-		if (deathParticles_) {
-			deathParticles_->Update();
-		}
-		break;
-	case Phase::kFadeOut:
-		fade_->Update();
-		if (fade_->IsFinished()) {
-			finished_ = true;
-		}
-
-		skydome_->Update();
-		cController_->Upadate();
-
-		for (Enemy* enemy : enemies_) {
-			enemy->UpDate();
-		}
-		for (HitEffect* hitEffect : hitEffects_) {
-			hitEffect->Update();
+		if (phase_ == Phase::kPlay) {
+			CheckAllCollisions();
 		}
 		break;
 	}
 
+	// 死亡した敵の削除
 	enemies_.remove_if([](Enemy* enemy) {
 		if (enemy->IsDead()) {
 			delete enemy;
-			return true; // 削除対象
+			return true;
 		}
-		return false; // 削除しない
+		return false;
 	});
 }
 
-// 当たり判定
+// 当たり判定チェック
 void GameScene::CheckAllCollisions() {
-	AABB aabb1, aabb2;
+	AABB aabb1 = player_->GetAABB();
 
-#pragma region 自キャラと敵キャラの当たり判定
-	{
-		aabb1 = player_->GetAABB();
+	for (Enemy* enemy : enemies_) {
+		if (enemy->IsCollisionDisabled())
+			continue;
+		AABB aabb2 = enemy->GetAABB();
 
-		for (Enemy* enemy : enemies_) {
-			aabb2 = enemy->GetAABB();
-			if (enemy->IsCollisionDisabled()) {
-				continue; // 衝突無効の敵はスキップ
-			}
-			if (IsCollision(aabb1, aabb2)) {
-				player_->OnCollision(enemy);
-				enemy->OnCollision(player_);
-			}
+		if (IsCollision(aabb1, aabb2)) {
+			player_->OnCollision(enemy);
+			enemy->OnCollision(player_);
 		}
 	}
-#pragma endregion
 }
 
+// ヒットエフェクト作成
 void GameScene::CreateHitEffect(const KamataEngine::Vector3& position) {
-	HitEffect* newHitEffect = HitEffect::Create(position);
-	hitEffects_.push_back(newHitEffect);
+	HitEffect* newEffect = HitEffect::Create(position);
+	hitEffects_.push_back(newEffect);
 }
 
+// 描画
 void GameScene::Draw() {
-
-	// DirectXCommonインスタンスの取得
 	DirectXCommon* dxCommon = DirectXCommon::GetInstance();
-
-	// 3Dオブジェクト描画前処理
 	Model::PreDraw(dxCommon->GetCommandList());
 
-	// 自キャラの描画
-	if (!player_->IsDead())
+	if (!player_->IsDead()) {
 		player_->Draw();
+	}
 
-	// 天球描画
 	skydome_->Draw();
 
-	// ブロックの描画
-	for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
-		for (WorldTransform*& worldTransformBlock : worldTransformBlockLine) {
-			if (!worldTransformBlock)
-				continue;
-
-			modelBlock->Draw(*worldTransformBlock, camera_);
+	for (auto& line : worldTransformBlocks_) {
+		for (WorldTransform* block : line) {
+			if (block)
+				modelBlock->Draw(*block, camera_);
 		}
 	}
 
-	// 02_09 12枚目 敵更新 → 02_10 7枚目で更新
-	//	enemy_->Draw();
 	for (Enemy* enemy : enemies_) {
 		enemy->Draw();
 	}
-	for (HitEffect* hitEffect : hitEffects_) {
-		hitEffect->Draw();
+
+	for (HitEffect* effect : hitEffects_) {
+		effect->Draw();
 	}
-	// 02_11 18枚目 デスパーティクルあれば描画
+
 	if (deathParticles_) {
 		deathParticles_->Draw();
 	}
 
 	Model::PostDraw();
 
-	// スプライト描画前処理
 	Sprite::PreDraw(dxCommon->GetCommandList());
-
-	// スプライト描画後処理
 	Sprite::PostDraw();
 
-	// 02_13 28枚目
-	fade_->Draw();
+	if (fade_) {
+		fade_->Draw();
+	}
 }
-// コンストラクタ
-GameScene::GameScene() {}

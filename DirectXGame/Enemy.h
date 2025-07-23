@@ -1,10 +1,9 @@
 #pragma once
 #include "KamataEngine.h"
 #include "Math.h"
-
 // 02_10_20枚
 class Player;
-
+class GameScene;
 class Enemy {
 public:
 	void UpDate();
@@ -16,6 +15,7 @@ public:
 	// 02_10 スライド20枚目 衝突応答
 	void OnCollision(const Player* player);
 
+	// Enemy.h
 	void Initialize(Model* model, Camera* camera, const Vector3& position);
 
 	// モデルのセット関数（モデルを記録）
@@ -32,6 +32,8 @@ public:
 
 	};
 	bool IsCollisionDisabled() const { return isCollisionDisabled_; }
+	// gameSceneのセッター
+	void SetGameScene(GameScene* gameScene) { gameScene_ = gameScene; }
 
 private:
 	// メンバ変数の追加
@@ -70,8 +72,9 @@ private:
 	static inline const float kDefeatedMotionAngleStart = 0.0f;
 	static inline const float kDefeatedMotionAngleEnd = -60.0f;
 
-	bool isCollisionDisabled_ = false; // 02_15 
+	bool isCollisionDisabled_ = false; // 02_15
 
 	GameScene* gameScene_ = nullptr;
 
+	std::array<KamataEngine::WorldTransform, 2> elllipseWorldTransforms_;
 };

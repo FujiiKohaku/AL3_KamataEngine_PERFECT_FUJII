@@ -33,7 +33,7 @@ public:
 	// デスフラグのgetter
 	bool IsFinished() const { return finished_; }
 
-		// エフェクトを生成
+	// エフェクトを生成
 	void CreateHitEffect(const KamataEngine::Vector3& position);
 
 private:
@@ -93,6 +93,8 @@ private:
 	// 02_11_page_16
 	Model* deathParticleModel = nullptr;
 
+	GameScene* gameScene = nullptr;
+
 	// ゲームのフェーズ型
 	// classは名前被りがないためだって鍵付きロッカーみたいな
 	// enum class Phase {
@@ -102,10 +104,7 @@ private:
 	// ゲームの現在フェーズの変数
 	// Phase phase_;
 
-
 	// 終了フラグ
 	bool finished_ = false;
 	Fade* fade_ = nullptr;
-
-
 };

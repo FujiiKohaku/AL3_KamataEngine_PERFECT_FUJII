@@ -1,10 +1,10 @@
 #define _USE_MATH_DEFINES
 #include "Enemy.h"
+#include "GameScene.h"
 #include "Player.h"
 #include <cassert>
 #include <cmath>
 #include <numbers>
-
 // 02_10 スライド20枚目
 void Enemy::OnCollision(const Player* player) {
 	// 02_15 スライド6枚目　デスフラグを立てる
@@ -18,15 +18,15 @@ void Enemy::OnCollision(const Player* player) {
 		// 敵のふるまいを敗北に変更
 		behaviorRequest_ = Behavior::kDefeated;
 		isCollisionDisabled_ = true;
+		// --- エフェクト生成 ---
+		Vector3 effectPos;
+
+		effectPos.x = static_cast<float>(GetWorldPosition().x);
+		effectPos.y = static_cast<float>(GetWorldPosition().y);
+		effectPos.z = static_cast<float>(GetWorldPosition().z);
+		gameScene_->CreateHitEffect(effectPos);
+		(void)player;
 	}
-
-	// --- エフェクト生成 ---
-	Vector3 effectPos = GetWorldPosition();
-	effectPos.y += 2.0f; // 少し上にずらす
-
-	// ゲームシーンにエフェクト生成を依頼（※この gameScene_ はどこかに定義されている必要あり）
-	gameScene_->CreateEffect(effectPos); // ← この関数が必要！
-	(void)player;
 }
 
 void Enemy::Initialize(Model* model, Camera* camera, const Vector3& position) {
@@ -49,6 +49,8 @@ void Enemy::Initialize(Model* model, Camera* camera, const Vector3& position) {
 
 	// 02_09
 	walkTimer = 0.0f;
+
+
 }
 void Enemy::UpDate() {
 	// 変更リクエストがあったら
