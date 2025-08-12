@@ -2,7 +2,7 @@
 
 using namespace KamataEngine;
 // 初期化
-void GameScene::Initialize() {}
+void GameScene::Initialize() {z}
 // 更新
 void GameScene::Update() {}
 // 描画

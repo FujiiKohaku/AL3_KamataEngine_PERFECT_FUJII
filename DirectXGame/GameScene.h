@@ -9,5 +9,5 @@ public:
 	// 更新
 	void Update();
 	// 描画
-	void Draw();
+	void Draw();z
 };
