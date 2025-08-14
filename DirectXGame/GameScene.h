@@ -1,4 +1,5 @@
 #pragma once
+
 #include "CameraController.h"
 #include "DeathParticles.h"
 #include "Enemy.h"
@@ -9,102 +10,89 @@
 #include "Math.h"
 #include "Player.h"
 #include "Skydome.h"
+#include <list>
 #include <vector>
 
-// ゲームシーン
+// ==========================
+// ゲームシーン クラス
+// ==========================
 class GameScene {
 public:
-	// 初期化
-	void Initialize();
-	// 更新
-	void Update();
-	// 描画
-	void Draw();
-	//////////////////
-	// 関数AL3_02_02//
-	///////////////////
 	GameScene();
 	~GameScene();
 
+	// 初期化（リソース読み込みやオブジェクト生成）
+	void Initialize();
+
+	// 毎フレーム更新
+	void Update();
+
+	// 毎フレーム描画
+	void Draw();
+
+	// マップチップなどからブロックを生成
 	void GenerateBlocks();
 
-	// 02_10 16枚目 衝突判定と応答
+	// 全てのオブジェクト間の衝突判定と応答処理
 	void CheckAllCollisions();
-	// デスフラグのgetter
+
+	// シーン終了フラグ取得
 	bool IsFinished() const { return finished_; }
 
-	// エフェクトを生成
+	// ヒットエフェクトを指定位置に生成
 	void CreateHitEffect(const KamataEngine::Vector3& position);
 
 private:
-	// 02_12 4枚目 ゲームのフェーズ（型）
+	// ===== ゲームの進行状態 =====
 	enum class Phase {
-		kFadeIn, // フェードイン
-		kPlay,   // ゲームプレイ
-		kDeath,  // デス演出
-		kFadeOut // フェードアウト
+		kFadeIn, // 開始フェード中
+		kPlay,   // プレイ中
+		kDeath,  // デス演出中
+		kFadeOut // 終了フェード中
 	};
+	Phase phase_; // 現在のフェーズ
 
-	// 02_12 4枚目 ゲームの現在フェーズ（変数）
-	Phase phase_;
-
-	// 02_12 9枚目
+	// フェーズ切り替え処理
 	void ChangePhase();
-	// テクスチャハンドル
-	uint32_t textureHandle_ = 0;
-	// 3Dモデルデータ
-	KamataEngine::Model* model_ = nullptr;
-	// 攻撃モデルデータ
-	KamataEngine ::Model* modelAttack_ = nullptr;
-	// カメラ
-	KamataEngine::Camera camera_;
-	// 自キャラ
-	Player* player_ = nullptr;
-	// 3Dモデルデータ(block)AL3_02_02
-	KamataEngine::Model* modelBlock = nullptr;
-	// ブロック用のワールドトランスフォームAL3_02_02
+
+	// ===== リソース / モデル =====
+	uint32_t textureHandle_ = 0;                 // 汎用テクスチャハンドル
+	KamataEngine::Model* model_ = nullptr;       // プレイヤーなどのメインモデル
+	KamataEngine::Model* modelAttack_ = nullptr; // 攻撃用モデル
+	KamataEngine::Model* modelBlock = nullptr;   // ブロック用モデル
+
+	// ===== ブロック配置 =====
+	// 二次元配列形式でWorldTransformのポインタを保持
+	// [行][列]でアクセス、生成はGenerateBlocksで行い、破棄時はdeleteとclear
 	std::vector<std::vector<KamataEngine::WorldTransform*>> worldTransformBlocks_;
 
-	// デバックカメラ有効AL3_02_02
-	bool isDebugCameraActive = false;
-	// デバッグカメラAL3_02_02
-	KamataEngine::DebugCamera* debugCamera_ = nullptr;
-	// スカイドームモデル
-	KamataEngine::Model* modelSkydome_ = nullptr;
-	// スカイドーム
-	Skydome* skydome_ = nullptr;
-	// マップチップフィールド
-	MapChipField* mapChipField_;
-	// カメラコントローラ
-	CameraController* cController_ = nullptr;
+	// ===== カメラ関連 =====
+	KamataEngine::Camera camera_;                      // メインカメラ
+	bool isDebugCameraActive = false;                  // デバッグカメラ有効フラグ
+	KamataEngine::DebugCamera* debugCamera_ = nullptr; // デバッグカメラ
 
-	// 02_09 10枚目 エネミークラス
-	/*Enemy* enemy_ = nullptr;*/ // 02_10で削除
-	// 02_09 10枚目 エネミーモデル
-	KamataEngine::Model* enemy_model_ = nullptr;
-	KamataEngine::Model* modelPlayerHit_ = nullptr;
-	KamataEngine::Model* modelParticle_ = nullptr;
-	// 02_10
-	std::list<Enemy*> enemies_;
+	// ===== 環境オブジェクト =====
+	KamataEngine::Model* modelSkydome_ = nullptr; // スカイドームモデル
+	Skydome* skydome_ = nullptr;                  // スカイドーム本体
+	MapChipField* mapChipField_ = nullptr;        // マップチップ管理
+	CameraController* cController_ = nullptr;     // カメラ操作コントローラ
 
-	std::list<HitEffect*> hitEffects_;
-	// 02_11_page_15
-	DeathParticles* deathParticles_ = nullptr;
-	// 02_11_page_16
-	Model* deathParticleModel = nullptr;
+	// ===== プレイヤー関連 =====
+	Player* player_ = nullptr;
+	KamataEngine::Model* modelPlayerHit_ = nullptr; // プレイヤー被弾時モデル
 
-	GameScene* gameScene = nullptr;
+	// ===== エネミー関連 =====
+	KamataEngine::Model* enemy_model_ = nullptr; // 敵モデル
+	std::list<Enemy*> enemies_;                  // 敵リスト
 
-	// ゲームのフェーズ型
-	// classは名前被りがないためだって鍵付きロッカーみたいな
-	// enum class Phase {
-	//	kPlay,  // ゲームプレイ
-	//	kDeath, // デス演出
-	//};
-	// ゲームの現在フェーズの変数
-	// Phase phase_;
+	// ===== エフェクト関連 =====
+	KamataEngine::Model* modelParticle_ = nullptr;     // 汎用パーティクルモデル
+	std::list<HitEffect*> hitEffects_;                 // ヒットエフェクトリスト
+	DeathParticles* deathParticles_ = nullptr;         // デス演出パーティクル
+	KamataEngine::Model* deathParticleModel = nullptr; // デスパーティクルモデル
 
-	// 終了フラグ
-	bool finished_ = false;
-	Fade* fade_ = nullptr;
+	// ===== その他 =====
+	GameScene* gameScene = nullptr; // 自己参照？用途不明（不要なら削除推奨）
+	bool finished_ = false;         // シーン終了フラグ
+	Fade* fade_ = nullptr;          // フェード管理
 };

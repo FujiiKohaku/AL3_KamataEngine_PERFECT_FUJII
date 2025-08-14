@@ -1,48 +1,40 @@
 #include "TitleScene.h"
 #include "Math.h"
+#include <cmath> // std::fmod, std::sin
 #include <numbers>
 
 TitleScene::~TitleScene() { delete fade_; }
 
 void TitleScene::Initialize() {
-
+	// モデル読み込み
 	modelTitle_ = Model::CreateFromOBJ("titleFont", true);
 	modelPlayer_ = Model::CreateFromOBJ("player");
-	const float kPlayerTitle = 2.0f;
+
 	// カメラ初期化
 	camera_.Initialize();
+
+	// タイトル文字のワールド設定
+	constexpr float kPlayerTitle = 2.0f;
 	worldTransformTitle_.Initialize();
 	worldTransformTitle_.scale_ = {kPlayerTitle, kPlayerTitle, kPlayerTitle};
 
-	const float kPlayerScale = 10.0f;
-
+	// プレイヤーモデルのワールド設定
+	constexpr float kPlayerScale = 10.0f;
 	worldTransformPlayer_.Initialize();
-
 	worldTransformPlayer_.scale_ = {kPlayerScale, kPlayerScale, kPlayerScale};
-
 	worldTransformPlayer_.rotation_.y = 0.95f * std::numbers::pi_v<float>;
+	worldTransformPlayer_.translation_ = {-2.0f, -10.0f, 0.0f};
 
-	worldTransformPlayer_.translation_.x = -2.0f;
-
-	worldTransformPlayer_.translation_.y = -10.0f;
-
+	// フェード初期化
 	fade_ = new Fade();
 	fade_->Initialize();
-
 	fade_->Start(Fade::Status::FadeIn, 1.0f);
 }
 
 void TitleScene::Update() {
-
-	// 02_12 27枚目
-	//if (Input::GetInstance()->PushKey(DIK_SPACE)) {
-	//	finished_ = true;
-	//}
-	// 02_13 27枚目
 	switch (phase_) {
 	case Phase::kFadeIn:
 		fade_->Update();
-
 		if (fade_->IsFinished()) {
 			phase_ = Phase::kMain;
 		}
@@ -60,36 +52,28 @@ void TitleScene::Update() {
 		}
 		break;
 	}
+
+	// タイトルの上下アニメーション
 	counter_ += 1.0f / 60.0f;
 	counter_ = std::fmod(counter_, kTimeTitleMove);
-
 	float angle = counter_ / kTimeTitleMove * 2.0f * std::numbers::pi_v<float>;
-
 	worldTransformTitle_.translation_.y = std::sin(angle) + 10.0f;
 
+	// カメラ更新
 	camera_.TransferMatrix();
 
-	// アフィン変換～DirectXに転送(タイトル座標)
+	// 行列転送
 	WorldTransformUpdate(worldTransformTitle_);
-
-	// アフィン変換～DirectXに転送（プレイヤー座標）
 	WorldTransformUpdate(worldTransformPlayer_);
-
-	/*fade_->Update();*/
 }
 
 void TitleScene::Draw() {
-
-	DirectXCommon* dxCommon_ = DirectXCommon::GetInstance();
-	// コマンドリストの取得
-	ID3D12GraphicsCommandList* commandList = dxCommon_->GetCommandList();
+	auto* dxCommon = DirectXCommon::GetInstance();
+	ID3D12GraphicsCommandList* commandList = dxCommon->GetCommandList();
 
 	Model::PreDraw(commandList);
-
 	modelTitle_->Draw(worldTransformTitle_, camera_);
 	modelPlayer_->Draw(worldTransformPlayer_, camera_);
-
 	fade_->Draw();
-
 	Model::PostDraw();
 }

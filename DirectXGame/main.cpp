@@ -2,132 +2,163 @@
 #include "KamataEngine.h"
 #include "TitleScene.h"
 #include <Windows.h>
-// タイトルシーンのポインタ（初期化はまだ）02_12_page21
-TitleScene* titleScene = nullptr;
-GameScene* gameScene = nullptr;
-// 02_12 25枚目(Scene sceneまで)
-enum class Scene {
-	kUnknown = 0,
-	kTitle,
-	kGame,
-};
-// 現在シーン（型）
-Scene scene = Scene::kUnknown;
-// 02_12 29枚//シーンを返る関数まとめます
-void ChangeScene() {
 
+// ====== シーン用グローバル ======
+TitleScene* titleScene = nullptr; // タイトルシーンの実体（必要な時だけnew）
+GameScene* gameScene = nullptr;   // ゲームシーンの実体（必要な時だけnew）
+
+// シーン種別
+enum class Scene {
+	kUnknown = 0, // 未定（初期化中など）
+	kTitle,       // タイトル
+	kGame,        // ゲーム本編
+};
+
+// 現在のシーン
+Scene scene = Scene::kUnknown;
+
+// ====== シーン切り替え（終了フラグを見て次へ） ======
+void ChangeScene() {
 	switch (scene) {
 	case Scene::kTitle:
-		if (titleScene->IsFinished()) {
-			// シーン変更
+		// titleSceneが存在していて、かつ終了要求されたらゲームへ
+		if (titleScene && titleScene->IsFinished()) {
 			scene = Scene::kGame;
-			delete titleScene;
-			titleScene = nullptr;
+
+			delete titleScene;    // 先に解放
+			titleScene = nullptr; // ダングリング防止
+
 			gameScene = new GameScene;
 			gameScene->Initialize();
 		}
 		break;
+
 	case Scene::kGame:
-		// 02_12 30枚目
-		if (gameScene->IsFinished()) {
-			// シーン変更
+		// gameSceneが存在していて、かつ終了要求されたらタイトルへ
+		if (gameScene && gameScene->IsFinished()) {
 			scene = Scene::kTitle;
-			delete gameScene;
+
+			delete gameScene; // 先に解放
 			gameScene = nullptr;
+
 			titleScene = new TitleScene;
 			titleScene->Initialize();
 		}
 		break;
+
+	case Scene::kUnknown:
+	default:
+		// ここは基本来ない。初期化直後にkTitleへ遷移する想定。
+		break;
 	}
 }
-// アップデート関数スイッチ文で管理するため関数にまとめます
+
+// ====== シーン更新 ======
 void UpdateScene() {
 	switch (scene) {
-	case Scene::kUnknown:
-		break;
 	case Scene::kTitle:
-		titleScene->Update();
+		if (titleScene) {
+			titleScene->Update();
+		}
 		break;
-	case Scene::kGame:
-		gameScene->Update();
-		break;
-	default:
-		break;
-	}
-}
-// ドロウ関数をスイッチ文で制御するために関数でまとめる
-void DrawScene() {
 
-	switch (scene) {
-	case Scene::kUnknown:
-		break;
-	case Scene::kTitle:
-		titleScene->Draw();
-		break;
 	case Scene::kGame:
-		gameScene->Draw();
+		if (gameScene) {
+			gameScene->Update();
+		}
 		break;
+
+	case Scene::kUnknown:
 	default:
+		// 何もしない
 		break;
 	}
 }
-// Windowsアプリでのエントリーポイント(main関数)
+
+// ====== シーン描画 ======
+void DrawScene() {
+	switch (scene) {
+	case Scene::kTitle:
+		if (titleScene) {
+			titleScene->Draw();
+		}
+		break;
+
+	case Scene::kGame:
+		if (gameScene) {
+			gameScene->Draw();
+		}
+		break;
+
+	case Scene::kUnknown:
+	default:
+		// 何もしない
+		break;
+	}
+}
+
+// ====== WinMain（エントリポイント） ======
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
-	// エンジンの初期化
+	// エンジン初期化
 	KamataEngine::Initialize();
 
-	// DirectXCommonインスタスの取得
+	// 共通インスタンス取得
 	KamataEngine::DirectXCommon* dxCommon = KamataEngine::DirectXCommon::GetInstance();
-	// ImGuiManagerインスタンスの取得
 	ImGuiManager* imguiManager = ImGuiManager::GetInstance();
 
+	// 最初はタイトルから
 	scene = Scene::kTitle;
 	titleScene = new TitleScene;
 	titleScene->Initialize();
 
-	// メインループ
+	// ====== メインループ ======
 	while (true) {
 
-		// エンジンの更新
+		// エンジン更新（trueなら終了要求）
 		if (KamataEngine::Update()) {
 			break;
 		}
-		// ImGui受付開始
+
+		// ImGui 入力受付開始
 		imguiManager->Begin();
 
-		// シーン切り替え
+		// 必要ならシーン切替
 		ChangeScene();
 
 		// シーン更新
 		UpdateScene();
-		// ImGui受付終了
+
+		// ImGui 入力受付終了（ここでウィジェット確定）
 		imguiManager->End();
 
-		// 描画開始
+		// ====== 描画フェーズ ======
 		dxCommon->PreDraw();
-		//軸？
+
+		// 便利描画（座標軸/プリミティブ）
 		AxisIndicator::GetInstance()->Draw();
-		// プリミティブ描画のリセット
 		PrimitiveDrawer::GetInstance()->Reset();
-		// シーンの描画
-		DrawScene(); // 02_12 33枚目で追加
-		             // ImGui描画
-		imguiManager->Draw();
+
+		// シーン描画
+		DrawScene();
+
+		// ImGui描画（※二重呼び出しは不要）
 		imguiManager->Draw();
 
-		// 描画終了
 		dxCommon->PostDraw();
 	}
-	// ゲームシーンの解放
-	// タイトルシーンの解放
-	// nullptrの代入
-	gameScene = nullptr;
-	titleScene = nullptr;
-	delete gameScene;
-	delete titleScene;
-	// エンジンの終了処理
-	KamataEngine::Finalize();
 
+	// ====== 終了処理（delete → nullptrの順） ======
+	if (gameScene) {
+		delete gameScene;
+		gameScene = nullptr;
+	}
+	if (titleScene) {
+		delete titleScene;
+		titleScene = nullptr;
+	}
+
+	// エンジン終了
+	KamataEngine::Finalize();
 	return 0;
 }
