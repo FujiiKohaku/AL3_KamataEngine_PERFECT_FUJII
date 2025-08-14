@@ -1,5 +1,6 @@
 #pragma once
 #include "KamataEngine.h"
+#include "Math.h"
 #include "Player.h"
 #include <vector>
 // ゲームシーン
@@ -33,4 +34,7 @@ private:
 
 	// ブロック用のワールドトランスフォーム
 	std::vector<KamataEngine::WorldTransform*> worldTransformBlocks_;
+
+	// デバッグカメラ有効フラグ
+	bool isDebugCameraActive_ = false;
 };

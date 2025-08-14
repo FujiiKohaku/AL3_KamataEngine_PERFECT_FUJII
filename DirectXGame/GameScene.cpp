@@ -22,7 +22,7 @@ void GameScene::Initialize() {
 	model_ = KamataEngine::Model::Create();
 
 	// モデルブロック作成
-	model_ = KamataEngine::Model::Create();
+	modelBlock_ = KamataEngine::Model::Create();
 	// ワールドトランスフォームの初期化
 	worldtransform_.Initialize();
 
@@ -43,22 +43,48 @@ void GameScene::Initialize() {
 	// 要素数
 	const uint32_t kBlockNumX = 20;
 	// ブロック一個分の横幅
-	const float kBlockWidth = 1.0f;
-	//要素数を変更する
+	const float kBlockWidth = 2.0f;
 	worldTransformBlocks_.resize(kBlockNumX);
 
-	//キューブの生成
-
+	// キューブの生成
+	for (uint32_t i = 0; i < kBlockNumX; ++i) {
+		worldTransformBlocks_[i] = new WorldTransform();
+		worldTransformBlocks_[i]->Initialize();
+		worldTransformBlocks_[i]->translation_.x = kBlockWidth * i;
+		worldTransformBlocks_[i]->translation_.y = 0.0f;
+	}
 }
 
 // 更新
 void GameScene::Update() {
 	// デバッグカメラの更新
+#ifdef _DEBUG
+	if (Input::GetInstance()->TriggerKey(DIK_C))
+		isDebugCameraActive_ = true;
+#endif
 
-	debugCamera_->Update();
+	if (isDebugCameraActive_) {
+		debugCamera_->Update();
+		camera_->matView = debugCamera_->GetCamera().matView;
+		camera_->matProjection = debugCamera_->GetCamera().matProjection;
+		// ビュープロジェクション行列の転送
+		camera_->TransferMatrix();
+		
+	} else {
+
+		camera_->UpdateMatrix();
+	}
 
 	// playerの更新
 	player_->UpDate();
+
+	// ブロックの更新
+	for (WorldTransform* worldTransformBlock : worldTransformBlocks_) {
+
+		worldTransformBlock->matWorld_ = MakeAffineMatrix(worldTransformBlock->scale_, worldTransformBlock->rotation_, worldTransformBlock->translation_);
+		// 定数バッファに転送する
+		worldTransformBlock->TransferMatrix();
+	}
 }
 
 // 描画
@@ -69,5 +95,9 @@ void GameScene::Draw() {
 	Model::PreDraw(dxcommon->GetCommandList());
 	// model_->Draw(worldtransform_, debugCamera_->GetCamera(), textureHandle_);
 	player_->Draw();
+	// ブロックの描画
+	for (WorldTransform* worldTransformBlock : worldTransformBlocks_) {
+		modelBlock_->Draw(*worldTransformBlock, *camera_, nullptr);
+	}
 	Model::PostDraw();
 }
