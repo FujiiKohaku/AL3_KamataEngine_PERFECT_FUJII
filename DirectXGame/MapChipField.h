@@ -21,22 +21,22 @@ public:
 
 	void ResetMapChipData();
 
-	void LoadMapChipData(const std::string& filepath);
+	void LoadMapChipCsv(const std::string& filepath);
 
-	MapChipType GetmapChipTypeByIndex(uint32_t xIndex, uint32_t yIndex);
+	MapChipType GetMapChipTypeByIndex(uint32_t xIndex, uint32_t yIndex);
 
 	Vector3 GetMapChipPositionByIndex(uint32_t xIndex, uint32_t yIndedx);
 
-	uint32_t GetNumBlockVirtical() const { return kNumBlockX; }
-	uint32_t GetNumBlockHorizontal() const { return kNumBlockY; }
+	uint32_t GetNumBlockVirtical() const { return kNumBlockVirtical; }
+	uint32_t GetNumBlockHorizontal() const { return kNumBlockHorizontal; }
 
 private:
 	// 1ブロックのサイズ
 	static inline const float kBlockWidth = 1.0f;
 	static inline const float kBlockHeight = 1.0f;
-	// ブロックの個数
-	static inline const uint32_t kNumBlockX = 20;
-	static inline const uint32_t kNumBlockY = 100;
+	// 1ブロックのサイズ
+	static inline const uint32_t kNumBlockVirtical = 20;
+	static inline const uint32_t kNumBlockHorizontal = 100;
 	// 二次元配列の構造体の変数
 	MapChipData mapChipData_;
 };

@@ -17,15 +17,15 @@ std::map<std::string, MapChipType> mapChipTable = {
 void MapChipField::ResetMapChipData() {
 
 	mapChipData_.data.clear();
-	mapChipData_.data.resize(kNumBlockX);
+	mapChipData_.data.resize(kNumBlockVirtical);
 
 	for (std::vector<MapChipType>& mapChipDataLine : mapChipData_.data) {
-		mapChipDataLine.resize(kNumBlockY);
+		mapChipDataLine.resize(kNumBlockHorizontal);
 	}
 }
 
 // CSV読み込み
-void MapChipField::LoadMapChipData(const std::string& filePath) {
+void MapChipField::LoadMapChipCsv(const std::string& filePath) {
 	std::ifstream file(filePath);
 	assert(file.is_open());
 
@@ -36,11 +36,11 @@ void MapChipField::LoadMapChipData(const std::string& filePath) {
 	ResetMapChipData();
 
 	std::string line;
-	for (uint32_t y = 0; y < kNumBlockY; ++y) {
+	for (uint32_t y = 0; y < kNumBlockVirtical; ++y) {
 		getline(mapChipCsv, line);
 		std::istringstream line_stream(line);
 
-		for (uint32_t x = 0; x < kNumBlockX; ++x) {
+		for (uint32_t x = 0; x < kNumBlockHorizontal; ++x) {
 			std::string word;
 			getline(line_stream, word, ',');
 			if (mapChipTable.contains(word)) {
@@ -51,12 +51,15 @@ void MapChipField::LoadMapChipData(const std::string& filePath) {
 }
 
 // インデックスから座標取得
-Vector3 MapChipField::GetMapChipPositionByIndex(uint32_t xIndex, uint32_t yIndex) { return Vector3(kBlockWidth * xIndex, kBlockHeight * (kNumBlockY - 1 - yIndex), 0); }
+Vector3 MapChipField::GetMapChipPositionByIndex(uint32_t xIndex, uint32_t yIndex) { return Vector3(kBlockWidth * xIndex, kBlockHeight * (kNumBlockVirtical - 1 - yIndex), 0); }
 
-// タイプ取得
-MapChipType MapChipField::GetmapChipTypeByIndex(uint32_t xIndex, uint32_t yIndex) {
-	if (xIndex >= kNumBlockX || yIndex >= kNumBlockY) {
+MapChipType MapChipField::GetMapChipTypeByIndex(uint32_t xIndex, uint32_t yIndex) {
+	if (xIndex < 0 || kNumBlockHorizontal - 1 < xIndex) {
 		return MapChipType::kBlank;
 	}
+	if (yIndex < 0 || kNumBlockVirtical - 1 < yIndex) {
+		return MapChipType::kBlank;
+	}
+
 	return mapChipData_.data[yIndex][xIndex];
 }

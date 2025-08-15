@@ -52,6 +52,7 @@ void GameScene::Initialize() {
 	// const uint32_t kBlockNumX = 20; // 要素数
 	// const float kBlockWidth = 2.0f; // ブロック1個分の横幅
 	/*worldTransformBlocks_.resize(kBlockNumX);*/
+	modelBlock_ = Model::CreateFromOBJ()
 
 	// スカイドーム
 	skydome_ = new Skydome();
@@ -60,7 +61,7 @@ void GameScene::Initialize() {
 
 	// マップチップフィールドの初期化
 	mapChipField_ = new MapChipField();
-	mapChipField_->LoadMapChipData("Resources/blocks.csv");
+	mapChipField_-> LoadMapChipCsv("Resources/blocks.csv");
 	GenerateBlocks();
 }
 
@@ -149,7 +150,7 @@ void GameScene::GenerateBlocks() {
 
 		for (uint32_t j = 0; j < numBlockHorizontal; ++j) {
 
-			if (mapChipField_->GetmapChipTypeByIndex(j, i) == MapChipType::kBlock) {
+			if (mapChipField_->GetMapChipTypeByIndex(j, i) == MapChipType::kBlock) {
 				WorldTransform* worldTransform = new WorldTransform();
 				worldTransform->Initialize();
 				worldTransformBlocks_[i][j] = worldTransform;
