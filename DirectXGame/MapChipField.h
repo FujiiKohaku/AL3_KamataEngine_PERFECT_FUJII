@@ -27,6 +27,9 @@ public:
 
 	Vector3 GetMapChipPositionByIndex(uint32_t xIndex, uint32_t yIndedx);
 
+	uint32_t GetNumBlockVirtical() const { return kNumBlockX; }
+	uint32_t GetNumBlockHorizontal() const { return kNumBlockY; }
+
 private:
 	// 1ブロックのサイズ
 	static inline const float kBlockWidth = 1.0f;

@@ -16,6 +16,8 @@ public:
 	void Update();
 	void Draw();
 
+	void GenerateBlocks();
+
 private:
 	// ===== リソース =====
 	// モデル
@@ -37,7 +39,7 @@ private:
 	Skydome* skydome_ = nullptr;
 
 	// ブロック用ワールドトランスフォーム（インスタンスごとに所有）
-	std::vector<KamataEngine::WorldTransform*> worldTransformBlocks_;
+	std::vector<std::vector<WorldTransform*>> worldTransformBlocks_;
 
 	// ===== フラグ =====
 	bool isDebugCameraActive_ = false;
