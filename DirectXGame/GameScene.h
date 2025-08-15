@@ -1,40 +1,48 @@
 #pragma once
 #include "KamataEngine.h"
+#include "MapChipField.h"
 #include "Math.h"
 #include "Player.h"
+#include "Skydome.h"
 #include <vector>
+
 // ゲームシーン
 class GameScene {
 public:
 	~GameScene();
 
-	// 初期化
+	// ライフサイクル
 	void Initialize();
-	// 更新
 	void Update();
-	// 描画
 	void Draw();
 
 private:
-	// 3dmodelの読み込み
+	// ===== リソース =====
+	// モデル
 	KamataEngine::Model* model_ = nullptr;
+	KamataEngine::Model* modelBlock_ = nullptr;
+	KamataEngine::Model* skydomeModel_ = nullptr;
+
 	// テクスチャ
 	uint32_t textureHandle_ = 0;
 
+	// ===== 変換・カメラ =====
 	KamataEngine::WorldTransform worldtransform_;
-	KamataEngine::Camera* camera_;
+	KamataEngine::WorldTransform worldTransformSkydome_; // ← 名前空間を明示
+	KamataEngine::Camera* camera_ = nullptr;
+	KamataEngine::DebugCamera* debugCamera_ = nullptr;
 
-	// デバッグカメラ
-	KamataEngine::DebugCamera* debugCamera_;
+	// ===== ゲームオブジェクト =====
+	Player* player_ = nullptr;
+	Skydome* skydome_ = nullptr;
 
-	Player* player_;
-
-	// 3dモデルの読み込み
-	KamataEngine::Model* modelBlock_ = nullptr;
-
-	// ブロック用のワールドトランスフォーム
+	// ブロック用ワールドトランスフォーム（インスタンスごとに所有）
 	std::vector<KamataEngine::WorldTransform*> worldTransformBlocks_;
 
-	// デバッグカメラ有効フラグ
+	// ===== フラグ =====
 	bool isDebugCameraActive_ = false;
+
+	//===== マップチップフィールド =====
+	MapChipField* mapChipField_; // マップチップフィールド
+
 };
