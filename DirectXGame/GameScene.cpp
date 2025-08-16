@@ -29,7 +29,7 @@ void GameScene::Initialize() {
 
 	// 3Dモデル生成
 	model_ = KamataEngine::Model::Create();
-	model_= Model::CreateFromOBJ("player", true);
+	model_ = Model::CreateFromOBJ("player", true);
 	modelBlock_ = KamataEngine::Model::Create();
 
 	// ワールドトランスフォーム初期化
@@ -45,15 +45,14 @@ void GameScene::Initialize() {
 	// テクスチャ読み込み
 	textureHandle_ = TextureManager::Load("mario.jpg");
 
-
-		// マップチップフィールドの初期化
+	// マップチップフィールドの初期化
 	mapChipField_ = new MapChipField();
 	mapChipField_->LoadMapChipCsv("Resources/blocks.csv");
 	Vector3 playerposition = mapChipField_->GetMapChipPositionByIndex(5, 5);
 	// プレイヤー生成
 	player_ = new Player();
 	player_->Initialize(model_, camera_, playerposition);
-
+	player_->SetMapChipField(mapChipField_);
 	// ブロック列の準備
 	// const uint32_t kBlockNumX = 20; // 要素数
 	// const float kBlockWidth = 2.0f; // ブロック1個分の横幅
@@ -64,7 +63,6 @@ void GameScene::Initialize() {
 	skydome_ = new Skydome();
 	skydomeModel_ = Model::CreateFromOBJ("skydome", true); // skydomeModel_ が指しているモデルに対して、Model クラス版の CreateFromOBJ を呼ぶ
 	skydome_->initialize(skydomeModel_, camera_);
-
 
 	GenerateBlocks();
 }
@@ -138,7 +136,8 @@ void GameScene::Draw() {
 	Model::PostDraw();
 }
 
-// ブロック生成
+#pragma region ブロック生成関数
+// ブロック生成関数
 void GameScene::GenerateBlocks() {
 
 	uint32_t numBlockVirtical = mapChipField_->GetNumBlockVirtical();
@@ -163,3 +162,4 @@ void GameScene::GenerateBlocks() {
 		}
 	}
 }
+#pragma endregion

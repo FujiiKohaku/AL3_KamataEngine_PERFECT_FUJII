@@ -5,6 +5,9 @@
 #include <cmath>
 #include <cstdint>
 #include <numbers>
+
+class MapChipField;
+
 float Lerp(float x1, float x2, float t);
 
 float EaseInOut(float x1, float x2, float t);
@@ -20,6 +23,10 @@ public:
 	Player();
 	// デストラクタ
 	~Player();
+
+	void SetMapChipField(MapChipField* mapChipField) { mapChipField_ = mapChipField; }
+
+	void InputMove();
 
 private: // C++ではメンバ変数は特別な理由がなければprivateにする
 	     // ワールド変換データ
@@ -42,4 +49,28 @@ private: // C++ではメンバ変数は特別な理由がなければprivateに�
 	enum class LRDirection { kLeft, kRight, kNone };
 
 	LRDirection lrDirection_ = lrDirection_ = LRDirection::kRight;
+	// 旋回開始時の角度
+	float turnFirstRotationY_ = 0.0f;
+	// 旋回タイマー
+	float turnTimer_ = 0.0f;
+	// 旋回時間＜秒＞
+	static inline const float kTimeTrun = 0.3f;
+
+	// ジャンプについて
+	// 接地状態フラグ
+	bool onGround_ = true;
+	// 重力加速度(下方向)
+	static inline const float kGravityAcceleration = 0.98f / 60.0f;
+	// 最大落下速度(下方向)
+	static inline const float kLimitFallSpeed = 0.3f;
+	// ジャンプ初速(上方向)
+	static inline const float kjumpAcceleration = 20.0f / 60.0f;
+
+	// キャラクターの当たり判定サイズ
+	//一マスを通りやすくするために0.8にする
+	static inline const float kWidth = 0.8f;
+	static inline const float kheight = 0.8f;
+
+	// マップチップによるフィールド
+	MapChipField* mapChipField_ = nullptr; // マップチップフィールド
 };
