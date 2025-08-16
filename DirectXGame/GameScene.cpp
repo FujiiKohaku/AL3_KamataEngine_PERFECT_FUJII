@@ -6,16 +6,19 @@ using namespace KamataEngine;
 // デストラクタ
 //--------------------------------------------------
 GameScene::~GameScene() {
+	delete player_;  // 先にプレイヤーを消す
+	delete skydome_; // 先にスカイドームを消す
+
 	delete model_;
-	delete debugCamera_;
-	delete player_;
-	delete camera_;
 	delete modelBlock_;
 	delete skydomeModel_;
+
+	delete debugCamera_;
+	delete camera_;
 	delete mapChipField_;
 
-	for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
-		for (WorldTransform* worldTransformBlock : worldTransformBlockLine) {
+	for (auto& worldTransformBlockLine : worldTransformBlocks_) {
+		for (auto& worldTransformBlock : worldTransformBlockLine) {
 			delete worldTransformBlock;
 		}
 	}
@@ -28,7 +31,6 @@ GameScene::~GameScene() {
 void GameScene::Initialize() {
 
 	// 3Dモデル生成
-	model_ = KamataEngine::Model::Create();
 	model_ = Model::CreateFromOBJ("player", true);
 	modelBlock_ = KamataEngine::Model::Create();
 

@@ -28,8 +28,9 @@ public:
 
 	void InputMove();
 
-private: // C++ではメンバ変数は特別な理由がなければprivateにする
-	     // ワールド変換データ
+private:
+	// C++ではメンバ変数は特別な理由がなければprivateにする
+	// ワールド変換データ
 	KamataEngine::WorldTransform worldTransform_;
 	// モデル
 	KamataEngine::Model* model_ = nullptr;
@@ -67,10 +68,17 @@ private: // C++ではメンバ変数は特別な理由がなければprivateに�
 	static inline const float kjumpAcceleration = 20.0f / 60.0f;
 
 	// キャラクターの当たり判定サイズ
-	//一マスを通りやすくするために0.8にする
+	// 一マスを通りやすくするために0.8にする
 	static inline const float kWidth = 0.8f;
 	static inline const float kheight = 0.8f;
 
 	// マップチップによるフィールド
 	MapChipField* mapChipField_ = nullptr; // マップチップフィールド
+
+	struct CollisionMapInfo {
+		bool isHitCeiling = false; // 天井に当たったか
+		bool isHitFloor = false;   // 床に当たったか
+		bool isHitWall = false;    // 壁に当たったか
+		Vector3 move;
+	};
 };
