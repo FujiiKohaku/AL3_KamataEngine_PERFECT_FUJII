@@ -5,7 +5,7 @@
 #include <cmath>
 #include <cstdint>
 #include <numbers>
-
+#include "MapChipField.h"
 class MapChipField;
 
 float Lerp(float x1, float x2, float t);
@@ -70,7 +70,7 @@ private:
 	// キャラクターの当たり判定サイズ
 	// 一マスを通りやすくするために0.8にする
 	static inline const float kWidth = 0.8f;
-	static inline const float kheight = 0.8f;
+	static inline const float kHeight = 0.8f;
 
 	// マップチップによるフィールド
 	MapChipField* mapChipField_ = nullptr; // マップチップフィールド
@@ -81,4 +81,28 @@ private:
 		bool isHitWall = false;    // 壁に当たったか
 		Vector3 move;
 	};
+
+	// 角
+	enum Corner {
+		kLeftTop,    // 左上
+		kLeftBottom,  // 左下
+		kRightTop,   // 右上
+		kRightBottom, // 右下
+		kNumCorners // 角の数
+	};
+	// map衝突判定
+	void CheckMapCollision(CollisionMapInfo& info);
+
+	void CheckMapCollisionUp(CollisionMapInfo& info);
+
+	void CheckMapCollisionDown(CollisionMapInfo& info);
+
+	void CheckMapCollisionLeft(CollisionMapInfo& info);
+
+	void CheckMapCollisionRight(CollisionMapInfo& info);
+
+	// 角の位置を取得
+	Vector3 CornerPosition(const Vector3& center, Corner corner);
+	//隙間ふふふ
+	static inline const float kBlank = 0.04f;
 };

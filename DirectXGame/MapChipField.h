@@ -30,6 +30,22 @@ public:
 	uint32_t GetNumBlockVirtical() const { return kNumBlockVirtical; }
 	uint32_t GetNumBlockHorizontal() const { return kNumBlockHorizontal; }
 
+	struct IndexSet {
+		uint32_t xIndex;
+		uint32_t yIndex;
+	};
+	// 範囲矩形
+	struct Rect {
+		float left;
+		float right;
+		float top;
+		float bottom;
+	};
+
+	IndexSet GetMapChipIndexSetByposition(const Vector3& position);
+
+	Rect GetRectByIndex(uint32_t xIndex, uint32_t yIndex);
+
 private:
 	// 1ブロックのサイズ
 	static inline const float kBlockWidth = 1.0f;
@@ -39,4 +55,5 @@ private:
 	static inline const uint32_t kNumBlockHorizontal = 100;
 	// 二次元配列の構造体の変数
 	MapChipData mapChipData_;
+
 };
