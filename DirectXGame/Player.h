@@ -1,11 +1,11 @@
 #pragma once
 #include "KamataEngine.h"
+#include "MapChipField.h"
 #include "Math.h"
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
 #include <numbers>
-#include "MapChipField.h"
 class MapChipField;
 
 float Lerp(float x1, float x2, float t);
@@ -27,6 +27,9 @@ public:
 	void SetMapChipField(MapChipField* mapChipField) { mapChipField_ = mapChipField; }
 
 	void InputMove();
+
+	const KamataEngine::WorldTransform& GetWorldTransform() const { return worldTransform_; }
+
 
 private:
 	// C++ではメンバ変数は特別な理由がなければprivateにする
@@ -84,11 +87,11 @@ private:
 
 	// 角
 	enum Corner {
-		kLeftTop,    // 左上
+		kLeftTop,     // 左上
 		kLeftBottom,  // 左下
-		kRightTop,   // 右上
+		kRightTop,    // 右上
 		kRightBottom, // 右下
-		kNumCorners // 角の数
+		kNumCorners   // 角の数
 	};
 	// map衝突判定
 	void CheckMapCollision(CollisionMapInfo& info);
@@ -103,6 +106,6 @@ private:
 
 	// 角の位置を取得
 	Vector3 CornerPosition(const Vector3& center, Corner corner);
-	//隙間ふふふ
+	// 隙間ふふふ
 	static inline const float kBlank = 0.04f;
 };

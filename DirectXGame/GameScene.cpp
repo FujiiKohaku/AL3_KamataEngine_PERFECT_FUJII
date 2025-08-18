@@ -17,6 +17,8 @@ GameScene::~GameScene() {
 	delete camera_;
 	delete mapChipField_;
 
+	delete cController_;
+
 	for (auto& worldTransformBlockLine : worldTransformBlocks_) {
 		for (auto& worldTransformBlock : worldTransformBlockLine) {
 			delete worldTransformBlock;
@@ -66,6 +68,12 @@ void GameScene::Initialize() {
 	skydomeModel_ = Model::CreateFromOBJ("skydome", true); // skydomeModel_ が指しているモデルに対して、Model クラス版の CreateFromOBJ を呼ぶ
 	skydome_->initialize(skydomeModel_, camera_);
 
+	// カメラコントローラーの初期化
+	cController_ = new CameraController();
+	cController_->Initialize(camera_); // カメラをゲームシーンに渡してる？
+	cController_->SetTarget(player_);  // プレイヤーをターゲットに設定
+	cController_->Reset();             // カメラの位置をプレイヤーに合わせてリセット
+
 	GenerateBlocks();
 }
 
@@ -106,8 +114,9 @@ void GameScene::Update() {
 		}
 	}
 
-	// スカイドーム更新
-	skydome_->UpDate();
+	skydome_->UpDate(); // スカイドーム更新
+
+	cController_->Update(); // カメラコントローラーの更新
 }
 
 //--------------------------------------------------
