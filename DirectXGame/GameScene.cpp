@@ -74,6 +74,8 @@ void GameScene::Initialize() {
 	cController_->SetTarget(player_);  // プレイヤーをターゲットに設定
 	cController_->Reset();             // カメラの位置をプレイヤーに合わせてリセット
 
+	CameraController::Rect cameraArea = {12.0f, 100 - 12.0f, 6.0f, 6.0f};//移動範囲の指定
+	cController_->SetMovableArea(cameraArea); // カメラの移動可能範囲を設定
 	GenerateBlocks();
 }
 
