@@ -30,6 +30,7 @@ public:
 
 	const KamataEngine::WorldTransform& GetWorldTransform() const { return worldTransform_; }
 
+	const KamataEngine::Vector3& GetVelocity() const { return velocity_; };
 
 private:
 	// C++ではメンバ変数は特別な理由がなければprivateにする
