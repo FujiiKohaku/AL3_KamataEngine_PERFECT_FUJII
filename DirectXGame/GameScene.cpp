@@ -28,62 +28,80 @@ GameScene::~GameScene() {
 	worldTransformBlocks_.clear();
 }
 
-//--------------------------------------------------
+//==================================================
 // 初期化
-//--------------------------------------------------
+//==================================================
 void GameScene::Initialize() {
 
-	// 3Dモデル生成
-	model_ = Model::CreateFromOBJ("playermax", true);
-	modelBlock_ = KamataEngine::Model::Create();
+	//--------------------------------------------------
+	// モデル生成
+	//--------------------------------------------------
+	model_ = Model::CreateFromOBJ("playermax", true);      // プレイヤーモデル
+	modelBlock_ = Model::CreateFromOBJ("block", true);     // ブロックモデル
+	skydomeModel_ = Model::CreateFromOBJ("skydome", true); // スカイドームモデル
+	enemyModel_ = Model::CreateFromOBJ("enemy", true);     // エネミーモデル
 
-	// ワールドトランスフォーム初期化
+	//--------------------------------------------------
+	// ワールドトランスフォーム
+	//--------------------------------------------------
 	worldtransform_.Initialize();
 
-	// カメラ初期化
+	//--------------------------------------------------
+	// カメラ関連
+	//--------------------------------------------------
 	camera_ = new Camera();
 	camera_->Initialize();
-
-	// デバッグカメラ生成
 	debugCamera_ = new DebugCamera(1080, 720);
 
+	//--------------------------------------------------
 	// テクスチャ読み込み
+	//--------------------------------------------------
 	textureHandle_ = TextureManager::Load("mario.jpg");
 
-	// マップチップフィールドの初期化
+	//--------------------------------------------------
+	// マップチップフィールド
+	//--------------------------------------------------
 	mapChipField_ = new MapChipField();
 	mapChipField_->LoadMapChipCsv("Resources/blocks.csv");
-	Vector3 playerposition = mapChipField_->GetMapChipPositionByIndex(5, 5);
+
+	//--------------------------------------------------
 	// プレイヤー生成
+	//--------------------------------------------------
+	Vector3 playerposition = mapChipField_->GetMapChipPositionByIndex(5, 5);
 	player_ = new Player();
 	player_->Initialize(model_, camera_, playerposition);
 	player_->SetMapChipField(mapChipField_);
-	// ブロック列の準備
-	// const uint32_t kBlockNumX = 20; // 要素数
-	// const float kBlockWidth = 2.0f; // ブロック1個分の横幅
-	/*worldTransformBlocks_.resize(kBlockNumX);*/
-	modelBlock_ = Model::CreateFromOBJ("block", true);
 
-	// スカイドーム
-	skydome_ = new Skydome();
-	skydomeModel_ = Model::CreateFromOBJ("skydome", true); // skydomeModel_ が指しているモデルに対して、Model クラス版の CreateFromOBJ を呼ぶ
-	skydome_->initialize(skydomeModel_, camera_);
-
-	// カメラコントローラーの初期化
-	cController_ = new CameraController();
-	cController_->Initialize(camera_); // カメラをゲームシーンに渡してる？
-	cController_->SetTarget(player_);  // プレイヤーをターゲットに設定
-	cController_->Reset();             // カメラの位置をプレイヤーに合わせてリセット
-
-	CameraController::Rect cameraArea = {12.0f, 100 - 12.0f, 6.0f, 6.0f}; // 移動範囲の指定
-	cController_->SetMovableArea(cameraArea);                             // カメラの移動可能範囲を設定
+	//--------------------------------------------------
+	// ブロック生成
+	//--------------------------------------------------
 	GenerateBlocks();
 
-	enemy_ = new Enemy;
-	enemyModel_ = Model::CreateFromOBJ("enemy", true); // エネミーモデル
-	Vector3 enemyPosition = mapChipField_->GetMapChipPositionByIndex(10, 2);
+	//--------------------------------------------------
+	// スカイドーム生成
+	//--------------------------------------------------
+	skydome_ = new Skydome();
+	skydome_->initialize(skydomeModel_, camera_);
+
+	//--------------------------------------------------
+	// カメラコントローラー
+	//--------------------------------------------------
+	cController_ = new CameraController();
+	cController_->Initialize(camera_);
+	cController_->SetTarget(player_);
+	cController_->Reset();
+
+	CameraController::Rect cameraArea = {12.0f, 100 - 12.0f, 6.0f, 6.0f};
+	cController_->SetMovableArea(cameraArea);
+
+	//--------------------------------------------------
+	// 敵生成
+	//--------------------------------------------------
+	Vector3 enemyPosition = mapChipField_->GetMapChipPositionByIndex(10, 10);
+	enemy_ = new Enemy();
 	enemy_->Initialize(enemyModel_, camera_, enemyPosition);
 }
+
 
 //--------------------------------------------------
 // 更新

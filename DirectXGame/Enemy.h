@@ -8,11 +8,17 @@ public:
 	void UpDate();
 
 	void Draw();
-	
+
 private:
 	KamataEngine::WorldTransform worldTransform_;
 
 	KamataEngine::Model* model_;
 
 	KamataEngine::Camera* camera_;
+
+	// 歩行の速さ
+	static inline const float kWalkSpeed = 0.01f;
+
+	// 速度
+	KamataEngine::Vector3 velocity_ = {};
 };
