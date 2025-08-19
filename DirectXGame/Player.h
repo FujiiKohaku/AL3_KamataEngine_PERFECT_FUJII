@@ -45,9 +45,9 @@ private:
 
 	Vector3 velocity_ = {};
 
-	static inline const float kAcceleration = 0.05f; // 加速度
+	static inline const float kAcceleration = 0.02f; // 加速度
 
-	static inline const float kAtteenuation = 0.3f; // 減衰率
+	static inline const float kAtteenuation = 0.05f; // 減衰率
 
 	static inline const float kMaxSpeed = 0.5f; // 最大速度
 	// 左右判別
@@ -104,9 +104,19 @@ private:
 	void CheckMapCollisionLeft(CollisionMapInfo& info);
 
 	void CheckMapCollisionRight(CollisionMapInfo& info);
-
+	// 02_08 スライド27枚目 壁接触している場合の処理
+	void UpdateOnWall(const CollisionMapInfo& info);
+	// 地面にいるか更新
+	void UpdateOnGround(const CollisionMapInfo& info);
 	// 角の位置を取得
 	Vector3 CornerPosition(const Vector3& center, Corner corner);
 	// 隙間ふふふ
 	static inline const float kBlank = 0.04f;
+	// 着地時の速度減衰率 // 着地時の減衰率
+	static inline const float kAttenuationLanding = 0.2f; // 着地時の減衰率
+
+	static inline const float kGroundSearchHeight = 0.06f;
+	// 着地時の速度減衰率
+	static inline const float kAttenuationWall = 0.2f;
+	static inline const float kLimitRunSpeed = 0.3f;
 };

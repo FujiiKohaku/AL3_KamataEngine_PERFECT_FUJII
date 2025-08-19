@@ -53,7 +53,7 @@ private:
 	static inline const float kinterpolationRate = 0.1f;
 
 	// 速度のバイアス（プレイヤーの進行方向に先行してカメラを動かす量）
-	static inline const float kVelocityBias = 30.0f;
+	static inline const float kVelocityBias = 20.0f;
 
 	// プレイヤーを画面内に収めるためのマージン
 	// → 左右: ±9.0f, 上下: ±5.0f
