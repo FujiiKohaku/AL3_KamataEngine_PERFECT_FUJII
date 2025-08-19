@@ -18,6 +18,7 @@ GameScene::~GameScene() {
 	delete mapChipField_;
 
 	delete cController_;
+	delete enemy_;
 
 	for (auto& worldTransformBlockLine : worldTransformBlocks_) {
 		for (auto& worldTransformBlock : worldTransformBlockLine) {
@@ -74,9 +75,14 @@ void GameScene::Initialize() {
 	cController_->SetTarget(player_);  // プレイヤーをターゲットに設定
 	cController_->Reset();             // カメラの位置をプレイヤーに合わせてリセット
 
-	CameraController::Rect cameraArea = {12.0f, 100 - 12.0f, 6.0f, 6.0f};//移動範囲の指定
-	cController_->SetMovableArea(cameraArea); // カメラの移動可能範囲を設定
+	CameraController::Rect cameraArea = {12.0f, 100 - 12.0f, 6.0f, 6.0f}; // 移動範囲の指定
+	cController_->SetMovableArea(cameraArea);                             // カメラの移動可能範囲を設定
 	GenerateBlocks();
+
+	enemy_ = new Enemy;
+	enemyModel_ = Model::CreateFromOBJ("enemy", true); // エネミーモデル
+	Vector3 enemyPosition = mapChipField_->GetMapChipPositionByIndex(10, 2);
+	enemy_->Initialize(enemyModel_, camera_, enemyPosition);
 }
 
 //--------------------------------------------------
@@ -87,7 +93,7 @@ void GameScene::Update() {
 	// デバッグカメラ切替（Debug時のみ）
 #ifdef _DEBUG
 	if (Input::GetInstance()->TriggerKey(DIK_C)) {
-		isDebugCameraActive_ = true;
+		isDebugCameraActive_ = !isDebugCameraActive_; // ←トグルにする
 	}
 #endif
 
@@ -99,11 +105,13 @@ void GameScene::Update() {
 		camera_->TransferMatrix(); // ビュープロジェクション行列の転送
 	} else {
 		camera_->UpdateMatrix();
+		cController_->Update(); // デバッグカメラのときは呼ばない
 	}
-
+	
 	// プレイヤー更新
 	player_->Update();
-
+	// エネミー更新
+	enemy_->UpDate();
 	// ブロックの更新
 	for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
 		for (WorldTransform*& worldTransformBlock : worldTransformBlockLine) {
@@ -118,7 +126,7 @@ void GameScene::Update() {
 
 	skydome_->UpDate(); // スカイドーム更新
 
-	cController_->Update(); // カメラコントローラーの更新
+
 }
 
 //--------------------------------------------------
@@ -133,6 +141,7 @@ void GameScene::Draw() {
 	// モデル描画（プレイヤー自身で描画）
 	// model_->Draw(worldtransform_, debugCamera_->GetCamera(), textureHandle_);
 	player_->Draw();
+	enemy_->Draw();
 
 	// スカイドーム描画
 	skydome_->Draw();

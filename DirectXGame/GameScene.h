@@ -1,12 +1,12 @@
 #pragma once
 #include "CameraController.h"
+#include "Enemy.h"
 #include "KamataEngine.h"
 #include "MapChipField.h"
 #include "Math.h"
 #include "Player.h"
 #include "Skydome.h"
 #include <vector>
-
 // ゲームシーン
 class GameScene {
 public:
@@ -25,7 +25,7 @@ private:
 	KamataEngine::Model* model_ = nullptr;
 	KamataEngine::Model* modelBlock_ = nullptr;
 	KamataEngine::Model* skydomeModel_ = nullptr;
-
+	KamataEngine::Model* enemyModel_ = nullptr;
 	// テクスチャ
 	uint32_t textureHandle_ = 0;
 
@@ -38,7 +38,7 @@ private:
 	// ===== ゲームオブジェクト =====
 	Player* player_ = nullptr;
 	Skydome* skydome_ = nullptr;
-
+	Enemy* enemy_ = nullptr;
 	// ブロック用ワールドトランスフォーム（インスタンスごとに所有）
 	std::vector<std::vector<WorldTransform*>> worldTransformBlocks_;
 
