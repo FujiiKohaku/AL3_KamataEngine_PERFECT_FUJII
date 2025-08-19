@@ -186,19 +186,14 @@ void Player::CheckMapCollisionUp(CollisionMapInfo& info) {
 
 	// 天井に当たった場合
 	if (hit) {
-		// 現在座標が壁の外か判定
-		MapChipField::IndexSet indexSetNow;
-		indexSetNow = mapChipField_->GetMapChipIndexSetByposition(worldTransform_.translation_ + Vector3(0,+kWidth / 2.0f, 0));
-		if (indexSetNow.yIndex != indexSet.yIndex) {
 
-			// めり込みを防ぐように移動量を修正
-			indexSet = mapChipField_->GetMapChipIndexSetByposition(worldTransform_.translation_ + Vector3(0, +kHeight / 2.0f, 0));
-			MapChipField::Rect rect = mapChipField_->GetRectByIndex(indexSet.xIndex, indexSet.yIndex);
-			info.move.y = std::max(0.0f, rect.bottom - worldTransform_.translation_.y - (kHeight / 2.0f + kBlank));
+		// めり込みを防ぐように移動量を修正
+		indexSet = mapChipField_->GetMapChipIndexSetByposition(worldTransform_.translation_ + Vector3(0, +kHeight / 2.0f, 0));
+		MapChipField::Rect rect = mapChipField_->GetRectByIndex(indexSet.xIndex, indexSet.yIndex);
+		info.move.y = std::max(0.0f, rect.bottom - worldTransform_.translation_.y - (kHeight / 2.0f + kBlank));
 
-			// 天井ヒットを記録
-			info.isHitCeiling = true;
-		}
+		// 天井ヒットを記録
+		info.isHitCeiling = true;
 	}
 }
 #pragma endregion
@@ -238,19 +233,14 @@ void Player::CheckMapCollisionDown(CollisionMapInfo& info) {
 	}
 
 	if (hit) {
-		// 現在座標座標が壁の外か判定
-		MapChipField::IndexSet indexSetNow;
-		indexSetNow = mapChipField_->GetMapChipIndexSetByposition(worldTransform_.translation_ + Vector3(0, -kHeight / 2.0f, 0));
-		if (indexSetNow.yIndex != indexSet.yIndex) {
 
-			// めり込みを排除する方向に移動量を設定する
-			indexSet = mapChipField_->GetMapChipIndexSetByposition(worldTransform_.translation_ + Vector3(0, -kHeight / 2.0f, 0));
-			// めり込む先ブロックの範囲矩形
-			MapChipField::Rect rect = mapChipField_->GetRectByIndex(indexSet.xIndex, indexSet.yIndex);
-			info.move.y = std::min(0.0f, rect.top - worldTransform_.translation_.y + (kHeight / 2.0f + kBlank));
-			// 地面にたったことを記録
-			info.isHitFloor = true;
-		}
+		// めり込みを排除する方向に移動量を設定する
+		indexSet = mapChipField_->GetMapChipIndexSetByposition(worldTransform_.translation_ + info.move + Vector3(0, -kHeight / 2.0f, 0));
+		// めり込む先ブロックの範囲矩形
+		MapChipField::Rect rect = mapChipField_->GetRectByIndex(indexSet.xIndex, indexSet.yIndex);
+		info.move.y = std::min(0.0f, rect.top - worldTransform_.translation_.y + (kHeight / 2.0f + kBlank));
+		// 地面にたったことを記録
+		info.isHitFloor = true;
 	}
 }
 
@@ -351,16 +341,12 @@ void Player::CheckMapCollisionRight(CollisionMapInfo& info) {
 
 	// ブロックにヒット？
 	if (hit) {
-		// 現在座標が壁の外か判定
-		MapChipField::IndexSet indexSetNow;
-		indexSetNow = mapChipField_->GetMapChipIndexSetByposition(worldTransform_.translation_ + Vector3(+kWidth / 2.0f, 0, 0));
-		if (indexSetNow.xIndex != indexSet.xIndex) {
-			// めり込みを排除する方向に移動量を設定する
-			indexSet = mapChipField_->GetMapChipIndexSetByposition(worldTransform_.translation_ + info.move + Vector3(+kWidth / 2.0f, 0, 0));
-			MapChipField::Rect rect = mapChipField_->GetRectByIndex(indexSet.xIndex, indexSet.yIndex);
-			info.move.x = std::max(0.0f, rect.left - worldTransform_.translation_.x - (kWidth / 2.0f + kBlank));
-			info.isHitWall = true;
-		}
+
+		// めり込みを排除する方向に移動量を設定する
+		indexSet = mapChipField_->GetMapChipIndexSetByposition(worldTransform_.translation_ + info.move + Vector3(+kWidth / 2.0f, 0, 0));
+		MapChipField::Rect rect = mapChipField_->GetRectByIndex(indexSet.xIndex, indexSet.yIndex);
+		info.move.x = std::max(0.0f, rect.left - worldTransform_.translation_.x - (kWidth / 2.0f + kBlank));
+		info.isHitWall = true;
 	}
 }
 
@@ -403,17 +389,12 @@ void Player::CheckMapCollisionLeft(CollisionMapInfo& info) {
 
 	// ブロックにヒット？
 	if (hit) {
-		// 現在座標が壁の外か判定
-		MapChipField::IndexSet indexSetNow;
-		indexSetNow = mapChipField_->GetMapChipIndexSetByposition(worldTransform_.translation_ + Vector3(-kWidth / 2.0f, 0, 0));
 
-		if (indexSetNow.xIndex != indexSet.xIndex) {
-			// めり込みを排除する方向に移動量を設定する
-			indexSet = mapChipField_->GetMapChipIndexSetByposition(worldTransform_.translation_ + info.move + Vector3(-kWidth / 2.0f, 0, 0));
-			MapChipField::Rect rect = mapChipField_->GetRectByIndex(indexSet.xIndex, indexSet.yIndex);
-			info.move.x = std::max(0.0f, rect.right - worldTransform_.translation_.x - (kWidth / 2.0f + kBlank));
-			info.isHitWall = true;
-		}
+		// めり込みを排除する方向に移動量を設定する
+		indexSet = mapChipField_->GetMapChipIndexSetByposition(worldTransform_.translation_ + info.move + Vector3(-kWidth / 2.0f, 0, 0));
+		MapChipField::Rect rect = mapChipField_->GetRectByIndex(indexSet.xIndex, indexSet.yIndex);
+		info.move.x = std::max(0.0f, rect.right - worldTransform_.translation_.x - (kWidth / 2.0f + kBlank));
+		info.isHitWall = true;
 	}
 }
 #pragma endregion
