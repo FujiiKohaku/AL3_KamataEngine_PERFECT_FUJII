@@ -33,7 +33,7 @@ GameScene::~GameScene() {
 void GameScene::Initialize() {
 
 	// 3Dモデル生成
-	model_ = Model::CreateFromOBJ("player", true);
+	model_ = Model::CreateFromOBJ("playermax", true);
 	modelBlock_ = KamataEngine::Model::Create();
 
 	// ワールドトランスフォーム初期化

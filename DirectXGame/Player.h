@@ -4,36 +4,57 @@
 #include "Math.h"
 #include <algorithm>
 #include <numbers>
+
 // 前方宣言
 class MapChipField;
+class Enemy; // 02_10 21枚目
 
-// 02_10 21枚目
-class Enemy;
-
+//==================================================
+// プレイヤークラス
+//==================================================
 class Player {
 public:
+	// コンストラクタ / デストラクタ
+	Player();
+	~Player();
+
 	// 初期化
 	void Initialize(KamataEngine::Model* model, KamataEngine::Camera* camera, const KamataEngine::Vector3& position);
-	// 更新
+
+	// 更新処理
 	void Update();
-	// 描画
+
+	// 描画処理
 	void Draw();
-	// コンストラクタ
-	Player();
-	// デストラクタ
-	~Player();
-	// getter(02_06スライド11枚目で追加)
+
+	//==================================================
+	// Getter / Setter
+	//==================================================
+	// ワールド変換を返す（描画などに利用）
 	const KamataEngine::WorldTransform& GetWorldTransform() const { return worldTransform_; }
 
-	// ベロシティのゲッター
+	// 現在の速度を返す
 	const KamataEngine::Vector3& GetVelocity() const { return velocity_; }
 
-	// 外部からポインタをセットするためのセッター
+	// マップチップフィールドを外部から設定
 	void SetMapChipField(MapChipField* mapChipField) { mapChipField_ = mapChipField; }
 
-	// 移動入力関数AL3_02_07スライド10枚目
+	// ワールド座標を取得（02_10 10枚目）
+	Vector3 GetWorldPosition();
+
+	// AABBを取得（02_10 13枚目）
+	AABB GetAABB();
+
+	// 敵との衝突応答（02_10 21枚目）
+	void OnCollision(const Enemy* enemy);
+
+	//==================================================
+	// 入力処理
+	//==================================================
+	// 移動入力処理（AL3_02_07 スライド10枚目）
 	void InputMove();
-	// 角 02_07スライド16枚目
+
+	// キャラクター矩形の角を示す列挙型（02_07 スライド16枚目）
 	enum Corner {
 		kRightBottom, // 右下
 		kLeftBottom,  // 左下
@@ -41,63 +62,6 @@ public:
 		kLeftTop,     // 左上
 		kNumCorner    // 要素数
 	};
-	// 02_10 10枚目 ワールド座標を取得
-	Vector3 GetWorldPosition();
-
-	// 02_10 13枚目
-	AABB GetAABB();
-
-	// 02_10 21枚目 衝突応答
-	void OnCollision(const Enemy* enemy);
-
-private: // C++ではメンバ変数は特別な理由がなければprivateにする
-	// ワールド変換データ
-	KamataEngine::WorldTransform worldTransform_;
-	// モデル
-	KamataEngine::Model* model_ = nullptr;
-	// テクスチャハンドル
-	uint32_t textureHandle_ = 0u;
-	// カメラ
-	KamataEngine::Camera* camera_ = nullptr;
-	// 速度
-	KamataEngine::Vector3 velocity_ = {};
-
-	static inline float kAccelaration_ = 0.01f;
-
-	static inline float kAttenuation = 0.05f;
-
-	static inline float kLimitRunSpeed = 0.2f;
-
-	// 左右
-	enum class LRDorection {
-		kRight,
-		kLeft,
-	};
-
-	LRDorection lrDirection_ = LRDorection::kRight;
-	// 旋回開始時の角度
-	float turnFirstRotationY_ = 0.0f;
-	// 旋回タイマー
-	float turnTimer_ = 0.0f;
-	// 旋回時間＜秒＞
-	static inline const float kTimeTrun = 0.3f;
-
-	// 接地状態フラグ
-	bool onGround_ = true;
-
-	// 重力加速度（下方向）
-	static inline const float kGravityAcceleration = 0.98f;
-	// 最大落下速度(下方向)
-	static inline const float kLimitFallSpeed = 0.5f;
-	// ジャンプ初速(上方向)
-	static inline const float kJumpAcceleration = 20.0f;
-	// マップチップフィールドAL3_02_07
-	MapChipField* mapChipField_ = nullptr;
-
-	// キャラクターの当たり判定サイズAL3_02_07
-	static inline const float kWidth = 0.8f;
-	static inline const float kHeight = 0.8f;
-	// マップとの当たり判定情報AL3_02_07p12
 	struct CollisionMapInfo {
 		bool isHitCeiling = false;
 		bool isHitLanding = false;
@@ -105,31 +69,69 @@ private: // C++ではメンバ変数は特別な理由がなければprivateに�
 		Vector3 move;
 	};
 
-	// map衝突判定AL3_02_07 p13
+private:
+	//==================================================
+	// 内部関数
+	//==================================================
+	// マップとの衝突判定処理（AL3_02_07 p13）
 	void CheckMapCollision(CollisionMapInfo& info);
-	// 02_07 スライド14枚目
 	void CheckMapCollisionUp(CollisionMapInfo& info);
 	void CheckMapCollisionDown(CollisionMapInfo& info);
 	void CheckMapCollisionRight(CollisionMapInfo& info);
 	void CheckMapCollisionLeft(CollisionMapInfo& info);
 
-	// 角を取る関数AL3_02_07_page17
+	// キャラクター矩形の角座標を算出（AL3_02_07 page17）
 	Vector3 CornerPosition(const Vector3& center, Corner corner);
-	// AL3_02_07_page_34
-	static inline const float kBlank = 0.04f;
 
-	// 接地状態の切り替え処理02_08_page_14
+	// 接地状態の更新（02_08 page14）
 	void UpdateOnGround(const CollisionMapInfo& info);
 
-	// 接地時の速度減衰率
-	static inline const float kAttenuationLanding = 0.0f;
-
-	// 02_08_page_25着地時の速度減衰率
-	static inline const float kAttenuationWall = 0.2f;
-
-	// 02_08_page_21 微小な数値
-	static inline const float kGroundSearchHeight = 0.06f;
-
-	// 02_08_page_27　壁と接触している場合の処理
+	// 壁衝突時の処理（02_08 page27）
 	void UpdateOnWall(const CollisionMapInfo& info);
+
+
+	//==================================================
+	// メンバ変数
+	//==================================================
+	// Transform / Rendering
+	KamataEngine::WorldTransform worldTransform_;
+	KamataEngine::Model* model_ = nullptr;
+	uint32_t textureHandle_ = 0u;
+	KamataEngine::Camera* camera_ = nullptr;
+
+	// 物理
+	KamataEngine::Vector3 velocity_ = {};  // 現在の速度
+	bool onGround_ = true;                 // 接地フラグ
+	MapChipField* mapChipField_ = nullptr; // マップフィールド
+
+
+	//==================================================
+	// キャラ挙動用パラメータ
+	//==================================================
+	// 移動パラメータ
+	static inline float kAccelaration_ = 0.01f; // 加速度
+	static inline float kAttenuation = 0.05f;   // 減衰率
+	static inline float kLimitRunSpeed = 0.2f;  // 最大走行速度
+
+	// ジャンプ / 重力
+	static inline const float kGravityAcceleration = 0.98f; // 重力加速度
+	static inline const float kLimitFallSpeed = 0.5f;       // 最大落下速度
+	static inline const float kJumpAcceleration = 20.0f;    // ジャンプ初速
+
+	// キャラクター当たり判定サイズ
+	static inline const float kWidth = 0.8f;  // 横幅
+	static inline const float kHeight = 1.5f; // 高さ
+	static inline const float kBlank = 0.04f; // 判定の余白
+
+	// 接地 / 壁パラメータ
+	static inline const float kAttenuationLanding = 0.0f;  // 着地時減衰
+	static inline const float kAttenuationWall = 0.2f;     // 壁接触時減衰
+	static inline const float kGroundSearchHeight = 0.06f; // 微小高さ
+
+	// 旋回関連
+	enum class LRDorection { kRight, kLeft };
+	LRDorection lrDirection_ = LRDorection::kRight;
+	float turnFirstRotationY_ = 0.0f;           // 旋回開始角度
+	float turnTimer_ = 0.0f;                    // 旋回タイマー
+	static inline const float kTimeTrun = 0.3f; // 旋回にかける時間（秒）
 };
