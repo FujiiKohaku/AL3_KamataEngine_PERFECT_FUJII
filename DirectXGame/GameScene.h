@@ -25,6 +25,7 @@ private:
 	// ===== リソース =====
 	// モデル
 	KamataEngine::Model* model_ = nullptr;
+	KamataEngine::Model* modelRolling = nullptr;
 	KamataEngine::Model* modelBlock_ = nullptr;
 	KamataEngine::Model* skydomeModel_ = nullptr;
 	KamataEngine::Model* enemyModel_ = nullptr;

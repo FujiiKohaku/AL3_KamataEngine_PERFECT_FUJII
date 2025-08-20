@@ -19,7 +19,7 @@ public:
 	~Player();
 
 	// 初期化
-	void Initialize(KamataEngine::Model* model, KamataEngine::Camera* camera, const KamataEngine::Vector3& position);
+	void Initialize(KamataEngine::Model* modelNormal, KamataEngine::Model* modelRolling, KamataEngine::Camera* camera, const KamataEngine::Vector3& position);
 
 	// 更新処理
 	void Update();
@@ -68,6 +68,8 @@ public:
 		bool isHitWall = false;
 		Vector3 move;
 	};
+	enum class PlayerState { Normal, Rolling };
+	PlayerState state_ = PlayerState::Normal;
 
 private:
 	//==================================================
@@ -89,12 +91,14 @@ private:
 	// 壁衝突時の処理（02_08 page27）
 	void UpdateOnWall(const CollisionMapInfo& info);
 
+	void UpdateState();
 	//==================================================
 	// メンバ変数
 	//==================================================
 	// Transform / Rendering
 	KamataEngine::WorldTransform worldTransform_;
 	KamataEngine::Model* model_ = nullptr;
+	KamataEngine::Model* modelRollling_ = nullptr;
 	uint32_t textureHandle_ = 0u;
 	KamataEngine::Camera* camera_ = nullptr;
 
@@ -116,9 +120,9 @@ private:
 	static inline const float kLimitFallSpeed = 0.5f;       // 最大落下速度
 	static inline const float kJumpAcceleration = 20.0f;    // ジャンプ初速
 
-	// キャラクター当たり判定サイズ
-	static inline const float kWidth = 0.8f;  // 横幅
-	static inline const float kHeight = 1.5f; // 高さ
+	// プレイヤー
+	float kWidth = 0.8f;                      // 横幅
+	float kHeight = 1.5f;                     // 高さ
 	static inline const float kBlank = 0.04f; // 判定の余白
 
 	// 接地 / 壁パラメータ

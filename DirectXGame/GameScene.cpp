@@ -40,7 +40,8 @@ void GameScene::Initialize() {
 	//--------------------------------------------------
 	// モデル生成
 	//--------------------------------------------------
-	model_ = Model::CreateFromOBJ("playermax", true);      // プレイヤーモデル
+	model_ = Model::CreateFromOBJ("playermax", true); // プレイヤーモデル
+	modelRolling = Model::CreateFromOBJ("roll", true);
 	modelBlock_ = Model::CreateFromOBJ("block", true);     // ブロックモデル
 	skydomeModel_ = Model::CreateFromOBJ("skydome", true); // スカイドームモデル
 	enemyModel_ = Model::CreateFromOBJ("enemy", true);     // エネミーモデル
@@ -73,7 +74,7 @@ void GameScene::Initialize() {
 	//--------------------------------------------------
 	Vector3 playerposition = mapChipField_->GetMapChipPositionByIndex(5, 5);
 	player_ = new Player();
-	player_->Initialize(model_, camera_, playerposition);
+	player_->Initialize(model_,modelRolling, camera_, playerposition);
 	player_->SetMapChipField(mapChipField_);
 
 	//--------------------------------------------------

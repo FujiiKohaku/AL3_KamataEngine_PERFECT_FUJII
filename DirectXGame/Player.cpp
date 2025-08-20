@@ -14,12 +14,14 @@ Player::~Player() {}
 //==================================================
 // 初期化処理
 //==================================================
-void Player::Initialize(KamataEngine::Model* model, KamataEngine::Camera* camera, const KamataEngine::Vector3& position) {
+void Player::Initialize(KamataEngine::Model* model, KamataEngine::Model* modelRollling, KamataEngine::Camera* camera, const KamataEngine::Vector3& position) {
 	assert(model);
 
 	model_ = model;
+
 	camera_ = camera;
 
+	modelRollling_ = modelRollling;
 	// ワールド変換の初期化
 	worldTransform_.Initialize();
 	worldTransform_.translation_ = position;
@@ -35,12 +37,12 @@ void Player::Initialize(KamataEngine::Model* model, KamataEngine::Camera* camera
 void Player::InputMove() {
 	if (onGround_) {
 		// 左右移動
-		if (Input::GetInstance()->PushKey(DIK_RIGHT) || Input::GetInstance()->PushKey(DIK_LEFT)) {
+		if (Input::GetInstance()->PushKey(DIK_A) || Input::GetInstance()->PushKey(DIK_D)) {
 
 			Vector3 acceleration = {};
 
 			// 右入力
-			if (Input::GetInstance()->PushKey(DIK_RIGHT)) {
+			if (Input::GetInstance()->PushKey(DIK_D)) {
 				if (velocity_.x < 0.0f) {
 					velocity_.x *= (1.0f - kAttenuation); // 急ブレーキ
 				}
@@ -52,7 +54,7 @@ void Player::InputMove() {
 				acceleration.x += kAccelaration_;
 
 				// 左入力
-			} else if (Input::GetInstance()->PushKey(DIK_LEFT)) {
+			} else if (Input::GetInstance()->PushKey(DIK_A)) {
 				if (velocity_.x > 0.0f) {
 					velocity_.x *= (1.0f - kAttenuation); // 急ブレーキ
 				}
@@ -73,7 +75,7 @@ void Player::InputMove() {
 		}
 
 		// ジャンプ
-		if (Input::GetInstance()->PushKey(DIK_UP)) {
+		if (Input::GetInstance()->PushKey(DIK_SPACE)) {
 			velocity_ += Vector3(0, kJumpAcceleration / 60.0f, 0);
 		}
 
@@ -315,6 +317,8 @@ void Player::UpdateOnWall(const CollisionMapInfo& info) {
 void Player::Update() {
 	InputMove();
 
+	UpdateState();
+
 	CollisionMapInfo collisionMapInfo;
 	collisionMapInfo.move = velocity_;
 
@@ -348,7 +352,13 @@ void Player::Update() {
 //==================================================
 // 描画処理
 //==================================================
-void Player::Draw() { model_->Draw(worldTransform_, *camera_); }
+void Player::Draw() {
+	if (state_ == PlayerState::Rolling) {
+		modelRollling_->Draw(worldTransform_, *camera_);
+	} else {
+		model_->Draw(worldTransform_, *camera_);
+	}
+}
 
 //==================================================
 // ユーティリティ
@@ -368,11 +378,64 @@ void Player::OnCollision(const Enemy* enemy) {
 }
 
 KamataEngine::Vector3 Player::GetWorldPosition() {
-	//ワールド座標を入れる変数
+	// ワールド座標を入れる変数
 	KamataEngine::Vector3 worldPos;
-	//ワールド行列の平行移動成分を取得
+	// ワールド行列の平行移動成分を取得
 	worldPos.x = worldTransform_.matWorld_.m[3][0];
 	worldPos.y = worldTransform_.matWorld_.m[3][1];
 	worldPos.z = worldTransform_.matWorld_.m[3][2];
 	return worldPos;
+}
+
+void Player::UpdateState() {
+	// --- 入力で状態遷移 ---
+	if (Input::GetInstance()->TriggerKey(DIK_O)) {
+		if (state_ == PlayerState::Normal) {
+			// 通常 → ローリング
+			state_ = PlayerState::Rolling;
+		} else {
+			// ローリング → 通常に戻る前にチェック
+			float nextHeight = 1.5f; // ノーマルの高さ
+			Vector3 topPos = worldTransform_.translation_ + Vector3(0, nextHeight / 2.0f, 0);
+
+			auto index = mapChipField_->GetMapChipIndexSetByposition(topPos);
+			auto mapChip = mapChipField_->GetMapChipTypeByIndex(index.xIndex, index.yIndex);
+
+			if (mapChip != MapChipType::kBlock) {
+				state_ = PlayerState::Normal; // 戻せる
+			}
+		}
+	}
+
+	// --- 高さを設定 ---
+	if (state_ == PlayerState::Rolling) {
+		kHeight = 0.8f;
+	} else {
+		kHeight = 1.5f;
+	}
+
+	// --- 下の判定（地面に埋まらないように補正） ---
+	if (state_ == PlayerState::Normal) {
+		Vector3 bottomPos = worldTransform_.translation_ + Vector3(0, -kHeight / 2.0f, 0);
+		auto index = mapChipField_->GetMapChipIndexSetByposition(bottomPos);
+		auto mapChip = mapChipField_->GetMapChipTypeByIndex(index.xIndex, index.yIndex);
+
+		if (mapChip == MapChipType::kBlock) {
+			auto rect = mapChipField_->GetRectByIndex(index.xIndex, index.yIndex);
+			worldTransform_.translation_.y = rect.top + kHeight / 2.0f + kBlank;
+		}
+	}
+
+	// --- 上の判定（天井にぶつかったら補正） ---
+	if (state_ == PlayerState::Normal) {
+		Vector3 topPos = worldTransform_.translation_ + Vector3(0, +kHeight / 2.0f, 0);
+		auto index = mapChipField_->GetMapChipIndexSetByposition(topPos);
+		auto mapChip = mapChipField_->GetMapChipTypeByIndex(index.xIndex, index.yIndex);
+
+		if (mapChip == MapChipType::kBlock) {
+			auto rect = mapChipField_->GetRectByIndex(index.xIndex, index.yIndex);
+			worldTransform_.translation_.y = rect.bottom - kHeight / 2.0f - kBlank;
+			velocity_.y = 0.0f; // 天井にぶつかったのでリセット
+		}
+	}
 }
