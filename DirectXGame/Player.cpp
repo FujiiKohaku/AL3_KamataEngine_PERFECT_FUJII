@@ -83,7 +83,7 @@ void Player::InputMove() {
 		velocity_.y = std::max(velocity_.y, -kLimitFallSpeed); // 落下速度制限
 	}
 }
-#pragma endregion 
+#pragma endregion
 
 //==================================================
 // 四隅の座標を返す
@@ -353,7 +353,6 @@ void Player::Draw() { model_->Draw(worldTransform_, *camera_); }
 //==================================================
 // ユーティリティ
 //==================================================
-Vector3 Player::GetWorldPosition() { return {worldTransform_.matWorld_.m[3][0], worldTransform_.matWorld_.m[3][1], worldTransform_.matWorld_.m[3][2]}; }
 
 AABB Player::GetAABB() {
 	Vector3 worldPos = GetWorldPosition();
@@ -366,4 +365,14 @@ AABB Player::GetAABB() {
 void Player::OnCollision(const Enemy* enemy) {
 	(void)enemy;
 	velocity_ += Vector3(0, kJumpAcceleration / 60.0f, 0); // 仮処理
+}
+
+KamataEngine::Vector3 Player::GetWorldPosition() {
+	//ワールド座標を入れる変数
+	KamataEngine::Vector3 worldPos;
+	//ワールド行列の平行移動成分を取得
+	worldPos.x = worldTransform_.matWorld_.m[3][0];
+	worldPos.y = worldTransform_.matWorld_.m[3][1];
+	worldPos.z = worldTransform_.matWorld_.m[3][2];
+	return worldPos;
 }

@@ -89,7 +89,6 @@ private:
 	// 壁衝突時の処理（02_08 page27）
 	void UpdateOnWall(const CollisionMapInfo& info);
 
-
 	//==================================================
 	// メンバ変数
 	//==================================================
@@ -103,7 +102,6 @@ private:
 	KamataEngine::Vector3 velocity_ = {};  // 現在の速度
 	bool onGround_ = true;                 // 接地フラグ
 	MapChipField* mapChipField_ = nullptr; // マップフィールド
-
 
 	//==================================================
 	// キャラ挙動用パラメータ

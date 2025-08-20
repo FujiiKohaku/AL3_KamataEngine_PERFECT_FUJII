@@ -19,6 +19,8 @@ public:
 
 	void GenerateBlocks();
 
+	void CheckAllCollisions();
+
 private:
 	// ===== リソース =====
 	// モデル
@@ -38,7 +40,7 @@ private:
 	// ===== ゲームオブジェクト =====
 	Player* player_ = nullptr;
 	Skydome* skydome_ = nullptr;
-	Enemy* enemy_ = nullptr;
+	std::list<Enemy*> enemies_;
 	// ブロック用ワールドトランスフォーム（インスタンスごとに所有）
 	std::vector<std::vector<WorldTransform*>> worldTransformBlocks_;
 
