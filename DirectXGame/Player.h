@@ -48,6 +48,7 @@ public:
 	// 敵との衝突応答（02_10 21枚目）
 	void OnCollision(const Enemy* enemy);
 
+	Vector3 GetPosition() const { return worldTransform_.translation_; }
 	//==================================================
 	// 入力処理
 	//==================================================

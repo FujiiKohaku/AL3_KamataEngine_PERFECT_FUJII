@@ -109,6 +109,7 @@ void GameScene::Initialize() {
 		newEnemy->Initialize(enemyModel_, camera_, enemyPosition);                        // 敵を初期化（モデル・カメラ・位置をセット）
 		enemies_.push_back(newEnemy);                                                     // 敵リスト(enemies_)に入れる
 	}
+
 }
 
 //--------------------------------------------------

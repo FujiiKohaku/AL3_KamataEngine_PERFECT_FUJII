@@ -1,5 +1,6 @@
 #pragma once
 #include "CameraController.h"
+#include "ChunkManager.h"
 #include "Enemy.h"
 #include "KamataEngine.h"
 #include "MapChipField.h"
@@ -54,4 +55,7 @@ private:
 	//====カメラコントローラー====
 
 	CameraController* cController_ = nullptr;
+
+	//マップチップのチャンク
+	std::unique_ptr<ChunkManager> chunkManager_;
 };
