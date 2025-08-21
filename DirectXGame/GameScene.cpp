@@ -6,8 +6,8 @@ using namespace KamataEngine;
 // デストラクタ
 //--------------------------------------------------
 GameScene::~GameScene() {
-	delete player_;  // 先にプレイヤーを消す
-	delete skydome_; // 先にスカイドームを消す
+	delete player_;
+	delete skydome_;
 
 	delete model_;
 	delete modelBlock_;
@@ -19,13 +19,16 @@ GameScene::~GameScene() {
 
 	delete cController_;
 
+	delete deathParticles_;
+	delete dethParticleModel;
+
 	for (Enemy* enemy : enemies_) {
 		delete enemy;
 	}
 	enemies_.clear(); // 中のポインタも全部消して空っぽにする
 
-	for (std::vector<WorldTransform*>& worldTransformBkockLine : worldTransformBlocks_) {
-		for (WorldTransform* worldTransformBlock : worldTransformBkockLine) {
+	for (auto& worldTransformBlockLine : worldTransformBlocks_) {
+		for (auto& worldTransformBlock : worldTransformBlockLine) {
 			delete worldTransformBlock;
 		}
 	}
@@ -67,14 +70,14 @@ void GameScene::Initialize() {
 	// マップチップフィールド
 	//--------------------------------------------------
 	mapChipField_ = new MapChipField();
-	mapChipField_->LoadMapChipCsv("Resources/blocks.csv");
+	mapChipField_->LoadMapChipCsv("Resources/floor.csv");
 
 	//--------------------------------------------------
 	// プレイヤー生成
 	//--------------------------------------------------
-	Vector3 playerposition = mapChipField_->GetMapChipPositionByIndex(5, 5);
+	Vector3 playerposition = mapChipField_->GetMapChipPositionByIndex(10, 10);
 	player_ = new Player();
-	player_->Initialize(model_,modelRolling, camera_, playerposition);
+	player_->Initialize(model_, modelRolling, camera_, playerposition);
 	player_->SetMapChipField(mapChipField_);
 
 	//--------------------------------------------------
@@ -109,7 +112,10 @@ void GameScene::Initialize() {
 		newEnemy->Initialize(enemyModel_, camera_, enemyPosition);                        // 敵を初期化（モデル・カメラ・位置をセット）
 		enemies_.push_back(newEnemy);                                                     // 敵リスト(enemies_)に入れる
 	}
-
+	deathParticles_ = new DeathParticles;
+	
+	deathParticles_ = new DeathParticles;
+	dethParticleModel = Model::CreateFromOBJ("deathParticle");
 }
 
 //--------------------------------------------------
@@ -155,6 +161,9 @@ void GameScene::Update() {
 	}
 
 	skydome_->UpDate(); // スカイドーム更新
+	if (deathParticles_) {
+		deathParticles_->Update();
+	}
 	CheckAllCollisions();
 }
 
@@ -184,6 +193,9 @@ void GameScene::Draw() {
 
 			modelBlock_->Draw(*worldTransformBlock, *camera_, nullptr);
 		}
+	}
+	if (deathParticles_) {
+		deathParticles_->Draw();
 	}
 	Model::PostDraw();
 }

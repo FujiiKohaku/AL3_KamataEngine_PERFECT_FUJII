@@ -1,6 +1,6 @@
 #pragma once
 #include "CameraController.h"
-#include "ChunkManager.h"
+#include "DeathParticles.h"
 #include "Enemy.h"
 #include "KamataEngine.h"
 #include "MapChipField.h"
@@ -19,7 +19,7 @@ public:
 	void Draw();
 
 	void GenerateBlocks();
-
+	void GenerateBlocks2();
 	void CheckAllCollisions();
 
 private:
@@ -56,6 +56,8 @@ private:
 
 	CameraController* cController_ = nullptr;
 
-	//マップチップのチャンク
-	std::unique_ptr<ChunkManager> chunkManager_;
+	// 02_11_page_15
+	DeathParticles* deathParticles_ = nullptr;
+	// 02_11_page_16
+	Model* dethParticleModel = nullptr;
 };
