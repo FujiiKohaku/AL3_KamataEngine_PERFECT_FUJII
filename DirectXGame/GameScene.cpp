@@ -24,8 +24,8 @@ GameScene::~GameScene() {
 	}
 	enemies_.clear(); // 中のポインタも全部消して空っぽにする
 
-	for (auto& worldTransformBlockLine : worldTransformBlocks_) {
-		for (auto& worldTransformBlock : worldTransformBlockLine) {
+	for (std::vector<WorldTransform*>& worldTransformBkockLine : worldTransformBlocks_) {
+		for (WorldTransform* worldTransformBlock : worldTransformBkockLine) {
 			delete worldTransformBlock;
 		}
 	}
