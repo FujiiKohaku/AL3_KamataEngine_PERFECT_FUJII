@@ -29,7 +29,7 @@ void Player::Initialize(KamataEngine::Model* model, KamataEngine::Model* modelRo
 	// 初期向き：右向き
 	worldTransform_.rotation_.y = std::numbers::pi_v<float> / 2.0f;
 
-	dustModel_ = Model::CreateFromOBJ("block", true);
+	dustModel_ = Model::CreateFromOBJ("particle", true);
 
 	dust_.Initialize(dustModel_, camera_);
 }
@@ -79,7 +79,7 @@ void Player::InputMove() {
 		}
 
 		// ジャンプ
-		if (Input::GetInstance()->PushKey(DIK_W)) {
+		if (Input::GetInstance()->PushKey(DIK_SPACE)) {
 			velocity_ += Vector3(0, kJumpAcceleration / 60.0f, 0);
 		}
 

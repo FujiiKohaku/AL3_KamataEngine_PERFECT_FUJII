@@ -187,7 +187,7 @@ case Phase::kReady: {
 			enemy->UpDate();
 
 #ifdef _DEBUG
-		if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
+		if (Input::GetInstance()->TriggerKey(DIK_G)) {
 			isDebugCameraActive_ = !isDebugCameraActive_;
 		}
 #endif
