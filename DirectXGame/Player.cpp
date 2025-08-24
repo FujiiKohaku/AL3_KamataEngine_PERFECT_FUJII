@@ -28,6 +28,10 @@ void Player::Initialize(KamataEngine::Model* model, KamataEngine::Model* modelRo
 
 	// 初期向き：右向き
 	worldTransform_.rotation_.y = std::numbers::pi_v<float> / 2.0f;
+
+	dustModel_ = Model::CreateFromOBJ("block", true);
+
+	dust_.Initialize(dustModel_, camera_);
 }
 
 #pragma region 入力処理ジャンプ関数化
@@ -318,6 +322,20 @@ void Player::Update() {
 	InputMove();
 
 	UpdateState();
+	// 砂ぼこり制御
+	if (onGround_ && fabs(velocity_.x) > 0.1f) {
+		dustEmitTimer_ += 1.0f / 60.0f; // 経過時間をカウント
+		if (dustEmitTimer_ >= 0.1f) {   // 0.1秒ごとに発生
+			Vector3 footPos = worldTransform_.translation_ + Vector3(0, -kHeight / 2.0f, 0);
+			dust_.Emit(footPos);
+			dustEmitTimer_ = 0.0f; // タイマーリセット
+		}
+	} else {
+		// 動いてない時はタイマーリセット（止まった瞬間にEmitしないため）
+		dustEmitTimer_ = 0.0f;
+	}
+
+	dust_.Update();
 
 	CollisionMapInfo collisionMapInfo;
 	collisionMapInfo.move = velocity_;
@@ -358,6 +376,7 @@ void Player::Draw() {
 	} else {
 		model_->Draw(worldTransform_, *camera_);
 	}
+	dust_.Draw();
 }
 
 //==================================================

@@ -108,6 +108,7 @@
   <ItemGroup>
     <ClCompile Include="CameraController.cpp" />
     <ClCompile Include="DeathParticles.cpp" />
+    <ClCompile Include="DustParticles.cpp" />
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="Fade.cpp" />
     <ClCompile Include="GameOverScene.cpp" />
@@ -197,6 +198,7 @@
   <ItemGroup>
     <ClInclude Include="CameraController.h" />
     <ClInclude Include="DeathParticles.h" />
+    <ClInclude Include="DustParticles.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="Fade.h" />
     <ClInclude Include="GameOverScene.h" />

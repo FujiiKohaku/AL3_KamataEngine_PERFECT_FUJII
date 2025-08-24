@@ -1,4 +1,5 @@
 #pragma once
+#include "DustParticles.h"
 #include "KamataEngine.h"
 #include "MapChipField.h"
 #include "Math.h"
@@ -140,4 +141,10 @@ private:
 	static inline const float kTimeTrun = 0.3f; // 旋回にかける時間（秒）
 
 	bool isDead_ = false;
+
+	DustParticles dust_;
+
+	Model* dustModel_;
+
+	float dustEmitTimer_;
 };
