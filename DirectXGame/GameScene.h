@@ -2,12 +2,15 @@
 #include "CameraController.h"
 #include "DeathParticles.h"
 #include "Enemy.h"
+#include "Fade.h"
 #include "KamataEngine.h"
 #include "MapChipField.h"
 #include "Math.h"
 #include "Player.h"
 #include "Skydome.h"
+#include <list>
 #include <vector>
+
 // ゲームシーン
 class GameScene {
 public:
@@ -19,8 +22,9 @@ public:
 	void Draw();
 
 	void GenerateBlocks();
-	void GenerateBlocks2();
 	void CheckAllCollisions();
+
+	bool IsFinished() const { return finished_; }
 
 private:
 	// ===== リソース =====
@@ -30,12 +34,21 @@ private:
 	KamataEngine::Model* modelBlock_ = nullptr;
 	KamataEngine::Model* skydomeModel_ = nullptr;
 	KamataEngine::Model* enemyModel_ = nullptr;
+	KamataEngine::Model* dethParticleModel = nullptr;
+
+	// Ready / Go!! モデル
+	KamataEngine::Model* readyModel_ = nullptr;
+	KamataEngine::Model* goModel_ = nullptr;
+
 	// テクスチャ
 	uint32_t textureHandle_ = 0;
 
 	// ===== 変換・カメラ =====
 	KamataEngine::WorldTransform worldtransform_;
-	KamataEngine::WorldTransform worldTransformSkydome_; // ← 名前空間を明示
+	KamataEngine::WorldTransform worldTransformSkydome_;
+	KamataEngine::WorldTransform worldTransformReady_;
+	KamataEngine::WorldTransform worldTransformGo_;
+
 	KamataEngine::Camera* camera_ = nullptr;
 	KamataEngine::DebugCamera* debugCamera_ = nullptr;
 
@@ -43,21 +56,35 @@ private:
 	Player* player_ = nullptr;
 	Skydome* skydome_ = nullptr;
 	std::list<Enemy*> enemies_;
+
 	// ブロック用ワールドトランスフォーム（インスタンスごとに所有）
 	std::vector<std::vector<WorldTransform*>> worldTransformBlocks_;
 
 	// ===== フラグ =====
 	bool isDebugCameraActive_ = false;
 
-	//===== マップチップフィールド =====
-	MapChipField* mapChipField_; // マップチップフィールド
+	// ===== マップチップフィールド =====
+	MapChipField* mapChipField_ = nullptr;
 
-	//====カメラコントローラー====
-
+	// ===== カメラコントローラー =====
 	CameraController* cController_ = nullptr;
 
-	// 02_11_page_15
+	// ===== デス演出 =====
 	DeathParticles* deathParticles_ = nullptr;
-	// 02_11_page_16
-	Model* dethParticleModel = nullptr;
+
+	// ===== フェーズ管理 =====
+	enum class Phase {
+		kFadeIn,
+		kReady, // READY-GO!! 演出
+		kPlay,
+		kDeath,
+		kFadeOut,
+	};
+	Phase phase_ = Phase::kFadeIn;
+
+	float readyTimer_ = 0.0f; // READY-GO!! 用タイマー
+
+	void ChangePhese();
+	bool finished_ = false;
+	Fade* fade_ = nullptr;
 };

@@ -75,7 +75,7 @@ void Player::InputMove() {
 		}
 
 		// ジャンプ
-		if (Input::GetInstance()->PushKey(DIK_SPACE)) {
+		if (Input::GetInstance()->PushKey(DIK_W)) {
 			velocity_ += Vector3(0, kJumpAcceleration / 60.0f, 0);
 		}
 
@@ -374,7 +374,7 @@ AABB Player::GetAABB() {
 
 void Player::OnCollision(const Enemy* enemy) {
 	(void)enemy;
-	velocity_ += Vector3(0, kJumpAcceleration / 60.0f, 0); // 仮処理
+	isDead_ = true;
 }
 
 KamataEngine::Vector3 Player::GetWorldPosition() {

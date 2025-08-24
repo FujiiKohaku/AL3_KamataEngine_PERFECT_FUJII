@@ -3,8 +3,8 @@
 #include "MapChipField.h"
 #include "Math.h"
 #include <algorithm>
+#include <array>
 #include <numbers>
-
 // 前方宣言
 class MapChipField;
 class Enemy; // 02_10 21枚目
@@ -71,6 +71,7 @@ public:
 	};
 	enum class PlayerState { Normal, Rolling };
 	PlayerState state_ = PlayerState::Normal;
+	bool IsDead() const { return isDead_; }
 
 private:
 	//==================================================
@@ -137,4 +138,6 @@ private:
 	float turnFirstRotationY_ = 0.0f;           // 旋回開始角度
 	float turnTimer_ = 0.0f;                    // 旋回タイマー
 	static inline const float kTimeTrun = 0.3f; // 旋回にかける時間（秒）
+
+	bool isDead_ = false;
 };

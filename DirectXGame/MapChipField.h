@@ -52,7 +52,7 @@ private:
 	static inline const float kBlockHeight = 1.0f;
 	// 1ブロックのサイズ
 	static inline const uint32_t kNumBlockVirtical = 20;
-	static inline const uint32_t kNumBlockHorizontal = 100;
+	static inline const uint32_t kNumBlockHorizontal = 200;
 	// 二次元配列の構造体の変数
 	MapChipData mapChipData_;
 
