@@ -319,51 +319,61 @@ void Player::UpdateOnWall(const CollisionMapInfo& info) {
 // 更新処理
 //==================================================
 void Player::Update() {
-	InputMove();
+	//==================================================
+	// 状態ごとの更新
+	//==================================================
+	if (state_ == PlayerState::Attack) {
+		UpdateAttack(); // 攻撃中
+	} else {
+		InputMove();   // 移動・ジャンプ入力
+		UpdateState(); // 状態遷移チェック（Normal⇔Rolling⇔Attack）
+	}
 
-	UpdateState();
-	// 砂ぼこり制御
+	//==================================================
+	// パーティクル（砂ぼこり）
+	//==================================================
 	if (onGround_ && fabs(velocity_.x) > 0.1f) {
-		dustEmitTimer_ += 1.0f / 60.0f; // 経過時間をカウント
+		dustEmitTimer_ += 1.0f / 60.0f; // 経過時間を加算
 		if (dustEmitTimer_ >= 0.1f) {   // 0.1秒ごとに発生
 			Vector3 footPos = worldTransform_.translation_ + Vector3(0, -kHeight / 2.0f, 0);
 			dust_.Emit(footPos);
-			dustEmitTimer_ = 0.0f; // タイマーリセット
+			dustEmitTimer_ = 0.0f;
 		}
 	} else {
-		// 動いてない時はタイマーリセット（止まった瞬間にEmitしないため）
-		dustEmitTimer_ = 0.0f;
+		dustEmitTimer_ = 0.0f; // 停止時はリセット
 	}
-
 	dust_.Update();
 
+	//==================================================
+	// 移動・衝突判定
+	//==================================================
 	CollisionMapInfo collisionMapInfo;
 	collisionMapInfo.move = velocity_;
 
-	// マップ衝突チェック
-	CheckMapCollision(collisionMapInfo);
+	CheckMapCollision(collisionMapInfo);                   // マップ衝突判定
+	worldTransform_.translation_ += collisionMapInfo.move; // 移動反映
 
-	// 移動反映
-	worldTransform_.translation_ += collisionMapInfo.move;
-
-	// 天井に当たったら上方向の速度リセット
 	if (collisionMapInfo.isHitCeiling) {
-		velocity_.y = 0;
+		velocity_.y = 0; // 天井に当たったらY速度リセット
 	}
 
-	// 接地判定
-	UpdateOnGround(collisionMapInfo);
-	UpdateOnWall(collisionMapInfo);
-	// 旋回制御
+	UpdateOnGround(collisionMapInfo); // 接地判定
+	UpdateOnWall(collisionMapInfo);   // 壁判定
+
+	//==================================================
+	// 旋回処理
+	//==================================================
 	if (turnTimer_ > 0.0f) {
 		turnTimer_ = std::max(turnTimer_ - (1.0f / 60.0f), 0.0f);
 
 		float destinationRotationYTable[] = {std::numbers::pi_v<float> / 2.0f, std::numbers::pi_v<float> * 3.0f / 2.0f};
-
 		float destinationRotationY = destinationRotationYTable[static_cast<uint32_t>(lrDirection_)];
 		worldTransform_.rotation_.y = EaseInOut(turnFirstRotationY_, destinationRotationY, 1.0f - turnTimer_ / kTimeTrun);
 	}
 
+	//==================================================
+	// 行列更新
+	//==================================================
 	WorldTransformUpdate(worldTransform_);
 }
 
@@ -426,6 +436,14 @@ void Player::UpdateState() {
 		}
 	}
 
+	// --- 攻撃開始 ---
+	if (Input::GetInstance()->TriggerKey(DIK_P) && state_ == PlayerState::Normal) {
+		state_ = PlayerState::Attack;
+		attackPhase_ = AttackPhase::kAnticipation;
+		attackTimer_ = 0;
+		velocity_ = {}; // 速度リセットしてから始める
+	}
+
 	// --- 高さを設定 ---
 	if (state_ == PlayerState::Rolling) {
 		kHeight = 0.8f;
@@ -457,4 +475,74 @@ void Player::UpdateState() {
 			velocity_.y = 0.0f; // 天井にぶつかったのでリセット
 		}
 	}
+}
+
+void Player::UpdateAttack() {
+	attackTimer_++;
+
+	switch (attackPhase_) {
+	case AttackPhase::kAnticipation: {                      // 溜め（横に縮む）
+		float t = static_cast<float>(attackTimer_) / 10.0f; // 10フレームで完了
+		worldTransform_.scale_.x = EaseOut(1.0f, 0.5f, t);  // 横縮む
+		worldTransform_.scale_.y = EaseOut(1.0f, 1.3f, t);  // 縦伸びる
+		worldTransform_.scale_.z = 1.0f;
+
+		if (attackTimer_ >= 10) {
+			attackPhase_ = AttackPhase::kAction;
+			attackTimer_ = 0;
+		}
+		break;
+	}
+
+case AttackPhase::kAction: { // 突進（横に伸びる）
+		if (lrDirection_ == LRDorection::kRight) {
+			velocity_.x = +0.2f; // 速度を半分に
+		} else {
+			velocity_.x = -0.2f;
+		}
+
+		float t = static_cast<float>(attackTimer_) / 8.0f; // 10フレームで完了
+		worldTransform_.scale_.x = EaseIn(0.5f, 1.4f, t);   // 横伸びる
+		worldTransform_.scale_.y = EaseOut(1.3f, 0.7f, t);  // 縦縮む
+		worldTransform_.scale_.z = 1.0f;
+
+		if (attackTimer_ >= 8) { // 10フレームで終了
+			attackPhase_ = AttackPhase::kRecovery;
+			attackTimer_ = 0;
+		}
+		break;
+	}
+
+	case AttackPhase::kRecovery: {                          // 元に戻る
+		float t = static_cast<float>(attackTimer_) / 15.0f; // 15フレームで戻す
+		worldTransform_.scale_.x = EaseOut(worldTransform_.scale_.x, 1.0f, t);
+		worldTransform_.scale_.y = EaseOut(worldTransform_.scale_.y, 1.0f, t);
+		worldTransform_.scale_.z = 1.0f;
+
+		velocity_.x *= 0.9f; // 減速
+
+		if (attackTimer_ >= 15) {
+			state_ = PlayerState::Normal;
+			attackPhase_ = AttackPhase::kUnknown;
+			worldTransform_.scale_ = {1.0f, 1.0f, 1.0f}; // 念のためリセット
+		}
+		break;
+	}
+
+	default:
+		break;
+	}
+
+	// 衝突と移動処理は今まで通り
+	CollisionMapInfo collisionMapInfo;
+	collisionMapInfo.move = velocity_;
+	CheckMapCollision(collisionMapInfo);
+	worldTransform_.translation_ += collisionMapInfo.move;
+
+	if (collisionMapInfo.isHitCeiling)
+		velocity_.y = 0;
+	UpdateOnGround(collisionMapInfo);
+	UpdateOnWall(collisionMapInfo);
+
+	WorldTransformUpdate(worldTransform_);
 }

@@ -70,9 +70,22 @@ public:
 		bool isHitWall = false;
 		Vector3 move;
 	};
-	enum class PlayerState { Normal, Rolling };
+	enum class PlayerState { Normal, Rolling, Attack };
 	PlayerState state_ = PlayerState::Normal;
 	bool IsDead() const { return isDead_; }
+
+	// 攻撃フェーズ
+	enum class AttackPhase {
+		kUnknown,
+		kAnticipation, // 溜め
+		kAction,       // 突進
+		kRecovery      // 余韻
+	};
+	AttackPhase attackPhase_ = AttackPhase::kUnknown;
+	uint32_t attackTimer_ = 0;
+
+	// 攻撃処理
+	void UpdateAttack();
 
 private:
 	//==================================================
