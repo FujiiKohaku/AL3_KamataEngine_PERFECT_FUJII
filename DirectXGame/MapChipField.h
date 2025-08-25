@@ -7,7 +7,8 @@
 enum class MapChipType {
 	kBlank, // 空白
 	kBlock, // 普通のブロック
-	kSpike, // ★トゲブロックを追加
+	kSpike, //トゲブロックを追加
+	kEnemy, //敵を追加
 };
 
 struct MapChipData {

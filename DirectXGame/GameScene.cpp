@@ -122,13 +122,13 @@ void GameScene::Initialize() {
 	CameraController::Rect cameraArea = {12.0f, 200 - 12.0f, 6.0f, 6.0f};
 	cController_->SetMovableArea(cameraArea);
 
-	// 敵生成
-	for (int32_t i = 0; i < 2; ++i) {
-		Enemy* newEnemy = new Enemy();
-		Vector3 enemyPosition = mapChipField_->GetMapChipPositionByIndex(14 + i * 2, 18);
-		newEnemy->Initialize(enemyModel_, camera_, enemyPosition);
-		enemies_.push_back(newEnemy);
-	}
+	//// 敵生成
+	//for (int32_t i = 0; i < 2; ++i) {
+	//	Enemy* newEnemy = new Enemy();
+	//	Vector3 enemyPosition = mapChipField_->GetMapChipPositionByIndex(14 + i * 2, 18);
+	//	newEnemy->Initialize(enemyModel_, camera_, enemyPosition);
+	//	enemies_.push_back(newEnemy);
+	//}
 
 	// デスパーティクル
 	deathParticles_ = new DeathParticles;
@@ -319,15 +319,24 @@ void GameScene::GenerateBlocks() {
 	for (uint32_t i = 0; i < numBlockVirtical; ++i) {
 		for (uint32_t j = 0; j < numBlockHorizontal; ++j) {
 			MapChipType type = mapChipField_->GetMapChipTypeByIndex(j, i);
+
 			if (type == MapChipType::kBlock || type == MapChipType::kSpike) {
+				// ブロックやトゲを配置
 				WorldTransform* worldTransform = new WorldTransform();
 				worldTransform->Initialize();
 				worldTransform->translation_ = mapChipField_->GetMapChipPositionByIndex(j, i);
 				worldTransformBlocks_[i][j] = worldTransform;
+			} else if (type == MapChipType::kEnemy) {
+				// ★ 敵を生成
+				Vector3 enemyPos = mapChipField_->GetMapChipPositionByIndex(j, i);
+				Enemy* newEnemy = new Enemy();
+				newEnemy->Initialize(enemyModel_, camera_, enemyPos);
+				enemies_.push_back(newEnemy);
 			}
 		}
 	}
 }
+
 
 //==================================================
 // 衝突判定
