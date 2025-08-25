@@ -57,11 +57,11 @@ void GameScene::Initialize() {
 	readyModel_ = Model::CreateFromOBJ("rReady", true);
 	goModel_ = Model::CreateFromOBJ("Go!", true);
 
-// Ready モデル
+	// Ready モデル
 	worldTransformReady_.Initialize();
 	worldTransformReady_.rotation_.x = std::numbers::pi_v<float> / 2.0f;
 	worldTransformReady_.rotation_.y = std::numbers::pi_v<float>;
-	worldTransformReady_.translation_.z = 30.0f;     // カメラの正面
+	worldTransformReady_.translation_.z = 30.0f; // カメラの正面
 	worldTransformReady_.translation_.x = 2.5f;
 	worldTransformReady_.translation_.y = 0.0f;       // 少し上に表示したければ調整
 	worldTransformReady_.scale_ = {9.0f, 9.0f, 9.0f}; // 見やすいサイズに拡大
@@ -140,6 +140,7 @@ void GameScene::Update() {
 	ChangePhese();
 	WorldTransformUpdate(worldTransformReady_);
 	WorldTransformUpdate(worldTransformGo_);
+
 	switch (phase_) {
 	case Phase::kFadeIn: {
 		if (fade_) {
@@ -153,7 +154,7 @@ void GameScene::Update() {
 		cController_->Update();
 	} break;
 
-case Phase::kReady: {
+	case Phase::kReady: {
 		readyTimer_ += 1.0f / 60.0f;
 
 		// READY 表示中（0〜1秒）
@@ -178,13 +179,13 @@ case Phase::kReady: {
 		cController_->Update();
 	} break;
 
-
 	case Phase::kPlay: {
 		skydome_->UpDate();
 		cController_->Update();
 		player_->Update();
-		for (Enemy* enemy : enemies_)
+		for (Enemy* enemy : enemies_) {
 			enemy->UpDate();
+		}
 
 #ifdef _DEBUG
 		if (Input::GetInstance()->TriggerKey(DIK_G)) {
@@ -218,10 +219,12 @@ case Phase::kReady: {
 		}
 		skydome_->UpDate();
 		cController_->Update();
-		for (Enemy* enemy : enemies_)
+		for (Enemy* enemy : enemies_) {
 			enemy->UpDate();
-		if (deathParticles_)
+		}
+		if (deathParticles_) {
 			deathParticles_->Update();
+		}
 	} break;
 
 	case Phase::kFadeOut: {
@@ -232,102 +235,113 @@ case Phase::kReady: {
 		}
 		skydome_->UpDate();
 		cController_->Update();
-		for (Enemy* enemy : enemies_)
+		for (Enemy* enemy : enemies_) {
 			enemy->UpDate();
+		}
 	} break;
 	}
+
+	// ====== フェーズ共通で敵削除処理 ======
+	enemies_.remove_if([](Enemy* enemy) {
+		if (enemy->IsDead()) {
+			delete enemy;
+			return true; // 削除対象
+		}
+		return false; // 残す
+	});
 }
 
-//==================================================
-// 描画
-//==================================================
-void GameScene::Draw() {
-	KamataEngine::DirectXCommon* dxcommon = KamataEngine::DirectXCommon::GetInstance();
-	Model::PreDraw(dxcommon->GetCommandList());
 
-	if (!player_->IsDead())
-		player_->Draw();
-	for (Enemy* enemy : enemies_)
-		enemy->Draw();
-	skydome_->Draw();
+	//==================================================
+	// 描画
+	//==================================================
+	void GameScene::Draw() {
+		KamataEngine::DirectXCommon* dxcommon = KamataEngine::DirectXCommon::GetInstance();
+		Model::PreDraw(dxcommon->GetCommandList());
 
-	for (auto& line : worldTransformBlocks_) {
-		for (auto& block : line) {
-			if (!block)
-				continue;
-			modelBlock_->Draw(*block, *camera_, nullptr);
+		if (!player_->IsDead())
+			player_->Draw();
+		for (Enemy* enemy : enemies_)
+			enemy->Draw();
+		skydome_->Draw();
+
+		for (auto& line : worldTransformBlocks_) {
+			for (auto& block : line) {
+				if (!block)
+					continue;
+				modelBlock_->Draw(*block, *camera_, nullptr);
+			}
 		}
-	}
 
-	if (deathParticles_)
-		deathParticles_->Draw();
+		if (deathParticles_)
+			deathParticles_->Draw();
 
-	// Ready-Go モデル描画
-	if (phase_ == Phase::kReady) {
-		if (readyTimer_ < 1.0f) {
-			readyModel_->Draw(worldTransformReady_, *camera_);
-		} else {
-			goModel_->Draw(worldTransformGo_, *camera_);
+		// Ready-Go モデル描画
+		if (phase_ == Phase::kReady) {
+			if (readyTimer_ < 1.0f) {
+				readyModel_->Draw(worldTransformReady_, *camera_);
+			} else {
+				goModel_->Draw(worldTransformGo_, *camera_);
+			}
 		}
-	}
-	//readyModel_->Draw(worldTransformReady_, *camera_);
-	fade_->Draw();
-	Model::PostDraw();
-}
-
-//==================================================
-// ブロック生成
-//==================================================
-void GameScene::GenerateBlocks() {
-	uint32_t numBlockVirtical = mapChipField_->GetNumBlockVirtical();
-	uint32_t numBlockHorizontal = mapChipField_->GetNumBlockHorizontal();
-
-	worldTransformBlocks_.resize(numBlockVirtical);
-	for (uint32_t i = 0; i < numBlockVirtical; ++i) {
-		worldTransformBlocks_[i].resize(numBlockHorizontal);
+		// readyModel_->Draw(worldTransformReady_, *camera_);
+		fade_->Draw();
+		Model::PostDraw();
 	}
 
-	for (uint32_t i = 0; i < numBlockVirtical; ++i) {
-		for (uint32_t j = 0; j < numBlockHorizontal; ++j) {
-			if (mapChipField_->GetMapChipTypeByIndex(j, i) == MapChipType::kBlock) {
-				WorldTransform* worldTransform = new WorldTransform();
-				worldTransform->Initialize();
-				worldTransform->translation_ = mapChipField_->GetMapChipPositionByIndex(j, i);
-				worldTransformBlocks_[i][j] = worldTransform;
+	//==================================================
+	// ブロック生成
+	//==================================================
+	void GameScene::GenerateBlocks() {
+		uint32_t numBlockVirtical = mapChipField_->GetNumBlockVirtical();
+		uint32_t numBlockHorizontal = mapChipField_->GetNumBlockHorizontal();
+
+		worldTransformBlocks_.resize(numBlockVirtical);
+		for (uint32_t i = 0; i < numBlockVirtical; ++i) {
+			worldTransformBlocks_[i].resize(numBlockHorizontal);
+		}
+
+		for (uint32_t i = 0; i < numBlockVirtical; ++i) {
+			for (uint32_t j = 0; j < numBlockHorizontal; ++j) {
+				if (mapChipField_->GetMapChipTypeByIndex(j, i) == MapChipType::kBlock) {
+					WorldTransform* worldTransform = new WorldTransform();
+					worldTransform->Initialize();
+					worldTransform->translation_ = mapChipField_->GetMapChipPositionByIndex(j, i);
+					worldTransformBlocks_[i][j] = worldTransform;
+				}
 			}
 		}
 	}
-}
 
-//==================================================
-// 衝突判定
-//==================================================
-void GameScene::CheckAllCollisions() {
-	AABB aabb1 = player_->GetAABB();
-	AABB aabb2;
-	for (Enemy* enemy : enemies_) {
-		aabb2 = enemy->GetAABB();
-		if (IsCollision(aabb1, aabb2)) {
-			player_->OnCollision(enemy);
-			enemy->OnCollision(player_);
+	//==================================================
+	// 衝突判定
+	//==================================================
+	void GameScene::CheckAllCollisions() {
+		AABB aabb1 = player_->GetAABB();
+		AABB aabb2;
+		for (Enemy* enemy : enemies_) {
+			aabb2 = enemy->GetAABB();
+			if (IsCollision(aabb1, aabb2)) {
+				player_->OnCollision(enemy);
+				enemy->OnCollision(player_);
+			}
 		}
 	}
-}
 
-//==================================================
-// フェーズ切替
-//==================================================
-void GameScene::ChangePhese() {
-	switch (phase_) {
-	case Phase::kPlay:
-		if (player_->IsDead()) {
-			phase_ = Phase::kDeath;
-			const Vector3& deathParticlesPosition = player_->GetWorldPosition();
-			deathParticles_ = new DeathParticles;
-			deathParticles_->Initialize(dethParticleModel, camera_, deathParticlesPosition);
+	//==================================================
+	// フェーズ切替
+	//==================================================
+	void GameScene::ChangePhese() {
+		switch (phase_) {
+		case Phase::kPlay:
+			if (player_->IsDead()) {
+				phase_ = Phase::kDeath;
+				const Vector3& deathParticlesPosition = player_->GetWorldPosition();
+				deathParticles_ = new DeathParticles;
+				deathParticles_->Initialize(dethParticleModel, camera_, deathParticlesPosition);
+			}
+			break;
+		case Phase::kDeath:
+			break;
 		}
-		break;
-	case Phase::kDeath:
-		break;
 	}
-}

@@ -86,6 +86,8 @@ public:
 
 	// 攻撃処理
 	void UpdateAttack();
+	// 攻撃中かどうかを返す
+	bool IsAttack() const { return state_ == PlayerState::Attack; }
 
 private:
 	//==================================================
@@ -108,6 +110,7 @@ private:
 	void UpdateOnWall(const CollisionMapInfo& info);
 
 	void UpdateState();
+
 	//==================================================
 	// メンバ変数
 	//==================================================
