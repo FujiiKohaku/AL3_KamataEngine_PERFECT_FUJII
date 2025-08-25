@@ -1,6 +1,7 @@
 #define NOMINMAX
 #define _USE_MATH_DEFINES
 #include "Enemy.h"
+#include "HitEffect.h" // ★エフェクトを使う
 #include "Player.h"
 #include <algorithm> // std::max
 #include <cassert>
@@ -120,5 +121,11 @@ void Enemy::OnCollision(const Player* player) {
 		behavior_ = Behavior::kDefeated; // 演出モードへ
 		deathTimer_ = 0;
 		isCollisionDisabled_ = true; // ★演出中は当たり判定無効
+
+		// ===== 演出 =====
+		// ヒットエフェクトを発生
+		HitEffect::Create(GetWorldPosition());
+
+		// 効果音（SoundManagerを導入してるなら）
 	}
 }

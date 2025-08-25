@@ -3,6 +3,7 @@
 #include "DeathParticles.h"
 #include "Enemy.h"
 #include "Fade.h"
+#include "HitEffect.h"
 #include "KamataEngine.h"
 #include "MapChipField.h"
 #include "Math.h"
@@ -87,4 +88,6 @@ private:
 	void ChangePhese();
 	bool finished_ = false;
 	Fade* fade_ = nullptr;
+
+	std::list<HitEffect*> hitEffects_;
 };
