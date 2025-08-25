@@ -330,7 +330,7 @@ void GameScene::GenerateBlocks() {
 				// ★ 敵を生成
 				Vector3 enemyPos = mapChipField_->GetMapChipPositionByIndex(j, i);
 				Enemy* newEnemy = new Enemy();
-				newEnemy->Initialize(enemyModel_, camera_, enemyPos);
+				newEnemy->Initialize(enemyModel_, camera_, enemyPos,mapChipField_);
 				enemies_.push_back(newEnemy);
 			}
 		}
