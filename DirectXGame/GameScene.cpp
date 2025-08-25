@@ -69,7 +69,7 @@ void GameScene::Initialize() {
 	debugCamera_ = new DebugCamera(1080, 720);
 
 	// ===== ヒットエフェクトにモデルとカメラを渡す =====
-	HitEffect::SetModel(Model::CreateFromOBJ("block", true));
+	HitEffect::SetModel(Model::CreateFromOBJ("AttackEffect", true));
 	HitEffect::SetCamera(camera_);
 
 	// Ready モデル
@@ -190,6 +190,12 @@ void GameScene::Update() {
 		for (Enemy* enemy : enemies_) {
 			enemy->UpDate();
 		}
+		// ===== デバッグカメラ切り替え =====
+#ifdef _DEBUG
+		if (Input::GetInstance()->TriggerKey(DIK_G)) {
+			isDebugCameraActive_ = !isDebugCameraActive_;
+		}
+#endif
 		if (isDebugCameraActive_) {
 			debugCamera_->Update();
 			camera_->matView = debugCamera_->GetCamera().matView;
@@ -312,7 +318,8 @@ void GameScene::GenerateBlocks() {
 
 	for (uint32_t i = 0; i < numBlockVirtical; ++i) {
 		for (uint32_t j = 0; j < numBlockHorizontal; ++j) {
-			if (mapChipField_->GetMapChipTypeByIndex(j, i) == MapChipType::kBlock) {
+			MapChipType type = mapChipField_->GetMapChipTypeByIndex(j, i);
+			if (type == MapChipType::kBlock || type == MapChipType::kSpike) {
 				WorldTransform* worldTransform = new WorldTransform();
 				worldTransform->Initialize();
 				worldTransform->translation_ = mapChipField_->GetMapChipPositionByIndex(j, i);
