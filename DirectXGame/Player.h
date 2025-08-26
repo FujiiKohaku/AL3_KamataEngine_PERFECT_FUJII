@@ -5,6 +5,7 @@
 #include "Math.h"
 #include <algorithm>
 #include <array>
+#include "Enemy2.h"
 #include <numbers>
 // 前方宣言
 class MapChipField;
@@ -29,6 +30,8 @@ public:
 	void Draw();
 
 	void CheckSpringCollision(const std::vector<std::vector<WorldTransform*>>& springs);
+	// 火の当たり判定
+	void CheckFireCollision(const std::vector<std::vector<WorldTransform*>>& fires);
 
 	//==================================================
 	// Getter / Setter
@@ -49,8 +52,9 @@ public:
 	AABB GetAABB();
 
 	// 敵との衝突応答（02_10 21枚目）
-	void OnCollision(const Enemy* enemy);
 
+	void OnCollision(const Enemy* enemy);
+	void OnCollision(const Enemy2* enemy2);
 	Vector3 GetPosition() const { return worldTransform_.translation_; }
 	//==================================================
 	// 入力処理
@@ -167,4 +171,7 @@ private:
 	float dustEmitTimer_;
 	const float kJumpInitialVelocity = 0.25f; // 最低ジャンプ高さ
 	const float kJumpBoost = 0.35f;           // 長押し補助の強さ
+
+	int jumpCount_ = 0;          // 今何回ジャンプしたか
+	const int kMaxJumpCount = 2; // 最大ジャンプ回数（二段ジャンプなら2）
 };

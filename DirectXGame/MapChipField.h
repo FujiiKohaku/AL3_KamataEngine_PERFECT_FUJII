@@ -5,11 +5,13 @@
 
 // マップチップの種類
 enum class MapChipType {
-	kBlank, // 空白
-	kBlock, // 普通のブロック
-	kSpike, //トゲブロックを追加
-	kEnemy, //敵を追加
-	kSpring//ばね追加
+	kBlank,  // 空白
+	kBlock,  // 普通のブロック
+	kSpike,  // トゲブロックを追加
+	kEnemy,  // 敵を追加
+	kSpring, // ばね追加
+	kMovingFire,//火の玉
+	kEnemy2,
 };
 
 struct MapChipData {
@@ -51,5 +53,4 @@ private:
 	MapChipData mapChipData_;
 	static inline const uint32_t kNumBlockVirtical = 20;
 	static inline const uint32_t kNumBlockHorizontal = 200;
-
 };

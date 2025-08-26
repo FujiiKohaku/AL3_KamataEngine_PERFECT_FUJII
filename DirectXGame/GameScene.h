@@ -2,6 +2,7 @@
 #include "CameraController.h"
 #include "DeathParticles.h"
 #include "Enemy.h"
+#include "Enemy2.h"
 #include "Fade.h"
 #include "HitEffect.h"
 #include "KamataEngine.h"
@@ -26,8 +27,6 @@ public:
 	void CheckAllCollisions();
 
 	bool IsFinished() const { return finished_; }
-
-
 
 private:
 	// ===== リソース =====
@@ -59,6 +58,7 @@ private:
 	Player* player_ = nullptr;
 	Skydome* skydome_ = nullptr;
 	std::list<Enemy*> enemies_;
+	std::list<Enemy2*> enemies2_;
 
 	// ブロック用ワールドトランスフォーム（インスタンスごとに所有）
 	std::vector<std::vector<WorldTransform*>> worldTransformBlocks_;
@@ -97,6 +97,10 @@ private:
 	std::vector<std::vector<WorldTransform*>> worldTransformSpikes_;
 
 	std::vector<std::vector<WorldTransform*>> worldTransformSprings_;
+	std::vector<std::vector<WorldTransform*>> worldTransformFires_;
+	Model* fireModel_ = nullptr;
 
 	Model* springModel_ = nullptr;
+
+	Model* enemyModel2_;
 };

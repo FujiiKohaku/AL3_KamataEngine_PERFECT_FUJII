@@ -31,7 +31,11 @@ GameScene::~GameScene() {
 		delete enemy;
 	}
 	enemies_.clear();
-
+	// ====== 敵の解放 ======
+	for (Enemy2* enemy : enemies2_) {
+		delete enemy;
+	}
+	enemies_.clear();
 	// ====== ヒットエフェクト解放 ======
 	for (HitEffect* effect : hitEffects_) {
 		delete effect;
@@ -62,7 +66,7 @@ void GameScene::Initialize() {
 	// Ready/Go モデル
 	readyModel_ = Model::CreateFromOBJ("rReady", true);
 	goModel_ = Model::CreateFromOBJ("Go!", true);
-
+	enemyModel2_ = Model::CreateFromOBJ("enemyBody", true);
 	// カメラ
 	camera_ = new Camera();
 	camera_->Initialize();
@@ -72,8 +76,9 @@ void GameScene::Initialize() {
 	HitEffect::SetModel(Model::CreateFromOBJ("AttackEffect", true));
 	HitEffect::SetCamera(camera_);
 
-	springModel_ = Model::CreateFromOBJ("tileBlock", true);
+	springModel_ = Model::CreateFromOBJ("spring", true);
 
+	fireModel_ = Model::CreateFromOBJ("fire", true);
 	// Ready モデル
 	worldTransformReady_.Initialize();
 	worldTransformReady_.rotation_.x = std::numbers::pi_v<float> / 2.0f;
@@ -100,7 +105,7 @@ void GameScene::Initialize() {
 
 	// マップ
 	mapChipField_ = new MapChipField();
-	mapChipField_->LoadMapChipCsv("Resources/blocks2.csv");
+	mapChipField_->LoadMapChipCsv("Resources/blocks3.csv");
 
 	// プレイヤー生成
 	Vector3 playerposition = mapChipField_->GetMapChipPositionByIndex(10, 10);
@@ -123,14 +128,6 @@ void GameScene::Initialize() {
 
 	CameraController::Rect cameraArea = {12.0f, 200 - 12.0f, 6.0f, 6.0f};
 	cController_->SetMovableArea(cameraArea);
-
-	//// 敵生成
-	// for (int32_t i = 0; i < 2; ++i) {
-	//	Enemy* newEnemy = new Enemy();
-	//	Vector3 enemyPosition = mapChipField_->GetMapChipPositionByIndex(14 + i * 2, 18);
-	//	newEnemy->Initialize(enemyModel_, camera_, enemyPosition);
-	//	enemies_.push_back(newEnemy);
-	// }
 
 	// デスパーティクル
 	deathParticles_ = new DeathParticles;
@@ -195,7 +192,9 @@ void GameScene::Update() {
 		for (Enemy* enemy : enemies_) {
 			enemy->UpDate();
 		}
-
+		for (Enemy2* enemy : enemies2_) {
+			enemy->Update();
+		}
 		// ===== デバッグカメラ切り替え =====
 #ifdef _DEBUG
 		if (Input::GetInstance()->TriggerKey(DIK_G)) {
@@ -236,8 +235,26 @@ void GameScene::Update() {
 				WorldTransformUpdate(*spring);
 			}
 		}
+		// ===== 火の更新 =====
+		static float t = 0.0f;
+		t += 1.0f / 60.0f; // フレームごとに進める
 
+		for (auto& line : worldTransformFires_) {
+			for (auto& fire : line) {
+				if (!fire)
+					continue;
+
+				float amplitude = 1.0f; // 上下の振れ幅
+				float speed = 2.0f;     // 上下の速さ
+
+				float baseY = fire->translation_.y; // 元の高さ（初期値を基準にしたいなら別で保持すると良い）
+				fire->translation_.y = baseY + amplitude * sinf(t * speed);
+
+				WorldTransformUpdate(*fire);
+			}
+		}
 		player_->CheckSpringCollision(worldTransformSprings_);
+		player_->CheckFireCollision(worldTransformFires_);
 		CheckAllCollisions();
 	} break;
 
@@ -271,7 +288,7 @@ void GameScene::Update() {
 	// ====== フェーズ共通で敵削除処理 ======
 	enemies_.remove_if([this](Enemy* enemy) {
 		if (enemy->IsDead()) {
-			// ★ヒットエフェクト生成
+			// ヒットエフェクト生成
 			hitEffects_.push_back(HitEffect::Create(enemy->GetWorldPosition()));
 			delete enemy;
 			return true;
@@ -302,6 +319,12 @@ void GameScene::Draw() {
 		player_->Draw();
 	for (Enemy* enemy : enemies_)
 		enemy->Draw();
+
+// Enemy2 の描画
+	for (Enemy2* enemy2 : enemies2_) {
+		enemy2->Draw();
+	}
+
 	skydome_->Draw();
 
 	// ====== ブロック描画 ======
@@ -331,6 +354,14 @@ void GameScene::Draw() {
 		}
 	}
 
+	// ====== 動く火の描画 ======
+	for (auto& line : worldTransformFires_) {
+		for (auto& fire : line) {
+			if (!fire)
+				continue;
+			fireModel_->Draw(*fire, *camera_, nullptr);
+		}
+	}
 
 	if (deathParticles_)
 		deathParticles_->Draw();
@@ -359,13 +390,17 @@ void GameScene::GenerateBlocks() {
 	uint32_t numBlockHorizontal = mapChipField_->GetNumBlockHorizontal();
 
 	worldTransformBlocks_.resize(numBlockVirtical);
-	worldTransformSpikes_.resize(numBlockVirtical); // ★追加
+	worldTransformSpikes_.resize(numBlockVirtical);
 
 	for (uint32_t i = 0; i < numBlockVirtical; ++i) {
 		worldTransformBlocks_[i].resize(numBlockHorizontal);
-		worldTransformSpikes_[i].resize(numBlockHorizontal); // ★追加
+		worldTransformSpikes_[i].resize(numBlockHorizontal);
 	}
 
+	worldTransformFires_.resize(numBlockVirtical);
+	for (uint32_t i = 0; i < numBlockVirtical; ++i) {
+		worldTransformFires_[i].resize(numBlockHorizontal);
+	}
 	worldTransformSprings_.resize(numBlockVirtical);
 	for (uint32_t i = 0; i < numBlockVirtical; ++i) {
 		worldTransformSprings_[i].resize(numBlockHorizontal);
@@ -403,13 +438,25 @@ void GameScene::GenerateBlocks() {
 			else if (type == MapChipType::kSpring) {
 				WorldTransform* wt = new WorldTransform();
 				wt->Initialize();
+				wt->scale_ = {0.5f, 0.5f, 0.5f};
+				wt->translation_ = mapChipField_->GetMapChipPositionByIndex(j, i);
+				// 配列に追加
+				worldTransformSprings_[i][j] = wt;
+			} else if (type == MapChipType::kMovingFire) {
+				WorldTransform* wt = new WorldTransform();
+				wt->Initialize();
 				wt->translation_ = mapChipField_->GetMapChipPositionByIndex(j, i);
 
-				// ★バネはちょっと小さめにしてわかりやすく
-				wt->scale_ = {0.8f, 0.5f, 0.8f};
+				// 火の大きさは少し小さめに
+				wt->scale_ = {0.5f, 0.5f, 0.5f};
 
-				// 配列に追加（worldTransformSprings_ を用意しておく）
-				worldTransformSprings_[i][j] = wt;
+				// 配列に追加（worldTransformFires_ を用意しておく）
+				worldTransformFires_[i][j] = wt;
+			} else if (type == MapChipType::kEnemy2) {
+				Vector3 enemyPos = mapChipField_->GetMapChipPositionByIndex(j, i);
+				Enemy2* newEnemy2 = new Enemy2();
+				newEnemy2->Initialize(enemyModel2_, camera_, enemyPos, mapChipField_);
+				enemies2_.push_back(newEnemy2);
 			}
 		}
 	}
@@ -419,16 +466,28 @@ void GameScene::GenerateBlocks() {
 // 衝突判定
 //==================================================
 void GameScene::CheckAllCollisions() {
-	AABB aabb1 = player_->GetAABB();
-	AABB aabb2;
-	for (Enemy* enemy : enemies_) {
-		aabb2 = enemy->GetAABB();
-		if (IsCollision(aabb1, aabb2)) {
-			player_->OnCollision(enemy);
-			enemy->OnCollision(player_);
-		}
-	}
+    AABB aabb1 = player_->GetAABB();
+    AABB aabb2;
+
+    // Enemy1 との当たり判定
+    for (Enemy* enemy : enemies_) {
+        aabb2 = enemy->GetAABB();
+        if (IsCollision(aabb1, aabb2)) {
+            player_->OnCollision(enemy);
+            enemy->OnCollision(player_);
+        }
+    }
+
+    // Enemy2 との当たり判定
+    for (Enemy2* enemy2 : enemies2_) {
+        aabb2 = enemy2->GetAABB();
+        if (IsCollision(aabb1, aabb2)) {
+            player_->OnCollision(enemy2);
+            enemy2->OnCollision(player_);
+        }
+    }
 }
+
 
 //==================================================
 // フェーズ切替

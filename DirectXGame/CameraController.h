@@ -40,7 +40,7 @@ private:
 	Player* target_ = nullptr;
 
 	// プレイヤーからの相対位置（後ろに15.0f下がった位置がデフォルト）
-	KamataEngine::Vector3 targetOffset_ = {0.0f, 0.0f, -15.0f};
+	KamataEngine::Vector3 targetOffset_ = {0.0f, 3.0f, -15.0f};
 
 	// 移動可能範囲（デフォルト: 0〜100）
 	// → 実際は GameScene 側で設定するので初期値は保険

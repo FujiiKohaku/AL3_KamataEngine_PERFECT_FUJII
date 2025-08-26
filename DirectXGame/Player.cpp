@@ -77,22 +77,27 @@ void Player::InputMove() {
 		velocity_.x *= (1.0f - kAttenuation);
 	}
 
-	// ===== ジャンプ処理 =====
-	if (onGround_) {
-		// ★ 地面にいるときにジャンプ開始
-		if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
+	// ===== ジャンプ処理（二段ジャンプ対応） =====
+	if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
+		if (onGround_ || jumpCount_ < kMaxJumpCount) {
 			velocity_.y = kJumpInitialVelocity; // 初速を与える
 			onGround_ = false;
+			jumpCount_++; // ジャンプ回数を増やす
 		}
-	} else {
-		// ★ ジャンプ中の長押し補助（上昇中だけ）
-		if (Input::GetInstance()->PushKey(DIK_SPACE) && velocity_.y > 0) {
-			velocity_.y += kJumpBoost / 60.0f;
-		}
+	}
 
-		// ★ 重力を加える
-		velocity_.y -= kGravityAcceleration / 60.0f;
-		velocity_.y = std::max(velocity_.y, -kLimitFallSpeed); // 落下速度制限
+	// ★ ジャンプ中の長押し補助（上昇中だけ）
+	if (Input::GetInstance()->PushKey(DIK_SPACE) && velocity_.y > 0) {
+		velocity_.y += kJumpBoost / 60.0f;
+	}
+
+	// ★ 重力を加える
+	velocity_.y -= kGravityAcceleration / 60.0f;
+	velocity_.y = std::max(velocity_.y, -kLimitFallSpeed); // 落下速度制限
+
+	// ===== 地面に着いたらジャンプ回数リセット =====
+	if (onGround_) {
+		jumpCount_ = 0;
 	}
 }
 
@@ -355,6 +360,10 @@ void Player::UpdateOnWall(const CollisionMapInfo& info) {
 // 更新処理
 //==================================================
 void Player::Update() {
+
+
+	
+
 	//==================================================
 	// 状態ごとの更新
 	//==================================================
@@ -443,6 +452,20 @@ AABB Player::GetAABB() {
 }
 
 void Player::OnCollision(const Enemy* enemy) {
+	// --- 敵がすでに倒れているなら何もしない ---
+	if (enemy->IsDefeated()) {
+		return;
+	}
+
+	if (IsAttack()) {
+		return; // 攻撃中は無敵
+	}
+
+	// --- それ以外は死亡 ---
+	isDead_ = true;
+}
+
+void Player::OnCollision(const Enemy2* enemy) {
 	// --- 敵がすでに倒れているなら何もしない ---
 	if (enemy->IsDefeated()) {
 		return;
@@ -612,10 +635,32 @@ void Player::CheckSpringCollision(const std::vector<std::vector<WorldTransform*>
 
 			// 当たり判定
 			if (IsCollision(playerAABB, springAABB)) {
-				// ★ バネに触れたら強制ジャンプ
+				//  バネに触れたら強制ジャンプ
 				velocity_.y = kJumpInitialVelocity * 1.5f; // 通常ジャンプの1.5倍
 				onGround_ = false;
 				return; // 1つヒットしたら終わり
+			}
+		}
+	}
+}
+void Player::CheckFireCollision(const std::vector<std::vector<WorldTransform*>>& fires) {
+	AABB playerAABB = GetAABB();
+
+	for (auto& line : fires) {
+		for (auto& fire : line) {
+			if (!fire)
+				continue;
+
+			// 火の AABB
+			AABB fireAABB = {
+			    {fire->translation_.x - MapChipField::kBlockWidth / 2.0f, fire->translation_.y - MapChipField::kBlockHeight / 2.0f, -0.5f},
+			    {fire->translation_.x + MapChipField::kBlockWidth / 2.0f, fire->translation_.y + MapChipField::kBlockHeight / 2.0f, +0.5f}
+            };
+
+			if (IsCollision(playerAABB, fireAABB)) {
+				// 火に触れたら即死
+				isDead_ = true;
+				return;
 			}
 		}
 	}
