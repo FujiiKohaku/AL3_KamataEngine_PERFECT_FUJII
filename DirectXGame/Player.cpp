@@ -596,3 +596,27 @@ void Player::UpdateAttack() {
 
 	WorldTransformUpdate(worldTransform_);
 }
+void Player::CheckSpringCollision(const std::vector<std::vector<WorldTransform*>>& springs) {
+	AABB playerAABB = GetAABB();
+
+	for (auto& line : springs) {
+		for (auto& spring : line) {
+			if (!spring)
+				continue;
+
+			// バネの AABB を計算
+			AABB springAABB = {
+			    {spring->translation_.x - MapChipField::kBlockWidth / 2.0f, spring->translation_.y - MapChipField::kBlockHeight / 2.0f, -0.5f},
+			    {spring->translation_.x + MapChipField::kBlockWidth / 2.0f, spring->translation_.y + MapChipField::kBlockHeight / 2.0f, +0.5f}
+            };
+
+			// 当たり判定
+			if (IsCollision(playerAABB, springAABB)) {
+				// ★ バネに触れたら強制ジャンプ
+				velocity_.y = kJumpInitialVelocity * 1.5f; // 通常ジャンプの1.5倍
+				onGround_ = false;
+				return; // 1つヒットしたら終わり
+			}
+		}
+	}
+}

@@ -8,10 +8,11 @@
 // 内部リンケージ
 namespace {
 std::map<std::string, MapChipType> mapChipTable = {
-    {"0", MapChipType::kBlank},
-    {"1", MapChipType::kBlock},
-    {"2", MapChipType::kSpike},
-    {"3", MapChipType::kEnemy},
+    {"0", MapChipType::kBlank },
+    {"1", MapChipType::kBlock },
+    {"2", MapChipType::kSpike },
+    {"3", MapChipType::kEnemy },
+    {"4", MapChipType::kSpring},
 };
 }
 

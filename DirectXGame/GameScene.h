@@ -96,5 +96,7 @@ private:
 	Model* spikeModel_ = nullptr;
 	std::vector<std::vector<WorldTransform*>> worldTransformSpikes_;
 
-	std::vector<std::vector<WorldTransform*>> worldTransformMovingBlocks_;
+	std::vector<std::vector<WorldTransform*>> worldTransformSprings_;
+
+	Model* springModel_ = nullptr;
 };

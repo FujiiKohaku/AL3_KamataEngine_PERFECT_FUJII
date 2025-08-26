@@ -72,6 +72,8 @@ void GameScene::Initialize() {
 	HitEffect::SetModel(Model::CreateFromOBJ("AttackEffect", true));
 	HitEffect::SetCamera(camera_);
 
+	springModel_ = Model::CreateFromOBJ("tileBlock", true);
+
 	// Ready モデル
 	worldTransformReady_.Initialize();
 	worldTransformReady_.rotation_.x = std::numbers::pi_v<float> / 2.0f;
@@ -226,7 +228,16 @@ void GameScene::Update() {
 				WorldTransformUpdate(*spike);
 			}
 		}
+		// ===== バネ更新 =====
+		for (auto& line : worldTransformSprings_) {
+			for (auto& spring : line) {
+				if (!spring)
+					continue;
+				WorldTransformUpdate(*spring);
+			}
+		}
 
+		player_->CheckSpringCollision(worldTransformSprings_);
 		CheckAllCollisions();
 	} break;
 
@@ -311,6 +322,16 @@ void GameScene::Draw() {
 		}
 	}
 
+	// ====== バネ描画 ======
+	for (auto& line : worldTransformSprings_) {
+		for (auto& spring : line) {
+			if (!spring)
+				continue;
+			springModel_->Draw(*spring, *camera_, nullptr);
+		}
+	}
+
+
 	if (deathParticles_)
 		deathParticles_->Draw();
 
@@ -345,6 +366,10 @@ void GameScene::GenerateBlocks() {
 		worldTransformSpikes_[i].resize(numBlockHorizontal); // ★追加
 	}
 
+	worldTransformSprings_.resize(numBlockVirtical);
+	for (uint32_t i = 0; i < numBlockVirtical; ++i) {
+		worldTransformSprings_[i].resize(numBlockHorizontal);
+	}
 	for (uint32_t i = 0; i < numBlockVirtical; ++i) {
 		for (uint32_t j = 0; j < numBlockHorizontal; ++j) {
 			MapChipType type = mapChipField_->GetMapChipTypeByIndex(j, i);
@@ -373,6 +398,18 @@ void GameScene::GenerateBlocks() {
 				Enemy* newEnemy = new Enemy();
 				newEnemy->Initialize(enemyModel_, camera_, enemyPos, mapChipField_);
 				enemies_.push_back(newEnemy);
+			}
+
+			else if (type == MapChipType::kSpring) {
+				WorldTransform* wt = new WorldTransform();
+				wt->Initialize();
+				wt->translation_ = mapChipField_->GetMapChipPositionByIndex(j, i);
+
+				// ★バネはちょっと小さめにしてわかりやすく
+				wt->scale_ = {0.8f, 0.5f, 0.8f};
+
+				// 配列に追加（worldTransformSprings_ を用意しておく）
+				worldTransformSprings_[i][j] = wt;
 			}
 		}
 	}

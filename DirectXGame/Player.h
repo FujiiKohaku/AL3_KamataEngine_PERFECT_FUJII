@@ -28,6 +28,8 @@ public:
 	// 描画処理
 	void Draw();
 
+	void CheckSpringCollision(const std::vector<std::vector<WorldTransform*>>& springs);
+
 	//==================================================
 	// Getter / Setter
 	//==================================================
