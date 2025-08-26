@@ -54,11 +54,11 @@ void GameScene::Initialize() {
 	// モデル生成
 	model_ = Model::CreateFromOBJ("playermax", true);
 	modelRolling = Model::CreateFromOBJ("roll", true);
-	modelBlock_ = Model::CreateFromOBJ("block", true);
+	modelBlock_ = Model::CreateFromOBJ("tileBlock", true);
 	skydomeModel_ = Model::CreateFromOBJ("skydome", true);
 	enemyModel_ = Model::CreateFromOBJ("enemyBody", true);
 	dethParticleModel = Model::CreateFromOBJ("deathParticle");
-
+	spikeModel_ = Model::CreateFromOBJ("spike", true);
 	// Ready/Go モデル
 	readyModel_ = Model::CreateFromOBJ("rReady", true);
 	goModel_ = Model::CreateFromOBJ("Go!", true);
@@ -123,12 +123,12 @@ void GameScene::Initialize() {
 	cController_->SetMovableArea(cameraArea);
 
 	//// 敵生成
-	//for (int32_t i = 0; i < 2; ++i) {
+	// for (int32_t i = 0; i < 2; ++i) {
 	//	Enemy* newEnemy = new Enemy();
 	//	Vector3 enemyPosition = mapChipField_->GetMapChipPositionByIndex(14 + i * 2, 18);
 	//	newEnemy->Initialize(enemyModel_, camera_, enemyPosition);
 	//	enemies_.push_back(newEnemy);
-	//}
+	// }
 
 	// デスパーティクル
 	deathParticles_ = new DeathParticles;
@@ -144,6 +144,9 @@ void GameScene::Initialize() {
 	readyTimer_ = 0.0f;
 }
 
+//==================================================
+// 更新
+//==================================================
 //==================================================
 // 更新
 //==================================================
@@ -190,6 +193,7 @@ void GameScene::Update() {
 		for (Enemy* enemy : enemies_) {
 			enemy->UpDate();
 		}
+
 		// ===== デバッグカメラ切り替え =====
 #ifdef _DEBUG
 		if (Input::GetInstance()->TriggerKey(DIK_G)) {
@@ -204,6 +208,8 @@ void GameScene::Update() {
 		} else {
 			camera_->UpdateMatrix();
 		}
+
+		// ===== ブロック更新 =====
 		for (auto& line : worldTransformBlocks_) {
 			for (auto& block : line) {
 				if (!block)
@@ -211,6 +217,16 @@ void GameScene::Update() {
 				WorldTransformUpdate(*block);
 			}
 		}
+
+		// ===== スパイク更新 =====
+		for (auto& line : worldTransformSpikes_) {
+			for (auto& spike : line) {
+				if (!spike)
+					continue;
+				WorldTransformUpdate(*spike);
+			}
+		}
+
 		CheckAllCollisions();
 	} break;
 
@@ -277,11 +293,21 @@ void GameScene::Draw() {
 		enemy->Draw();
 	skydome_->Draw();
 
+	// ====== ブロック描画 ======
 	for (auto& line : worldTransformBlocks_) {
 		for (auto& block : line) {
 			if (!block)
 				continue;
 			modelBlock_->Draw(*block, *camera_, nullptr);
+		}
+	}
+
+	// ====== スパイク描画 ======
+	for (auto& line : worldTransformSpikes_) {
+		for (auto& spike : line) {
+			if (!spike)
+				continue;
+			spikeModel_->Draw(*spike, *camera_, nullptr);
 		}
 	}
 
@@ -312,31 +338,45 @@ void GameScene::GenerateBlocks() {
 	uint32_t numBlockHorizontal = mapChipField_->GetNumBlockHorizontal();
 
 	worldTransformBlocks_.resize(numBlockVirtical);
+	worldTransformSpikes_.resize(numBlockVirtical); // ★追加
+
 	for (uint32_t i = 0; i < numBlockVirtical; ++i) {
 		worldTransformBlocks_[i].resize(numBlockHorizontal);
+		worldTransformSpikes_[i].resize(numBlockHorizontal); // ★追加
 	}
 
 	for (uint32_t i = 0; i < numBlockVirtical; ++i) {
 		for (uint32_t j = 0; j < numBlockHorizontal; ++j) {
 			MapChipType type = mapChipField_->GetMapChipTypeByIndex(j, i);
 
-			if (type == MapChipType::kBlock || type == MapChipType::kSpike) {
-				// ブロックやトゲを配置
-				WorldTransform* worldTransform = new WorldTransform();
-				worldTransform->Initialize();
-				worldTransform->translation_ = mapChipField_->GetMapChipPositionByIndex(j, i);
-				worldTransformBlocks_[i][j] = worldTransform;
+			if (type == MapChipType::kBlock) {
+				WorldTransform* wt = new WorldTransform();
+				wt->Initialize();
+				wt->translation_ = mapChipField_->GetMapChipPositionByIndex(j, i);
+				worldTransformBlocks_[i][j] = wt;
+
+			} else if (type == MapChipType::kSpike) {
+				WorldTransform* wt = new WorldTransform();
+				wt->Initialize();
+				wt->translation_ = mapChipField_->GetMapChipPositionByIndex(j, i);
+
+				//  サイズを0.5倍
+				wt->scale_ = {0.5f, 0.5f, 0.5f};
+
+				// ★ 左に90°回転（Y軸方向を想定）
+				wt->rotation_.y = -std::numbers::pi_v<float> / 2.0f;
+
+				worldTransformSpikes_[i][j] = wt;
+
 			} else if (type == MapChipType::kEnemy) {
-				// ★ 敵を生成
 				Vector3 enemyPos = mapChipField_->GetMapChipPositionByIndex(j, i);
 				Enemy* newEnemy = new Enemy();
-				newEnemy->Initialize(enemyModel_, camera_, enemyPos,mapChipField_);
+				newEnemy->Initialize(enemyModel_, camera_, enemyPos, mapChipField_);
 				enemies_.push_back(newEnemy);
 			}
 		}
 	}
 }
-
 
 //==================================================
 // 衝突判定

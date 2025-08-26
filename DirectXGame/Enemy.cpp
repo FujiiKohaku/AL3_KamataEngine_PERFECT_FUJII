@@ -142,3 +142,4 @@ void Enemy::OnCollision(const Player* player) {
 		HitEffect::Create(GetWorldPosition());
 	}
 }
+bool Enemy::IsDefeated() const { return (behavior_ == Behavior::kDefeated || isDead_); }

@@ -26,6 +26,7 @@ public:
 
 	// 生存判定
 	bool IsDead() const { return isDead_; }
+	bool IsDefeated() const;
 
 private:
 	KamataEngine::WorldTransform worldTransform_;

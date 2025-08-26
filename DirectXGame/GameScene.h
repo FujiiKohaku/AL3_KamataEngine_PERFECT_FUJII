@@ -27,6 +27,8 @@ public:
 
 	bool IsFinished() const { return finished_; }
 
+
+
 private:
 	// ===== リソース =====
 	// モデル
@@ -90,4 +92,9 @@ private:
 	Fade* fade_ = nullptr;
 
 	std::list<HitEffect*> hitEffects_;
+
+	Model* spikeModel_ = nullptr;
+	std::vector<std::vector<WorldTransform*>> worldTransformSpikes_;
+
+	std::vector<std::vector<WorldTransform*>> worldTransformMovingBlocks_;
 };

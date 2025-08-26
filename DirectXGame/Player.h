@@ -163,4 +163,6 @@ private:
 	Model* dustModel_;
 
 	float dustEmitTimer_;
+	const float kJumpInitialVelocity = 0.25f; // 最低ジャンプ高さ
+	const float kJumpBoost = 0.35f;           // 長押し補助の強さ
 };
