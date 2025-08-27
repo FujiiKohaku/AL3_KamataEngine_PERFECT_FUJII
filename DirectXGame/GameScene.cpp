@@ -48,6 +48,8 @@ GameScene::~GameScene() {
 			delete worldTransformBlock;
 		}
 	}
+
+	delete spriteMove_;
 	worldTransformBlocks_.clear();
 }
 
@@ -109,7 +111,7 @@ void GameScene::Initialize() {
 	mapChipField_->LoadMapChipCsv("Resources/blocks3.csv");
 
 	// プレイヤー生成
-	Vector3 playerposition = mapChipField_->GetMapChipPositionByIndex(195, 10);
+	Vector3 playerposition = mapChipField_->GetMapChipPositionByIndex(5, 10);
 	player_ = new Player();
 	player_->Initialize(model_, modelRolling, camera_, playerposition);
 	player_->SetMapChipField(mapChipField_);
@@ -142,6 +144,15 @@ void GameScene::Initialize() {
 
 	// Ready-Go タイマー
 	readyTimer_ = 0.0f;
+
+	textureHandleMove_ = TextureManager::Load("setumei.jpg");
+	textureHandleJump_ = TextureManager::Load("junp.jpg");
+	textureHandleAttack = TextureManager::Load("Attack.jpg");
+	textureHandleDown = TextureManager::Load("down.jpg");
+	spriteMove_ = KamataEngine::Sprite::Create(textureHandleMove_, {50, 50});
+	spriteJump_ = KamataEngine::Sprite::Create(textureHandleJump_, {50, 150});
+	spriteAttack = KamataEngine::Sprite::Create(textureHandleAttack, {50, 250});
+	spriteDown = KamataEngine::Sprite::Create(textureHandleDown, {50, 350});
 }
 
 //==================================================
@@ -262,6 +273,7 @@ void GameScene::Update() {
 		player_->CheckSpringCollision(worldTransformSprings_);
 		player_->CheckFireCollision(worldTransformFires_);
 		CheckAllCollisions();
+
 	} break;
 
 	case Phase::kDeath: {
@@ -319,21 +331,29 @@ void GameScene::Update() {
 //==================================================
 void GameScene::Draw() {
 	KamataEngine::DirectXCommon* dxcommon = KamataEngine::DirectXCommon::GetInstance();
+
+	// ==============================
+	// 3D描画開始
+	// ==============================
 	Model::PreDraw(dxcommon->GetCommandList());
 
-	if (!player_->IsDead())
+	// --- プレイヤー ---
+	if (!player_->IsDead()) {
 		player_->Draw();
-	for (Enemy* enemy : enemies_)
-		enemy->Draw();
+	}
 
-	// Enemy2 の描画
+	// --- 敵描画 ---
+	for (Enemy* enemy : enemies_) {
+		enemy->Draw();
+	}
 	for (Enemy2* enemy2 : enemies2_) {
 		enemy2->Draw();
 	}
 
+	// --- スカイドーム ---
 	skydome_->Draw();
 
-	// ====== ブロック描画 ======
+	// --- ブロック ---
 	for (auto& line : worldTransformBlocks_) {
 		for (auto& block : line) {
 			if (!block)
@@ -342,7 +362,7 @@ void GameScene::Draw() {
 		}
 	}
 
-	// ====== スパイク描画 ======
+	// --- スパイク ---
 	for (auto& line : worldTransformSpikes_) {
 		for (auto& spike : line) {
 			if (!spike)
@@ -351,7 +371,7 @@ void GameScene::Draw() {
 		}
 	}
 
-	// ====== バネ描画 ======
+	// --- バネ ---
 	for (auto& line : worldTransformSprings_) {
 		for (auto& spring : line) {
 			if (!spring)
@@ -360,7 +380,7 @@ void GameScene::Draw() {
 		}
 	}
 
-	// ====== 動く火の描画 ======
+	// --- 動く火 ---
 	for (auto& line : worldTransformFires_) {
 		for (auto& fire : line) {
 			if (!fire)
@@ -369,18 +389,22 @@ void GameScene::Draw() {
 		}
 	}
 
+	// --- ゴール ---
 	if (worldTransformGoal_) {
 		goalModel_->Draw(*worldTransformGoal_, *camera_);
 	}
 
-	if (deathParticles_)
+	// --- デスパーティクル ---
+	if (deathParticles_) {
 		deathParticles_->Draw();
+	}
 
-	// ====== ヒットエフェクト描画 ======
+	// --- ヒットエフェクト ---
 	for (auto* effect : hitEffects_) {
 		effect->Draw();
 	}
 
+	// --- Ready/Go 演出 ---
 	if (phase_ == Phase::kReady) {
 		if (readyTimer_ < 1.0f) {
 			readyModel_->Draw(worldTransformReady_, *camera_);
@@ -388,8 +412,39 @@ void GameScene::Draw() {
 			goModel_->Draw(worldTransformGo_, *camera_);
 		}
 	}
-	fade_->Draw();
+
 	Model::PostDraw();
+	// ==============================
+	// 3D描画終了
+	// ==============================
+
+	// ==============================
+	// 2D描画開始 (UI, フェード, スプライト)
+	// ==============================
+	Sprite::PreDraw(dxcommon->GetCommandList());
+
+	// --- 説明スプライト ---
+	if (spriteMove_) {
+		spriteMove_->Draw();
+	}
+	if (spriteJump_) {
+		spriteJump_->Draw();
+	}
+	if (spriteAttack) {
+		spriteAttack->Draw();
+	}
+	if (spriteDown) {
+		spriteDown->Draw();
+	}
+	// --- フェード ---
+	if (fade_) {
+		fade_->Draw();
+	}
+
+	Sprite::PostDraw();
+	// ==============================
+	// 2D描画終了
+	// ==============================
 }
 
 //==================================================
@@ -511,9 +566,12 @@ void GameScene::CheckAllCollisions() {
         };
 
 		if (IsCollision(player_->GetAABB(), goalAABB)) {
-			phase_ = Phase::kFadeOut; //クリア
-			isClear_ = true;  
-			finished_ = true;
+			if (phase_ != Phase::kFadeOut) {
+				// フェードアウト開始（1秒くらい）
+				fade_->Start(Fade::Status::FadeOut, 1.0f);
+				phase_ = Phase::kFadeOut;
+				isClear_ = true;
+			}
 		}
 	}
 }

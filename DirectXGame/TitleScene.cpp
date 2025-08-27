@@ -15,7 +15,7 @@ void TitleScene::Initialize() {
 	//--------------------------------------------------
 	// モデル生成
 	//--------------------------------------------------
-	modelTitle_ = Model::CreateFromOBJ("titleFont", true);
+	modelTitle_ = Model::CreateFromOBJ("aru", true);
 	modelPlayer_ = Model::CreateFromOBJ("playermax");
 	sun_ = Model::CreateFromOBJ("isLand", true);
 	backGround_ = Model::CreateFromOBJ("sora", true);
@@ -68,6 +68,13 @@ void TitleScene::Initialize() {
 	worldTransformPushSpace_.translation_.y = -10.0f;
 	worldTransformPushSpace_.rotation_.x = std::numbers::pi_v<float> / 2.0f;
 	worldTransformPushSpace_.rotation_.y = std::numbers::pi_v<float>;
+
+	//-------------------------------------------------
+	// タイトル
+	//-------------------------------------------------
+	worldTransformTitle_.rotation_.x = std::numbers::pi_v<float> / 2.0f;
+	worldTransformTitle_.rotation_.y = std::numbers::pi_v<float>;
+	worldTransformTitle_.translation_.z = -5.0f;
 
 	//--------------------------------------------------
 	// フェード生成

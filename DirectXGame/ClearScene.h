@@ -3,6 +3,7 @@
 #include "Fade.h"
 #include "KamataEngine.h"
 #include "Math.h"
+
 class ClearScene {
 public:
 	void Initialize();
@@ -10,11 +11,29 @@ public:
 	void Draw();
 
 	bool IsFinished() const { return finished_; }
-	bool GoToTitle() const { return goToTitle_; }
+
+	enum class Result { None, Retry, Title };
+	Result GetResult() const { return result_; }
+
+	enum class State { WaitInput, FadeOut, Finish };
+	State state_;
 
 private:
-	KamataEngine::Camera* camera_ = nullptr;
-	Fade* fade_ = nullptr;
+	enum class Phase { kFadeIn, kMain, kFadeOut };
+
+	Phase phase_ = Phase::kFadeIn;
 	bool finished_ = false;
-	bool goToTitle_ = false;
+	Result result_ = Result::None;
+
+	Fade* fade_ = nullptr;
+
+	KamataEngine::Model* clearFont_ = nullptr; // "GAME CLEAR"文字
+	KamataEngine::Model* retryFont_ = nullptr; // "Press Enter"文字
+
+	KamataEngine::Camera* camera_ = nullptr;
+	KamataEngine::Model* modelSkyDome_ = nullptr;
+
+	KamataEngine::WorldTransform worldTransformSky_;
+	KamataEngine::WorldTransform worldTransformClear_;
+	KamataEngine::WorldTransform worldTransformPushTo_;
 };

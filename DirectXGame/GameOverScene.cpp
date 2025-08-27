@@ -1,4 +1,5 @@
 #include "GameOverScene.h"
+#include <algorithm>
 #include <numbers>
 
 //==================================================

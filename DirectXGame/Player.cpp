@@ -83,6 +83,9 @@ void Player::InputMove() {
 			velocity_.y = kJumpInitialVelocity; // 初速を与える
 			onGround_ = false;
 			jumpCount_++; // ジャンプ回数を増やす
+
+			
+
 		}
 	}
 

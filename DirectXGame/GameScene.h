@@ -13,98 +13,127 @@
 #include <list>
 #include <vector>
 
+//--------------------------------------------------
 // ゲームシーン
+//--------------------------------------------------
 class GameScene {
 public:
 	~GameScene();
 
-	// ライフサイクル
-	void Initialize();
-	void Update();
-	void Draw();
+	// ===== ライフサイクル =====
+	void Initialize(); // 初期化
+	void Update();     // 更新
+	void Draw();       // 描画
 
-	void GenerateBlocks();
-	void CheckAllCollisions();
+	// ===== 補助処理 =====
+	void GenerateBlocks();     // マップチップからブロック生成
+	void CheckAllCollisions(); // 全衝突判定
 
+	// ===== 状態確認 =====
 	bool IsFinished() const { return finished_; }
 	bool IsClear() const { return isClear_; }
 
 private:
-	// ===== リソース =====
-	// モデル
+	//--------------------------------------------------
+	// リソース（モデル / テクスチャ）
+	//--------------------------------------------------
+	// プレイヤー・敵・背景
 	KamataEngine::Model* model_ = nullptr;
 	KamataEngine::Model* modelRolling = nullptr;
 	KamataEngine::Model* modelBlock_ = nullptr;
 	KamataEngine::Model* skydomeModel_ = nullptr;
 	KamataEngine::Model* enemyModel_ = nullptr;
+	KamataEngine::Model* enemyModel2_ = nullptr;
 	KamataEngine::Model* dethParticleModel = nullptr;
 
-	// Ready / Go!! モデル
+	// オブジェクト
+	Model* spikeModel_ = nullptr;
+	Model* springModel_ = nullptr;
+	Model* fireModel_ = nullptr;
+	KamataEngine::Model* goalModel_ = nullptr;
+
+	// READY / GO!! 演出モデル
 	KamataEngine::Model* readyModel_ = nullptr;
 	KamataEngine::Model* goModel_ = nullptr;
 
 	// テクスチャ
 	uint32_t textureHandle_ = 0;
+	uint32_t textureHandleMove_ = 0;
+	uint32_t textureHandleJump_ = 0;
+	uint32_t textureHandleAttack = 0;
+	uint32_t textureHandleDown = 0;
+	//--------------------------------------------------
+	// 変換行列 / カメラ
+	//--------------------------------------------------
+	KamataEngine::WorldTransform worldtransform_;        // 汎用ワールド変換
+	KamataEngine::WorldTransform worldTransformReady_;   // Ready用
+	KamataEngine::WorldTransform worldTransformGo_;      // Go用
+	KamataEngine::WorldTransform worldTransformSkydome_; // スカイドーム用
 
-	// ===== 変換・カメラ =====
-	KamataEngine::WorldTransform worldtransform_;
-	KamataEngine::WorldTransform worldTransformSkydome_;
-	KamataEngine::WorldTransform worldTransformReady_;
-	KamataEngine::WorldTransform worldTransformGo_;
+	KamataEngine::Camera* camera_ = nullptr;           // メインカメラ
+	KamataEngine::DebugCamera* debugCamera_ = nullptr; // デバッグカメラ
 
-	KamataEngine::Camera* camera_ = nullptr;
-	KamataEngine::DebugCamera* debugCamera_ = nullptr;
-
-	// ===== ゲームオブジェクト =====
+	//--------------------------------------------------
+	// ゲームオブジェクト
+	//--------------------------------------------------
 	Player* player_ = nullptr;
 	Skydome* skydome_ = nullptr;
-	std::list<Enemy*> enemies_;
-	std::list<Enemy2*> enemies2_;
 
-	// ブロック用ワールドトランスフォーム（インスタンスごとに所有）
-	std::vector<std::vector<WorldTransform*>> worldTransformBlocks_;
+	std::list<Enemy*> enemies_;   // 敵1リスト
+	std::list<Enemy2*> enemies2_; // 敵2リスト
 
-	// ===== フラグ =====
-	bool isDebugCameraActive_ = false;
+	// マップチップ由来の配置オブジェクト
+	std::vector<std::vector<WorldTransform*>> worldTransformBlocks_;  // ブロック
+	std::vector<std::vector<WorldTransform*>> worldTransformSpikes_;  // スパイク
+	std::vector<std::vector<WorldTransform*>> worldTransformSprings_; // バネ
+	std::vector<std::vector<WorldTransform*>> worldTransformFires_;   // 火
 
-	// ===== マップチップフィールド =====
+	WorldTransform* worldTransformGoal_ = nullptr; // ゴール
+
+	//--------------------------------------------------
+	// マップ / カメラ
+	//--------------------------------------------------
 	MapChipField* mapChipField_ = nullptr;
-
-	// ===== カメラコントローラー =====
 	CameraController* cController_ = nullptr;
+	bool isDebugCameraActive_ = false; // デバッグカメラON/OFF
 
-	// ===== デス演出 =====
-	DeathParticles* deathParticles_ = nullptr;
+	//--------------------------------------------------
+	// 演出系
+	//--------------------------------------------------
+	DeathParticles* deathParticles_ = nullptr; // デス演出
+	std::list<HitEffect*> hitEffects_;         // ヒットエフェクト
 
-	// ===== フェーズ管理 =====
+	// READY-GO!! 管理
+	float readyTimer_ = 0.0f;
+
+	// フェーズ管理
 	enum class Phase {
 		kFadeIn,
-		kReady, // READY-GO!! 演出
-		kPlay,
-		kDeath,
-		kFadeOut,
+		kReady,   // READY-GO!! 演出
+		kPlay,    // プレイ中
+		kDeath,   // 死亡演出
+		kFadeOut, // シーン終了
 	};
 	Phase phase_ = Phase::kFadeIn;
-
-	float readyTimer_ = 0.0f; // READY-GO!! 用タイマー
-
 	void ChangePhese();
-	bool finished_ = false;
+
+	// フェード
 	Fade* fade_ = nullptr;
 
-	std::list<HitEffect*> hitEffects_;
+	//--------------------------------------------------
+	// 状態フラグ
+	//--------------------------------------------------
+	bool finished_ = false; // シーン終了フラグ
+	bool isClear_ = false;  // ゴールクリアフラグ
 
-	Model* spikeModel_ = nullptr;
-	std::vector<std::vector<WorldTransform*>> worldTransformSpikes_;
+	//--------------------------------------------------
+	// UI（2Dスプライト）
+	//--------------------------------------------------
+	KamataEngine::Sprite* spriteMove_ = nullptr;
 
-	std::vector<std::vector<WorldTransform*>> worldTransformSprings_;
-	std::vector<std::vector<WorldTransform*>> worldTransformFires_;
-	WorldTransform* worldTransformGoal_ = nullptr;
-	KamataEngine::Model* goalModel_ = nullptr;        
-	Model* fireModel_ = nullptr;
+	KamataEngine::Sprite* spriteJump_ = nullptr;
 
-	Model* springModel_ = nullptr;
+	KamataEngine::Sprite* spriteAttack = nullptr;
 
-	Model* enemyModel2_;
-	bool isClear_ = false;
+	KamataEngine::Sprite* spriteDown = nullptr;
 };
