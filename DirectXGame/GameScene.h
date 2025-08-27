@@ -27,6 +27,7 @@ public:
 	void CheckAllCollisions();
 
 	bool IsFinished() const { return finished_; }
+	bool IsClear() const { return isClear_; }
 
 private:
 	// ===== リソース =====
@@ -98,9 +99,12 @@ private:
 
 	std::vector<std::vector<WorldTransform*>> worldTransformSprings_;
 	std::vector<std::vector<WorldTransform*>> worldTransformFires_;
+	WorldTransform* worldTransformGoal_ = nullptr;
+	KamataEngine::Model* goalModel_ = nullptr;        
 	Model* fireModel_ = nullptr;
 
 	Model* springModel_ = nullptr;
 
 	Model* enemyModel2_;
+	bool isClear_ = false;
 };

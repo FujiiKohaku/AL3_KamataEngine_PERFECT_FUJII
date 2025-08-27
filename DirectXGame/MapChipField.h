@@ -12,6 +12,7 @@ enum class MapChipType {
 	kSpring, // ばね追加
 	kMovingFire,//火の玉
 	kEnemy2,
+	kGoal,
 };
 
 struct MapChipData {

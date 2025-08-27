@@ -15,6 +15,7 @@ std::map<std::string, MapChipType> mapChipTable = {
     {"4", MapChipType::kSpring    },
     {"5", MapChipType::kMovingFire},
     {"6", MapChipType::kEnemy2    },
+    {"7", MapChipType::kGoal      },
 };
 }
 

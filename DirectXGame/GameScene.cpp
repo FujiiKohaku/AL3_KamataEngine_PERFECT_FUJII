@@ -79,6 +79,7 @@ void GameScene::Initialize() {
 	springModel_ = Model::CreateFromOBJ("spring", true);
 
 	fireModel_ = Model::CreateFromOBJ("fire", true);
+	goalModel_ = Model::CreateFromOBJ("doa", true);
 	// Ready モデル
 	worldTransformReady_.Initialize();
 	worldTransformReady_.rotation_.x = std::numbers::pi_v<float> / 2.0f;
@@ -108,7 +109,7 @@ void GameScene::Initialize() {
 	mapChipField_->LoadMapChipCsv("Resources/blocks3.csv");
 
 	// プレイヤー生成
-	Vector3 playerposition = mapChipField_->GetMapChipPositionByIndex(10, 10);
+	Vector3 playerposition = mapChipField_->GetMapChipPositionByIndex(195, 10);
 	player_ = new Player();
 	player_->Initialize(model_, modelRolling, camera_, playerposition);
 	player_->SetMapChipField(mapChipField_);
@@ -253,6 +254,11 @@ void GameScene::Update() {
 				WorldTransformUpdate(*fire);
 			}
 		}
+
+		if (worldTransformGoal_) {
+			WorldTransformUpdate(*worldTransformGoal_);
+		}
+
 		player_->CheckSpringCollision(worldTransformSprings_);
 		player_->CheckFireCollision(worldTransformFires_);
 		CheckAllCollisions();
@@ -320,7 +326,7 @@ void GameScene::Draw() {
 	for (Enemy* enemy : enemies_)
 		enemy->Draw();
 
-// Enemy2 の描画
+	// Enemy2 の描画
 	for (Enemy2* enemy2 : enemies2_) {
 		enemy2->Draw();
 	}
@@ -361,6 +367,10 @@ void GameScene::Draw() {
 				continue;
 			fireModel_->Draw(*fire, *camera_, nullptr);
 		}
+	}
+
+	if (worldTransformGoal_) {
+		goalModel_->Draw(*worldTransformGoal_, *camera_);
 	}
 
 	if (deathParticles_)
@@ -423,7 +433,7 @@ void GameScene::GenerateBlocks() {
 				//  サイズを0.5倍
 				wt->scale_ = {0.5f, 0.5f, 0.5f};
 
-				// ★ 左に90°回転（Y軸方向を想定）
+				//  左に90°回転（Y軸方向を想定）
 				wt->rotation_.y = -std::numbers::pi_v<float> / 2.0f;
 
 				worldTransformSpikes_[i][j] = wt;
@@ -457,6 +467,13 @@ void GameScene::GenerateBlocks() {
 				Enemy2* newEnemy2 = new Enemy2();
 				newEnemy2->Initialize(enemyModel2_, camera_, enemyPos, mapChipField_);
 				enemies2_.push_back(newEnemy2);
+			} else if (type == MapChipType::kGoal) {
+				WorldTransform* wt = new WorldTransform();
+				wt->Initialize();
+				wt->translation_ = mapChipField_->GetMapChipPositionByIndex(j, i);
+				wt->scale_ = {1.0f, 1.0f, 1.0f};
+				wt->rotation_.y = -std::numbers::pi_v<float> / 2.0f;
+				worldTransformGoal_ = wt; // 1個だけなら単体で持つ
 			}
 		}
 	}
@@ -466,28 +483,40 @@ void GameScene::GenerateBlocks() {
 // 衝突判定
 //==================================================
 void GameScene::CheckAllCollisions() {
-    AABB aabb1 = player_->GetAABB();
-    AABB aabb2;
+	AABB aabb1 = player_->GetAABB();
+	AABB aabb2;
 
-    // Enemy1 との当たり判定
-    for (Enemy* enemy : enemies_) {
-        aabb2 = enemy->GetAABB();
-        if (IsCollision(aabb1, aabb2)) {
-            player_->OnCollision(enemy);
-            enemy->OnCollision(player_);
-        }
-    }
+	// Enemy1 との当たり判定
+	for (Enemy* enemy : enemies_) {
+		aabb2 = enemy->GetAABB();
+		if (IsCollision(aabb1, aabb2)) {
+			player_->OnCollision(enemy);
+			enemy->OnCollision(player_);
+		}
+	}
 
-    // Enemy2 との当たり判定
-    for (Enemy2* enemy2 : enemies2_) {
-        aabb2 = enemy2->GetAABB();
-        if (IsCollision(aabb1, aabb2)) {
-            player_->OnCollision(enemy2);
-            enemy2->OnCollision(player_);
-        }
-    }
+	// Enemy2 との当たり判定
+	for (Enemy2* enemy2 : enemies2_) {
+		aabb2 = enemy2->GetAABB();
+		if (IsCollision(aabb1, aabb2)) {
+			player_->OnCollision(enemy2);
+			enemy2->OnCollision(player_);
+		}
+	}
+
+	if (worldTransformGoal_) {
+		AABB goalAABB = {
+		    {worldTransformGoal_->translation_.x - 0.5f, worldTransformGoal_->translation_.y - 0.5f, -0.5f},
+		    {worldTransformGoal_->translation_.x + 0.5f, worldTransformGoal_->translation_.y + 0.5f, 0.5f }
+        };
+
+		if (IsCollision(player_->GetAABB(), goalAABB)) {
+			phase_ = Phase::kFadeOut; //クリア
+			isClear_ = true;  
+			finished_ = true;
+		}
+	}
 }
-
 
 //==================================================
 // フェーズ切替
