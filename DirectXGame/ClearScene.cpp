@@ -36,6 +36,10 @@ void ClearScene::Initialize() {
 
 	// 状態初期化
 	state_ = State::WaitInput;
+
+	soundHandleClear_ = Audio::GetInstance()->LoadWave("clear.wav");
+	Audio::GetInstance()->PlayWave(soundHandleClear_);
+	soundHandleSelect_ = Audio::GetInstance()->LoadWave("serect.wav");
 }
 
 //==================================================
@@ -55,8 +59,8 @@ void ClearScene::Update() {
 	float expandTime = 1.5f; // 拡大演出の時間
 
 	// 初期位置と最終位置
-	float startY = -3.0f;  // 画面下から
-	float centerY = 0.0f;  // 画面中央
+	float startY = -3.0f; // 画面下から
+	float centerY = 0.0f; // 画面中央
 	float offsetX = 0.0f; // ← 左に寄せたい量（マイナスで左、プラスで右）
 
 	// 打ち上げ
@@ -77,7 +81,7 @@ void ClearScene::Update() {
 		float t = (timer - (launchTime + waitTime)) / expandTime;
 		worldTransformClear_.translation_.x = offsetX;
 		worldTransformClear_.translation_.y = centerY;
-		float s = 0.3f + t * 1.5f; 
+		float s = 0.3f + t * 1.5f;
 		worldTransformClear_.scale_ = {s, s, s};
 	}
 	// 終了後はそのまま表示
@@ -87,8 +91,6 @@ void ClearScene::Update() {
 		worldTransformClear_.scale_ = {1.8f, 1.8f, 1.8f};
 	}
 
-
-
 	//==========================================
 	// 状態管理
 	//==========================================
@@ -97,6 +99,7 @@ void ClearScene::Update() {
 		// Enter押されたらフェードアウト開始
 		if (Input::GetInstance()->TriggerKey(DIK_RETURN)) {
 			fade_->Start(Fade::Status::FadeOut, 1.0f);
+			Audio::GetInstance()->PlayWave(soundHandleSelect_);
 			state_ = State::FadeOut;
 		}
 		break;

@@ -49,4 +49,6 @@ private:
 
 	// 02_11_30page 色の数値
 	Vector4 color_;
+
+	std::array<Vector3, kNumParticles> velocities_;
 };

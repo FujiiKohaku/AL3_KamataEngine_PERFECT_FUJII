@@ -36,6 +36,11 @@ void GameOverScene::Initialize() {
 
 	// 状態初期化
 	state_ = State::WaitInput;
+
+	soundHandleGameOver_ = Audio::GetInstance()->LoadWave("gameover.wav");
+	Audio::GetInstance()->PlayWave(soundHandleGameOver_);
+
+	soundHandleSelect_ = Audio::GetInstance()->LoadWave("serect.wav");
 }
 
 //==================================================
@@ -64,6 +69,7 @@ void GameOverScene::Update() {
 	case State::WaitInput:
 		// Enter押されたらフェードアウト開始
 		if (Input::GetInstance()->TriggerKey(DIK_RETURN)) {
+			Audio::GetInstance()->PlayWave(soundHandleSelect_);
 			fade_->Start(Fade::Status::FadeOut, 1.0f);
 			state_ = State::FadeOut;
 		}

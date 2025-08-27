@@ -1,11 +1,11 @@
 #pragma once
 #include "DustParticles.h"
+#include "Enemy2.h"
 #include "KamataEngine.h"
 #include "MapChipField.h"
 #include "Math.h"
 #include <algorithm>
 #include <array>
-#include "Enemy2.h"
 #include <numbers>
 // 前方宣言
 class MapChipField;
@@ -174,4 +174,12 @@ private:
 
 	int jumpCount_ = 0;          // 今何回ジャンプしたか
 	const int kMaxJumpCount = 2; // 最大ジャンプ回数（二段ジャンプなら2）
+
+	uint32_t soundHandleAttack = 0;
+
+	uint32_t soundHandleDeath = 0;
+
+	uint32_t soundHandleSpring = 0;
+
+	uint32_t soundHandleChange = 0;
 };

@@ -87,6 +87,8 @@ void TitleScene::Initialize() {
 	// フェーズ初期化
 	//--------------------------------------------------
 	phase_ = Phase::kFadeIn;
+
+	soundHandleSelecct = Audio::GetInstance()->LoadWave("serect.wav");
 }
 
 //==================================================
@@ -108,6 +110,7 @@ void TitleScene::Update() {
 	case Phase::kMain: {
 		if (Input::GetInstance()->PushKey(DIK_SPACE)) {
 			fade_->Start(Fade::Status::FadeOut, 1.0f);
+			Audio::GetInstance()->PlayWave(soundHandleSelecct);
 			phase_ = Phase::kFadeOut;
 		}
 	} break;

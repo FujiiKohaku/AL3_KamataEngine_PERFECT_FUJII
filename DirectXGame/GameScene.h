@@ -62,6 +62,7 @@ private:
 	uint32_t textureHandleJump_ = 0;
 	uint32_t textureHandleAttack = 0;
 	uint32_t textureHandleDown = 0;
+	uint32_t soundhandleGo_ = 0;
 	//--------------------------------------------------
 	// 変換行列 / カメラ
 	//--------------------------------------------------
@@ -136,4 +137,6 @@ private:
 	KamataEngine::Sprite* spriteAttack = nullptr;
 
 	KamataEngine::Sprite* spriteDown = nullptr;
+
+	bool playedReadySound_ = false;
 };

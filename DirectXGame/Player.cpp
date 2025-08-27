@@ -1,8 +1,8 @@
 #define NOMINMAX
 #include "Player.h"
+#include "Enemy.h"
 #include "imgui.h"
 #include <cassert>
-#include "Enemy.h"
 using namespace KamataEngine;
 
 //==================================================
@@ -31,6 +31,10 @@ void Player::Initialize(KamataEngine::Model* model, KamataEngine::Model* modelRo
 
 	dustModel_ = Model::CreateFromOBJ("particle", true);
 
+	soundHandleAttack = Audio::GetInstance()->LoadWave("kiru.wav");
+	soundHandleDeath = Audio::GetInstance()->LoadWave("desu.wav");
+	soundHandleSpring = Audio::GetInstance()->LoadWave("jumpbane.wav");
+	soundHandleChange = Audio::GetInstance()->LoadWave("changeMode.wav");
 	dust_.Initialize(dustModel_, camera_);
 }
 
@@ -73,7 +77,7 @@ void Player::InputMove() {
 		velocity_.x = std::clamp(velocity_.x, -kLimitRunSpeed, kLimitRunSpeed);
 
 	} else {
-		// 入力なし → 減速
+
 		velocity_.x *= (1.0f - kAttenuation);
 	}
 
@@ -82,19 +86,16 @@ void Player::InputMove() {
 		if (onGround_ || jumpCount_ < kMaxJumpCount) {
 			velocity_.y = kJumpInitialVelocity; // 初速を与える
 			onGround_ = false;
-			jumpCount_++; // ジャンプ回数を増やす
-
-			
-
+			jumpCount_++;
 		}
 	}
 
-	// ★ ジャンプ中の長押し補助（上昇中だけ）
+	//  ジャンプ中の長押し補助（上昇中だけ）
 	if (Input::GetInstance()->PushKey(DIK_SPACE) && velocity_.y > 0) {
 		velocity_.y += kJumpBoost / 60.0f;
 	}
 
-	// ★ 重力を加える
+	//  重力を加える
 	velocity_.y -= kGravityAcceleration / 60.0f;
 	velocity_.y = std::max(velocity_.y, -kLimitFallSpeed); // 落下速度制限
 
@@ -195,9 +196,10 @@ void Player::CheckMapCollisionDown(CollisionMapInfo& info) {
 		indexSet = mapChipField_->GetMapChipIndexSetByposition(positionsNew[corner]);
 		MapChipType mapChip = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
 
-		// ★ トゲなら即死
+		// トゲなら即死
 		if (mapChip == MapChipType::kSpike) {
 			isDead_ = true;
+			Audio::GetInstance()->PlayWave(soundHandleDeath);
 			return;
 		}
 
@@ -246,7 +248,8 @@ void Player::CheckMapCollisionRight(CollisionMapInfo& info) {
 
 		// ===== トゲなら即死 =====
 		if (mapChip == MapChipType::kSpike) {
-			isDead_ = true; // ★右からトゲに当たったら即死
+			isDead_ = true; // 右からトゲに当たったら即死
+			Audio::GetInstance()->PlayWave(soundHandleDeath);
 			return;
 		}
 	}
@@ -292,7 +295,8 @@ void Player::CheckMapCollisionLeft(CollisionMapInfo& info) {
 
 		// ===== トゲなら即死 =====
 		if (mapChip == MapChipType::kSpike) {
-			isDead_ = true; // ★ 左からトゲに当たったら即死
+			isDead_ = true; //  左からトゲに当たったら即死
+			Audio::GetInstance()->PlayWave(soundHandleDeath);
 			return;
 		}
 	}
@@ -364,9 +368,6 @@ void Player::UpdateOnWall(const CollisionMapInfo& info) {
 //==================================================
 void Player::Update() {
 
-
-	
-
 	//==================================================
 	// 状態ごとの更新
 	//==================================================
@@ -421,7 +422,8 @@ void Player::Update() {
 	//==================================================
 	// 穴落下死亡判定
 	//==================================================
-	if (worldTransform_.translation_.y < -5.0f) { // ★ここでしきい値設定
+	if (worldTransform_.translation_.y < -5.0f) { //
+		Audio::GetInstance()->PlayWave(soundHandleDeath);
 		isDead_ = true;
 	}
 	//==================================================
@@ -466,6 +468,7 @@ void Player::OnCollision(const Enemy* enemy) {
 
 	// --- それ以外は死亡 ---
 	isDead_ = true;
+	Audio::GetInstance()->PlayWave(soundHandleDeath);
 }
 
 void Player::OnCollision(const Enemy2* enemy) {
@@ -480,6 +483,7 @@ void Player::OnCollision(const Enemy2* enemy) {
 
 	// --- それ以外は死亡 ---
 	isDead_ = true;
+	Audio::GetInstance()->PlayWave(soundHandleDeath);
 }
 
 KamataEngine::Vector3 Player::GetWorldPosition() {
@@ -497,6 +501,7 @@ void Player::UpdateState() {
 	if (Input::GetInstance()->TriggerKey(DIK_O)) {
 		if (state_ == PlayerState::Normal) {
 			// 通常 → ローリング
+			Audio::GetInstance()->PlayWave(soundHandleChange);
 			state_ = PlayerState::Rolling;
 		} else {
 			// ローリング → 通常に戻る前にチェック
@@ -507,6 +512,7 @@ void Player::UpdateState() {
 			auto mapChip = mapChipField_->GetMapChipTypeByIndex(index.xIndex, index.yIndex);
 
 			if (mapChip != MapChipType::kBlock) {
+				Audio::GetInstance()->PlayWave(soundHandleChange);
 				state_ = PlayerState::Normal; // 戻せる
 			}
 		}
@@ -518,6 +524,8 @@ void Player::UpdateState() {
 		attackPhase_ = AttackPhase::kAnticipation;
 		attackTimer_ = 0;
 		velocity_ = {}; // 速度リセットしてから始める
+
+		Audio::GetInstance()->PlayWave(soundHandleAttack);
 	}
 
 	// --- 高さを設定 ---
@@ -641,6 +649,7 @@ void Player::CheckSpringCollision(const std::vector<std::vector<WorldTransform*>
 				//  バネに触れたら強制ジャンプ
 				velocity_.y = kJumpInitialVelocity * 1.5f; // 通常ジャンプの1.5倍
 				onGround_ = false;
+				Audio::GetInstance()->PlayWave(soundHandleSpring);
 				return; // 1つヒットしたら終わり
 			}
 		}
@@ -663,6 +672,7 @@ void Player::CheckFireCollision(const std::vector<std::vector<WorldTransform*>>&
 			if (IsCollision(playerAABB, fireAABB)) {
 				// 火に触れたら即死
 				isDead_ = true;
+				Audio::GetInstance()->PlayWave(soundHandleDeath);
 				return;
 			}
 		}

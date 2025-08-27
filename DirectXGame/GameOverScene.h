@@ -28,7 +28,6 @@ private:
 	KamataEngine::Model* gameOverFont_ = nullptr;
 	KamataEngine::Model* retryFont_ = nullptr;
 
-
 	KamataEngine::Camera* camera_;
 
 	KamataEngine::Model* modelSkyDome_;
@@ -37,5 +36,6 @@ private:
 	KamataEngine::WorldTransform worldTransformGameover_;
 	KamataEngine::WorldTransform worldTransformPushTo_;
 
-
+	uint32_t soundHandleGameOver_ = 0;
+	uint32_t soundHandleSelect_ = 0;
 };

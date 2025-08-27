@@ -153,6 +153,8 @@ void GameScene::Initialize() {
 	spriteJump_ = KamataEngine::Sprite::Create(textureHandleJump_, {50, 150});
 	spriteAttack = KamataEngine::Sprite::Create(textureHandleAttack, {50, 250});
 	spriteDown = KamataEngine::Sprite::Create(textureHandleDown, {50, 350});
+
+	soundhandleGo_ = Audio::GetInstance()->LoadWave("GO.wav");
 }
 
 //==================================================
@@ -178,18 +180,26 @@ void GameScene::Update() {
 		skydome_->UpDate();
 		cController_->Update();
 	} break;
-
 	case Phase::kReady: {
 		readyTimer_ += 1.0f / 60.0f;
+
 		if (readyTimer_ < 1.0f) {
 			float t = readyTimer_;
 			float scale = 12.0f - 3.0f * t;
 			worldTransformReady_.scale_ = {scale, scale, scale};
+
+		
 		} else {
 			float t = (readyTimer_ - 1.0f) * 2.0f * 3.14159f;
 			float scale = 9.0f + 1.0f * sinf(t * 4.0f);
 			worldTransformGo_.scale_ = {scale, scale, scale};
+			// 一度だけ鳴らす
+			if (!playedReadySound_) {
+				Audio::GetInstance()->PlayWave(soundhandleGo_);
+				playedReadySound_ = true;
+			}
 		}
+
 		if (readyTimer_ > 1.5f) {
 			phase_ = Phase::kPlay;
 		}

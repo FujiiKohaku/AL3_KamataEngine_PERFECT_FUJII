@@ -36,4 +36,8 @@ private:
 	KamataEngine::WorldTransform worldTransformSky_;
 	KamataEngine::WorldTransform worldTransformClear_;
 	KamataEngine::WorldTransform worldTransformPushTo_;
+
+	uint32_t soundHandleClear_;
+
+	uint32_t soundHandleSelect_;
 };
