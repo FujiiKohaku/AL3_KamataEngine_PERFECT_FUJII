@@ -2,7 +2,9 @@
 #include "KamataEngine.h"
 #include "Math.h"
 #include <algorithm>
+
 class Player;
+
 // Al2_02_06
 class CameraController {
 public:
@@ -20,9 +22,7 @@ public:
 	void Upadate();
 
 	void SetTarget(Player* target) { target_ = target; }
-
 	void Reset();
-
 	void SetMoveableArea(Rect area) { movableArea_ = area; }
 
 private:
@@ -33,15 +33,19 @@ private:
 
 	// 追従対象とカメラの座標の差(オフセット)//Al3_02_06
 	KamataEngine::Vector3 targetOffset_ = {0, 0, -15.0f};
+
 	// カメラ移動範囲02_06
 	Rect movableArea_ = {0, 100, 0, 100};
 
 	// 02_06スライド23枚目 目標座標
 	Vector3 destination_;
+
 	// 02_06スライド23枚目 座標補間割合
 	static inline const float kInterpolationRate = 0.1f;
+
 	// 速度掛け率AL3_02_06
 	static inline const float kVelocityBias = 30.0f;
+
 	// 02_06スライド33枚目 追従対象の各方向へのカメラ移動範囲
 	static inline const Rect targetMargin = {-9.0f, 9.0f, -5.0f, 5.0f};
 };

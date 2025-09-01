@@ -1,35 +1,41 @@
 #include "GameScene.h"
 #include "Math.h"
 using namespace KamataEngine;
+
 // 初期化
 void GameScene::Initialize() {
 
-	// 座標をマップチップ番号で指定
-	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(1, 18);
-	// ファイル名を指定してテクスチャを読み込む
-	// textureHandle_ = TextureManager::Load("player.png");
-	// 3Dモデルデータの生成
-	model_ = Model::Create();
-	model_ = Model::CreateFromOBJ("player", true);
-	// カメラの初期化
-	camera_.Initialize();
-	// 自キャラの生成
-	player_ = new Player();
-	// 自キャラの初期化
-	player_->Initialize(model_, &camera_, playerPosition);
-	// 3Dモデルデータの生成(block)AL3_02_02
-	modelBlock = Model::CreateFromOBJ("block", true);
 	// マップチップをnewする
 	mapChipField_ = new MapChipField;
 	mapChipField_->LoadMapChipCsv("Resources/blocks.csv");
-	// ワールドトランスフォームの初期化
-	//
+
+	// 座標をマップチップ番号で指定
+	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(1, 18);
+
+	// ファイル名を指定してテクスチャを読み込む
+	// textureHandle_ = TextureManager::Load("player.png");
+
+	// 3Dモデルデータの生成
+	model_ = Model::Create();
+	model_ = Model::CreateFromOBJ("player", true);
+
+	// カメラの初期化
+	camera_.Initialize();
+
+	// 自キャラの生成
+	player_ = new Player();
+
+	// 自キャラの初期化
+	player_->Initialize(model_, &camera_, playerPosition);
+
+	// 3Dモデルデータの生成(block)AL3_02_02
+	modelBlock = Model::CreateFromOBJ("block", true);
+
 	// 02_06カメラコントローラ
 	cController_ = new CameraController(); // 生成
 	cController_->Initialize(&camera_);    // 初期化
-	cController_->SetTarget(player_);//02_06
-	cController_->Reset();//02_06
-
+	cController_->SetTarget(player_);      // 02_06
+	cController_->Reset();                 // 02_06
 
 	// 初期化AL3_02_02
 
@@ -44,7 +50,9 @@ void GameScene::Initialize() {
 	skydome_ = new Skydome();
 	skydome_->Initialize(modelSkydome_, &camera_);
 
+	// ブロック生成
 	GenerateBlocks();
+
 	// Al2_02_06
 
 	// 02_06カメラコントローラ スライド18枚目
@@ -54,13 +62,17 @@ void GameScene::Initialize() {
 
 // 更新
 void GameScene::Update() {
+
 	// 自キャラの更新
 	player_->Update();
+
 	/* ブロックの更新AL3_02_02*/
 	for (const std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
 		for (WorldTransform* worldTransformBlock : worldTransformBlockLine) {
-			if (!worldTransformBlock)
+			if (!worldTransformBlock) {
 				continue;
+			}
+
 			worldTransformBlock->matWorld_ = MakeAffineMatrix(worldTransformBlock->scale_, worldTransformBlock->rotation_, worldTransformBlock->translation_);
 
 			worldTransformBlock->TransferMatrix();
@@ -73,6 +85,7 @@ void GameScene::Update() {
 		isDebugCameraActive = !isDebugCameraActive;
 	}
 #endif // ! _DEBUG
+
 	// カメラの処理AL3_02_02*/
 	if (isDebugCameraActive) {
 		// デバッグカメラの更新AL3_02_02*/
@@ -83,12 +96,12 @@ void GameScene::Update() {
 		camera_.TransferMatrix();
 	} else {
 		// ビュープロジェクション行列の更新と転送AL3_02_02*/
-
 		camera_.UpdateMatrix();
 		skydome_->Update();
 		cController_->Upadate();
 	}
 }
+
 // 描画
 void GameScene::Draw() {
 	// DirectXCommonインスタンスの取得
@@ -97,26 +110,31 @@ void GameScene::Draw() {
 	// 自キャラの描画
 	model_->PreDraw(dxCommon->GetCommandList());
 	player_->Draw();
+
 	// ブロックの描画AL3_02_02
 	for (const std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
 		for (WorldTransform* worldTransformBlock : worldTransformBlockLine) {
-			if (!worldTransformBlock)
+			if (!worldTransformBlock) {
 				continue;
-
+			}
 			modelBlock->Draw(*worldTransformBlock, camera_, nullptr);
 		}
 	}
+
 	skydome_->Draw();
 	model_->PostDraw();
 }
+
 // コンストラクタ
 GameScene::GameScene() {}
+
 // デストラクタ
 GameScene::~GameScene() {
 	// 3Dモデルデータの解散
 	delete model_;
 	// 自キャラの解散
 	delete player_;
+
 	/* 3Dモデルデータの解放(block)AL3_02_02*/
 	for (std::vector<WorldTransform*>& worldTransformBkockLine : worldTransformBlocks_) {
 		for (WorldTransform* worldTransformBlock : worldTransformBkockLine) {
@@ -124,6 +142,7 @@ GameScene::~GameScene() {
 		}
 	}
 	worldTransformBlocks_.clear();
+
 	// デバッグカメラの解放
 	delete debugCamera_;
 	// AL3_02_03
@@ -144,9 +163,7 @@ void GameScene::GenerateBlocks() {
 
 	// ブロックの生成
 	for (uint32_t i = 0; i < numBlockVirtical; ++i) {
-
 		for (uint32_t j = 0; j < numBlockHorizontal; ++j) {
-
 			if (mapChipField_->GetMapChipTypeByIndex(j, i) == MapChipType::kBlock) {
 				WorldTransform* worldTransform = new WorldTransform();
 				worldTransform->Initialize();

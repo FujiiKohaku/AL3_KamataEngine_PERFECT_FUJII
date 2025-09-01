@@ -5,6 +5,7 @@
 #include <cassert>
 
 using namespace KamataEngine;
+
 // 初期化
 void Player::Initialize(KamataEngine::Model* model, KamataEngine::Camera* camera, const KamataEngine::Vector3& position) {
 	// NULLポインタチェック
@@ -65,6 +66,7 @@ void Player::Update() {
 			// 非入力時は移動減衰を×
 			velocity_.x *= (1.0f - kAccelaration_);
 		}
+
 		// ジャンプ
 		if (Input::GetInstance()->PushKey(DIK_UP)) {
 			// ジャンプ初速
@@ -83,6 +85,7 @@ void Player::Update() {
 	worldTransform_.translation_ += velocity_;
 
 	bool landing = false;
+
 	// 地面との当たり判定
 	// 下降中？
 	if (velocity_.y < 0) {
@@ -112,6 +115,7 @@ void Player::Update() {
 			onGround_ = true;
 		}
 	}
+
 	// 旋回制御
 	{
 		if (turnTimer_ > 0.0f) {
@@ -127,16 +131,12 @@ void Player::Update() {
 		}
 
 		// 行列更新
-		//
-		//
-		//
-		// ここより上に処理書いて―
 		WorldRowFunction::MakeAffinTransFerMatrix(worldTransform_);
 	}
 }
+
 // 描画
 void Player::Draw() {
-
 	model_->Draw(worldTransform_, *camera_);
 
 	/////
@@ -144,5 +144,6 @@ void Player::Draw() {
 
 // コンストラクタ
 Player::Player() {}
+
 // デストラクタ
 Player::~Player() {}

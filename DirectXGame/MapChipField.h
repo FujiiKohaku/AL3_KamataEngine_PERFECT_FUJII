@@ -1,13 +1,16 @@
 #pragma once
 #include "KamataEngine.h"
 #include <math/Vector3.h>
+#include <vector>
 
 // マップチップ種別の定義
 enum class MapChipType {
 	kBlank, // 空白
-	kBlock, // ブロッ
+	kBlock, // ブロック
 };
-struct MapChipDate {
+
+// マップデータ
+struct MapChipData {
 	std::vector<std::vector<MapChipType>> data;
 };
 
@@ -17,20 +20,22 @@ public:
 	void ResetMapChipData();
 	void LoadMapChipCsv(const std::string& filepath);
 	MapChipType GetMapChipTypeByIndex(uint32_t xIndex, uint32_t yIndex);
-	// ゲッター
-	uint32_t GetBlockWidth() { return static_cast<uint32_t>(kNumBlockHorizontal); }
 
-	uint32_t GetBlockHeight() { return static_cast<uint32_t>(kNumBlockVirtical); }
+	// ゲッター
+	uint32_t GetBlockWidth() const { return static_cast<uint32_t>(kNumBlockHorizontal); }
+	uint32_t GetBlockHeight() const { return static_cast<uint32_t>(kNumBlockVirtical); }
 
 	KamataEngine::Vector3 GetMapChipPositionByIndex(uint32_t xIndex, uint32_t yIndex);
 
 private:
-	// ブロックの個数
+	// 1ブロックのサイズ
 	static inline const float kBlockWidth = 1.0f;
 	static inline const float kBlockHeight = 1.0f;
-	// 1ブロックのサイズ
+
+	// ブロックの個数
 	static inline const uint32_t kNumBlockVirtical = 20;
 	static inline const uint32_t kNumBlockHorizontal = 100;
-	//
-	MapChipDate mapChipData_;
+
+	// マップチップデータ
+	MapChipData mapChipData_;
 };
