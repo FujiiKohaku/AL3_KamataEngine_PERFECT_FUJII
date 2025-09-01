@@ -43,12 +43,7 @@ void GameScene::Initialize() {
 
 	modelBullet_ = Model::CreateFromOBJ("block");
 
-	// 弾の初期化
-	for (auto& bullet : bullets_) {
-		bullet = new Bullet(); // メモリ確保
-		bullet->Initialize(modelBullet_, &camera_);
-		bullet->SetActive(false); // フラグOFF
-	}
+
 }
 
 // 更新
@@ -73,11 +68,7 @@ void GameScene::Update() {
 
 	skydome_->Update();
 
-	for (auto& bullet : bullets_) {
-		if (bullet->IsActive()) {
-			bullet->Update();
-		}
-	}
+
 }
 
 // 描画
@@ -90,11 +81,7 @@ void GameScene::Draw() {
 	// 3Dオブジェクト
 	player_->Draw();
 	skydome_->Draw();
-	for (auto& bullet : bullets_) {
-		if (bullet->IsActive()) {
-			bullet->Draw();
-		}
-	}
+
 	// 3D描画終了
 	model_->PostDraw();
 }
@@ -108,8 +95,5 @@ GameScene::~GameScene() {
 	delete player_;
 	delete debugCamera_;
 	delete skydome_;
-	for (auto& bullet : bullets_) {
-		delete bullet; // メモリ解放
-		bullet = nullptr;
-	}
+
 }

@@ -23,7 +23,6 @@ public:
 	// 描画
 	void Draw();
 
-
 	/*void GenerateBlocks();*/
 
 private:
@@ -42,8 +41,6 @@ private:
 	// ===== オブジェクト関連 =====
 	Player* player_ = nullptr;   // 自キャラ
 	Skydome* skydome_ = nullptr; // スカイドーム
-
-	std::array<Bullet*, kMaxBullets> bullets_; // 複数弾を固定数で管理
 
 	// ===== マップ関連 =====
 	// MapChipField* mapChipField_ = nullptr;                                         // マップチップフィールド
