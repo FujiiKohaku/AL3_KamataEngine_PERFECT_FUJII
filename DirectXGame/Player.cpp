@@ -20,126 +20,45 @@ void Player::Initialize(KamataEngine::Model* model, KamataEngine::Camera* camera
 	worldTransform_.Initialize();
 	worldTransform_.translation_ = position;
 	worldTransform_.rotation_.y = std::numbers::pi_v<float> / 2.0f;
+
+	// bullets_.resize(kMaxBullets);
 }
 
 // 更新
 void Player::Update() {
 
-	// 移動入力（左右）
-	if (onGround_) {
-		// 左右移動操作
-		if (Input::GetInstance()->PushKey(DIK_RIGHT) || Input::GetInstance()->PushKey(DIK_LEFT)) {
+	MoveInput(); // 移動処理
 
-			// 左右加速
-			Vector3 acceleration = {};
-			if (Input::GetInstance()->PushKey(DIK_RIGHT)) {
-				// 左移動中の右入力
-				if (velocity_.x < 0.0f) {
-					// 速度と逆方向に入力中は急ブレーキ
-					velocity_.x *= (1.0f - kAttenuation);
-				}
-				if (lrDirection_ != LRDorection::kRight) {
-					lrDirection_ = LRDorection::kRight;
-					turnFirstRotationY_ = worldTransform_.rotation_.y;
-					turnTimer_ = kTimeTrun;
-				}
-				acceleration.x += kAccelaration_;
-			} else if (Input::GetInstance()->PushKey(DIK_LEFT)) {
-				// 右移動中の左入力
-				if (velocity_.x > 0.0f) {
-					// 速度と逆方向に入力中は急ブレーキ
-					velocity_.x *= (1.0f - kAttenuation);
-				}
-				if (lrDirection_ != LRDorection::kLeft) {
-					lrDirection_ = LRDorection::kLeft;
-					turnFirstRotationY_ = worldTransform_.rotation_.y;
-					turnTimer_ = 0.1f;
-				}
-				acceleration.x -= kAccelaration_;
-			}
+	JumpInput();      // ジャンプ処理
+	UpDateRotation(); // 向きの制御
 
-			// 速度に加算
-			velocity_ += acceleration;
-			velocity_.x = std::clamp(velocity_.x, -kLimitRunSpeed, kLimitRunSpeed);
-
-		} else {
-			// 非入力時は移動減衰を×
-			velocity_.x *= (1.0f - kAccelaration_);
-		}
-
-		// ジャンプ
-		if (Input::GetInstance()->PushKey(DIK_UP)) {
-			// ジャンプ初速
-			velocity_ += Vector3(0, kJumpAcceleration / 60, 0);
-		}
-
-	} else {
-		// 落下速度
-		velocity_ += Vector3(0, -kGravityAcceleration / 60.0f, 0);
-
-		// 落下速度制限
-		velocity_.y = std::max(velocity_.y, -kLimitFallSpeed);
-	}
-
+	Shoot();
 	// 位置に加算（移動）
 	worldTransform_.translation_ += velocity_;
 
-	bool landing = false;
+	WorldRowFunction::MakeAffinTransFerMatrix(worldTransform_);
 
-	// 地面との当たり判定
-	// 下降中？
-	if (velocity_.y < 0) {
-		// Y座標が地面以下になったら着地
-		if (worldTransform_.translation_.y <= 1.0f) {
-			landing = true;
-		}
-	}
+	// 弾発射処理
+	// 弾の更新
+	// for (auto& bullet : bullets_) {
+	//	bullet.Update();
+	//}
 
-	// 接地判定
-	if (onGround_) {
-		// ジャンプ開始
-		if (velocity_.y > 0.0f) {
-			// 空中状態に以降
-			onGround_ = false;
-		}
-	} else {
-		// 着地
-		if (landing) {
-			// めり込み排斥
-			worldTransform_.translation_.y = 1.0f;
-			// 摩擦で横方向速度が減衰する
-			velocity_.x *= (1.0f - kAttenuation);
-			// 下方向速度をリセット
-			velocity_.y = 0.0f;
-			// 接地状態に以降
-			onGround_ = true;
-		}
-	}
-
-	// 旋回制御
-	{
-		if (turnTimer_ > 0.0f) {
-			// タイマーを進める
-			turnTimer_ = std::max(turnTimer_ - (1.0f / 60.0f), 0.0f);
-
-			float destinationRotationYTable[] = {std::numbers::pi_v<float> / 2.0f, std::numbers::pi_v<float> * 3.0f / 2.0f};
-
-			// 状況に応じた角度を取得する
-			float destinationRotationY = destinationRotationYTable[static_cast<uint32_t>(lrDirection_)];
-			// 自キャラの角度を設定する
-			worldTransform_.rotation_.y = EaseInOut(turnFirstRotationY_, destinationRotationY, 1.0f - turnTimer_ / kTimeTrun);
-		}
-
-		// 行列更新
-		WorldRowFunction::MakeAffinTransFerMatrix(worldTransform_);
-	}
+	// ===== ImGui デバッグ表示 =====
+	ImGui::Begin("Player Debug");
+	ImGui::Text("Pos: (%.2f, %.2f, %.2f)", worldTransform_.translation_.x, worldTransform_.translation_.y, worldTransform_.translation_.z);
+	ImGui::Text("Vel: (%.2f, %.2f, %.2f)", velocity_.x, velocity_.y, velocity_.z);
+	ImGui::End();
 }
 
 // 描画
 void Player::Draw() {
 	model_->Draw(worldTransform_, *camera_);
 
-	/////
+	//// 弾の描画
+	// for (auto& bullet : bullets_) {
+	//	bullet.Draw(camera_);
+	// }
 }
 
 // コンストラクタ
@@ -147,3 +66,67 @@ Player::Player() {}
 
 // デストラクタ
 Player::~Player() {}
+
+#pragma region Moveinput
+
+void Player::MoveInput() {
+	Vector3 move = {0, 0, 0};
+
+	if (Input::GetInstance()->PushKey(DIK_D)) { // →右
+		move.x += 1.0f;
+	}
+	if (Input::GetInstance()->PushKey(DIK_A)) { // ←左
+		move.x -= 1.0f;
+	}
+	if (Input::GetInstance()->PushKey(DIK_W)) { // ↑上
+		move.y += 1.0f;
+	}
+	if (Input::GetInstance()->PushKey(DIK_S)) { // ↓下
+		move.y -= 1.0f;
+	}
+
+	// 斜め入力を正規化してスピード一定にする
+	if (move.x != 0.0f || move.y != 0.0f) {
+		float length = std::sqrt(move.x * move.x + move.y * move.y);
+		move.x /= length;
+		move.y /= length;
+	}
+
+	velocity_ = move * moveSpeed; // 入力方向 × 移動速度
+}
+
+#pragma endregion
+
+#pragma region jumpInput
+
+void Player::JumpInput() {
+
+	// ジャンプ
+	if (Input::GetInstance()->PushKey(DIK_UP)) {
+		// ジャンプ初速
+		velocity_ += Vector3(0, kJumpAcceleration / 60, 0);
+	}
+}
+
+#pragma endregion
+
+#pragma region UpDateRotation
+void Player::UpDateRotation() {
+	// 最大傾き角度（ラジアン）
+	const float tiltMax = 0.3f; // 約17度
+
+	// 目標の傾き
+	float targetTilt = 0.0f;
+
+	if (Input::GetInstance()->PushKey(DIK_A)) {
+		targetTilt = tiltMax; // 左に傾く
+	} else if (Input::GetInstance()->PushKey(DIK_D)) {
+		targetTilt = -tiltMax; // 右に傾く
+	}
+
+	// スムーズに補間して傾きを更新
+	worldTransform_.rotation_.x = Lerp(worldTransform_.rotation_.z, targetTilt, 0.2f);
+}
+#pragma endregion
+
+

@@ -1,9 +1,12 @@
 #pragma once
+#include "Bullet.h"
 #include "KamataEngine.h"
 #include "Math.h"
 #include <algorithm>
+#include <array>
+#include <memory>
 #include <numbers>
-
+#include <vector>
 class Player {
 public:
 	// 初期化
@@ -21,6 +24,16 @@ public:
 
 	// ベロシティのゲッター
 	const KamataEngine::Vector3& GetVelocity() const { return velocity_; }
+
+	void MoveInput();
+
+	void JumpInput();
+
+	void UpDateRotation();
+
+
+	void Shoot();
+		 
 
 private: // C++ではメンバ変数は特別な理由がなければprivateにする
 	// ワールド変換データ
@@ -57,6 +70,7 @@ private: // C++ではメンバ変数は特別な理由がなければprivateに�
 	// 接地状態フラグ
 	bool onGround_ = true;
 
+	bool landing_ = false;
 	// 重力加速度（下方向）
 	static inline const float kGravityAcceleration = 0.98f;
 	// 最大落下速度(下方向)
@@ -64,5 +78,8 @@ private: // C++ではメンバ変数は特別な理由がなければprivateに�
 	// ジャンプ初速(上方向)
 	static inline const float kJumpAcceleration = 20.0f;
 
-	
+	// 移動速度
+	float moveSpeed = 0.1f;
+
+
 };

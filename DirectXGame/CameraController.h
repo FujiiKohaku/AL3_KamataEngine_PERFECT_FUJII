@@ -19,7 +19,7 @@ public:
 	// Al2_02_06
 	void Initialize(KamataEngine::Camera* camera);
 	// Al2_02_06
-	void Upadate();
+	void Update();
 
 	void SetTarget(Player* target) { target_ = target; }
 	void Reset();

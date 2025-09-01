@@ -10,6 +10,9 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	// DirectXCommonインスタンスの取得
 	KamataEngine::DirectXCommon* dxCommon = KamataEngine::DirectXCommon::GetInstance();
 
+	// imGuiManagerのインスタンスを取得
+	ImGuiManager* imguiManager = ImGuiManager::GetInstance();
+
 	// ゲームシーンの生成・初期化
 	GameScene* gameScene = new GameScene();
 	gameScene->Initialize();
@@ -21,12 +24,22 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			break;
 		}
 
+		// ImGui受付開始
+		imguiManager->Begin();
+
 		// ゲームシーンの更新
 		gameScene->Update();
+
+		// imGui受付終了
+		imguiManager->End();
 
 		// 描画
 		dxCommon->PreDraw();
 		gameScene->Draw();
+
+		// ImGui描画
+		imguiManager->Draw();
+
 		dxCommon->PostDraw();
 	}
 
