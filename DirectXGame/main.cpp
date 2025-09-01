@@ -1,4 +1,4 @@
-#include "ClearScene.h" // ★ 追加
+#include "ClearScene.h" 
 #include "GameOverScene.h"
 #include "GameScene.h"
 #include "KamataEngine.h"
@@ -11,7 +11,7 @@ enum class Scene {
 	kTitle,
 	kGame,
 	kGameOver,
-	kClear, // ★ クリアシーン
+	kClear, 
 };
 
 // シーンのポインタ
@@ -30,6 +30,7 @@ void ChangeScene() {
 	switch (scene) {
 	case Scene::kTitle:
 		if (titleScene->IsFinished()) {
+			// === タイトルからゲームへ ===
 			scene = Scene::kGame;
 			delete titleScene;
 			titleScene = nullptr;
@@ -41,14 +42,27 @@ void ChangeScene() {
 
 	case Scene::kGame:
 		if (gameScene->IsFinished()) {
-			if (gameScene->IsClear()) {
+
+			// === Pause → Enter でタイトルに戻る ===
+			if (gameScene->IsReturnToTitle()) {
+				scene = Scene::kTitle;
+				delete gameScene;
+				gameScene = nullptr;
+
+				titleScene = new TitleScene;
+				titleScene->Initialize();
+			}
+			// === ゴールしてクリア ===
+			else if (gameScene->IsClear()) {
 				scene = Scene::kClear;
 				delete gameScene;
 				gameScene = nullptr;
 
 				clearScene = new ClearScene;
 				clearScene->Initialize();
-			} else { // 死んだら
+			}
+			// === 死亡したらゲームオーバー ===
+			else {
 				scene = Scene::kGameOver;
 				delete gameScene;
 				gameScene = nullptr;
@@ -61,6 +75,7 @@ void ChangeScene() {
 
 	case Scene::kGameOver:
 		if (gameOverScene->IsFinished()) {
+			// === ゲームオーバーからタイトルへ ===
 			scene = Scene::kTitle;
 			delete gameOverScene;
 			gameOverScene = nullptr;
@@ -72,6 +87,7 @@ void ChangeScene() {
 
 	case Scene::kClear:
 		if (clearScene->IsFinished()) {
+			// === クリア後はタイトルへ ===
 			scene = Scene::kTitle;
 			delete clearScene;
 			clearScene = nullptr;
@@ -80,8 +96,12 @@ void ChangeScene() {
 			titleScene->Initialize();
 		}
 		break;
+
+	default:
+		break;
 	}
 }
+
 
 //--------------------------------------------------
 // シーン更新

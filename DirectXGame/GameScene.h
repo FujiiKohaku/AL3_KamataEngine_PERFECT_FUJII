@@ -32,6 +32,7 @@ public:
 	// ===== 状態確認 =====
 	bool IsFinished() const { return finished_; }
 	bool IsClear() const { return isClear_; }
+	bool IsReturnToTitle() const { return returnToTitle_; }
 
 private:
 	//--------------------------------------------------
@@ -62,6 +63,7 @@ private:
 	uint32_t textureHandleJump_ = 0;
 	uint32_t textureHandleAttack = 0;
 	uint32_t textureHandleDown = 0;
+	uint32_t textureHandlePose_ = 0;
 	uint32_t soundhandleGo_ = 0;
 	//--------------------------------------------------
 	// 変換行列 / カメラ
@@ -114,6 +116,7 @@ private:
 		kPlay,    // プレイ中
 		kDeath,   // 死亡演出
 		kFadeOut, // シーン終了
+		kPause,
 	};
 	Phase phase_ = Phase::kFadeIn;
 	void ChangePhese();
@@ -126,7 +129,7 @@ private:
 	//--------------------------------------------------
 	bool finished_ = false; // シーン終了フラグ
 	bool isClear_ = false;  // ゴールクリアフラグ
-
+	bool returnToTitle_ = false; 
 	//--------------------------------------------------
 	// UI（2Dスプライト）
 	//--------------------------------------------------
@@ -138,5 +141,6 @@ private:
 
 	KamataEngine::Sprite* spriteDown = nullptr;
 
+	KamataEngine::Sprite* spritePose_ = nullptr;
 	bool playedReadySound_ = false;
 };

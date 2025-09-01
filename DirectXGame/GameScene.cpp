@@ -149,11 +149,12 @@ void GameScene::Initialize() {
 	textureHandleJump_ = TextureManager::Load("junp.jpg");
 	textureHandleAttack = TextureManager::Load("Attack.jpg");
 	textureHandleDown = TextureManager::Load("down.jpg");
+	textureHandlePose_ = TextureManager::Load("po-zu.jpg");
 	spriteMove_ = KamataEngine::Sprite::Create(textureHandleMove_, {50, 50});
 	spriteJump_ = KamataEngine::Sprite::Create(textureHandleJump_, {50, 150});
 	spriteAttack = KamataEngine::Sprite::Create(textureHandleAttack, {50, 250});
 	spriteDown = KamataEngine::Sprite::Create(textureHandleDown, {50, 350});
-
+	spritePose_ = KamataEngine::Sprite::Create(textureHandlePose_, {90, 0});
 	soundhandleGo_ = Audio::GetInstance()->LoadWave("GO.wav");
 }
 
@@ -188,7 +189,6 @@ void GameScene::Update() {
 			float scale = 12.0f - 3.0f * t;
 			worldTransformReady_.scale_ = {scale, scale, scale};
 
-		
 		} else {
 			float t = (readyTimer_ - 1.0f) * 2.0f * 3.14159f;
 			float scale = 9.0f + 1.0f * sinf(t * 4.0f);
@@ -217,6 +217,12 @@ void GameScene::Update() {
 		for (Enemy2* enemy : enemies2_) {
 			enemy->Update();
 		}
+		// ===== ESCキーでポーズに切り替え =====
+		if (Input::GetInstance()->TriggerKey(DIK_ESCAPE)) {
+			phase_ = Phase::kPause;
+			break;
+		}
+
 		// ===== デバッグカメラ切り替え =====
 #ifdef _DEBUG
 		if (Input::GetInstance()->TriggerKey(DIK_G)) {
@@ -249,6 +255,7 @@ void GameScene::Update() {
 				WorldTransformUpdate(*spike);
 			}
 		}
+
 		// ===== バネ更新 =====
 		for (auto& line : worldTransformSprings_) {
 			for (auto& spring : line) {
@@ -311,6 +318,18 @@ void GameScene::Update() {
 		for (Enemy* enemy : enemies_)
 			enemy->UpDate();
 	} break;
+	case Phase::kPause:
+		if (Input::GetInstance()->TriggerKey(DIK_ESCAPE)) {
+			phase_ = Phase::kPlay;
+		}
+
+		// ===== Enterでタイトルに戻る =====
+		if (Input::GetInstance()->TriggerKey(DIK_RETURN)) {
+			fade_->Start(Fade::Status::FadeOut, 1.0f);
+			phase_ = Phase::kFadeOut;
+			returnToTitle_ = true;
+		}
+		break;
 	}
 
 	// ====== フェーズ共通で敵削除処理 ======
@@ -446,6 +465,11 @@ void GameScene::Draw() {
 	if (spriteDown) {
 		spriteDown->Draw();
 	}
+	if (phase_ == Phase::kPause) {
+
+		spritePose_->Draw();
+	}
+
 	// --- フェード ---
 	if (fade_) {
 		fade_->Draw();

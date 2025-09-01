@@ -3,51 +3,71 @@
 #include "KamataEngine.h"
 using namespace KamataEngine;
 
-// 02_12 19枚目 タイトルシーン
+//--------------------------------------------------
+// タイトルシーン
+// 02_12 スライド 19枚目
+//--------------------------------------------------
 class TitleScene {
 public:
 	~TitleScene();
 
+	// ライフサイクル
 	void Initialize();
-
 	void Update();
-
 	void Draw();
 
-	// 02_12 26枚目
+	// シーンが終了したか
 	bool IsFinished() const { return finished_; }
 
-	// 02_12 27枚目 シーンのフェーズ
+	// シーンのフェーズ
+	// 02_12 スライド 27枚目
 	enum class Phase {
 		kFadeIn,  // フェードイン
-		kMain,    // メイン部
+		kMain,    // メイン
 		kFadeOut, // フェードアウト
 	};
 
 private:
+	//--------------------------------------------------
+	// 定数
+	//--------------------------------------------------
 	static inline const float kTimeTitleMove = 2.0f;
 
-	// ビュープロジェクション
+	//--------------------------------------------------
+	// カメラ・ワールド変換
+	//--------------------------------------------------
 	Camera camera_;
-	WorldTransform worldTransformTitle_;
-	WorldTransform worldTransformPlayer_;
-	WorldTransform worldTransformSun_;
-	WorldTransform worldTransformBack_;
-	WorldTransform worldTransformPushSpace_;
+	WorldTransform worldTransformTitle_;     // タイトルロゴ
+	WorldTransform worldTransformPlayer_;    // プレイヤー
+	WorldTransform worldTransformSun_;       // 太陽
+	WorldTransform worldTransformBack_;      // 背景
+	WorldTransform worldTransformPushSpace_; // 「Push Space」
+
+	//--------------------------------------------------
+	// モデル・テクスチャ
+	//--------------------------------------------------
 	Model* modelPlayer_ = nullptr;
 	Model* modelTitle_ = nullptr;
 	Model* sun_ = nullptr;
-	Model* backGround_;
-	Model* pushSpace_;
-	uint32_t BackGroundTexture_;
-	float counter_ = 0.0f;
-	// 02_12 26枚目
-	bool finished_ = false;
-	// float counter_ = 0.0f;
-	Fade* fade_ = nullptr;
-	// 02_13 27枚目 現在のフェーズ
-	Phase phase_ = Phase::kFadeIn;
-	float angle_ = 0.0f;
+	Model* backGround_ = nullptr;
+	Model* pushSpace_ = nullptr;
+	uint32_t BackGroundTexture_ = 0;
 
+	//--------------------------------------------------
+	// フェード・演出
+	//--------------------------------------------------
+	Fade* fade_ = nullptr;
+	Phase phase_ = Phase::kFadeIn;
+	float counter_ = 0.0f; // 汎用タイマー
+	float angle_ = 0.0f;   // 演出回転用
+
+	//--------------------------------------------------
+	// 状態管理
+	//--------------------------------------------------
+	bool finished_ = false;
+
+	//--------------------------------------------------
+	// サウンド
+	//--------------------------------------------------
 	uint32_t soundHandleSelecct = 0;
 };
