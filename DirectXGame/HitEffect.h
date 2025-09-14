@@ -1,36 +1,62 @@
 #pragma once
-#include "KamataEngine.h"
-#include "Math.h"
-#include "Random.h"
+#include <KamataEngine.h>
+#include <cstdint>
+
+using namespace KamataEngine;
+
+// 02_16 5枚目
 class HitEffect {
 public:
-	// 初期化
-	void Initialize(const KamataEngine::Vector3& position);
-	// 更新
-	void Update();
-	// 描画
-	void Draw();
+	enum class State {
+		kSpread, // 拡大中
+		kFade,   // フェードアウト中
+		kDead    // 死亡
+	};
 
-	// 静的メンバ関数
-	// もデリ
+	// 02_16 10枚目(SetModel,SetCamera)
 	static void SetModel(KamataEngine::Model* model) { model_ = model; }
-	// カメラ
+
 	static void SetCamera(KamataEngine::Camera* camera) { camera_ = camera; }
 
-	// インスタンス生成と初期化
 	static HitEffect* Create(const KamataEngine::Vector3& position);
 
-	KamataEngine::Vector3 postion;
-	
+	void Update();
+
+	void Draw();
+
+	bool IsDead() const { return state_ == State::kDead; }
 
 private:
-	// モデル(借りてくる用)
-	static KamataEngine::Model* model_;
-	// カメラ(借りてくる用)
-	static KamataEngine::Camera* camera_;
+	HitEffect() = default;
+
+	void Initialize(const KamataEngine::Vector3& position);
+
+	// 拡大アニメーションの時間
+	static inline const uint32_t kSpreadTime = 10;
+
+	// フェードアウトアニメーションの時間
+	static inline const uint32_t kFadeTime = 20;
+
+	// エフェクトの寿命
+	static inline const uint32_t kLifetime = kSpreadTime + kFadeTime;
+
+	// 02_16 8枚目
+	static Model* model_;
+	static Camera* camera_;
+
+	// 楕円エフェクトの数
+	static const inline uint32_t kellipseEffectNum = 2;
+
+	// 楕円のワールドトランスフォーム
+	std::array<WorldTransform, kellipseEffectNum> ellipseWorldTransforms_;
+
 	// 円のワールドトランスフォーム
-	KamataEngine::WorldTransform circleWorldTransform_;
+	WorldTransform circleWorldTransform_;
 
-	std::array<KamataEngine::WorldTransform, 2> elllipseWorldTransforms_;
+	State state_ = State::kSpread;
 
+	// カウンター
+	uint32_t counter_ = 0;
+
+	ObjectColor objectColor_;
 };
