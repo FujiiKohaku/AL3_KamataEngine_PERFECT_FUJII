@@ -1,8 +1,113 @@
+#include "GameOverScene.h"
 #include "GameScene.h"
 #include "KamataEngine.h"
+#include "TitleScene.h"
 #include <Windows.h>
-
 using namespace KamataEngine; // これ書いておくとkamataEngine::書かなくてよい
+
+// シーンの種類
+enum class Scene {
+	kunknown = 0,
+	kTitle,
+	kGame,
+	kGameOver,
+	kClear,
+
+};
+//=============
+// シーンの宣言
+//=============
+// タイトルシーン
+TitleScene* titleScene = nullptr;
+
+// ゲームシーン
+GameScene* gameScene = nullptr;
+
+// ゲームオーバーシーン
+GameOverScene* gameoverScene = nullptr;
+// 初期化で現在のタイトルシーンを固定
+Scene scene = Scene::kTitle;
+
+//===================
+// シーン切り替え関数
+//===================
+
+void ChangeScene() {
+
+	switch (scene) {
+	case Scene::kTitle:
+		if (titleScene->Finished()) {
+			// タイトルシーンからゲームシーンに
+			delete titleScene;
+			titleScene = nullptr;
+
+			gameScene = new GameScene;
+			gameScene->Initialize();
+			scene = Scene::kGame;
+		}
+		break;
+
+	case Scene::kGame:
+
+		if (gameScene->Finished()) {
+
+			delete gameScene;
+			gameScene = nullptr;
+
+			gameoverScene = new GameOverScene;
+			gameoverScene->Initialize();
+			scene = Scene::kGameOver;
+		}
+		break;
+
+	case Scene::kGameOver:
+
+		break;
+	}
+}
+//===================
+// シーン更新関数
+//===================
+void UpdateScene() {
+
+	switch (scene) {
+	case Scene::kTitle:
+		titleScene->Update();
+
+		break;
+	case Scene::kGame:
+		gameScene->Update();
+		break;
+	case Scene::kGameOver:
+		gameoverScene->Update();
+		break;
+	case Scene::kClear:
+		break;
+	default:
+		break;
+	}
+}
+//===================
+// シーン描画関数
+//===================
+void DrawScene() {
+	switch (scene) {
+
+	case Scene::kTitle:
+		titleScene->Draw();
+		break;
+	case Scene::kGame:
+		gameScene->Draw();
+		break;
+	case Scene::kGameOver:
+		gameoverScene->Draw();
+		break;
+	case Scene::kClear:
+		break;
+	default:
+		break;
+	}
+}
 
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
@@ -12,10 +117,13 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 	// DirectXCommonインスタスの取得
 	DirectXCommon* dxComon = DirectXCommon::GetInstance();
-	// ゲームシーンのインスタンス生成
-	GameScene* gameScene = new GameScene();
-	// ゲームシーンの初期化
-	gameScene->Initialize();
+	ImGuiManager* imguiManager = ImGuiManager::GetInstance();
+
+	// 最初はタイトルを設定
+	scene = Scene::kTitle;
+	titleScene = new TitleScene;
+	titleScene->Initialize();
+
 	// メインループ
 	while (true) {
 
@@ -24,26 +132,54 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 			break;
 		}
-		// ゲームシーンの更新
-		gameScene->Update();
-		// 確認//////
-		//  描画開始
+		//-----------
+		// 更新処理
+		//-----------
+
+		// ImGui受付開始
+		imguiManager->Begin();
+		ImGui::Begin("Scene Controller");
+		if (ImGui::Button("Go Title")) {
+
+			delete gameScene;
+			gameScene = nullptr;
+			delete gameoverScene;
+			gameoverScene = nullptr;
+
+			titleScene = new TitleScene;
+			titleScene->Initialize();
+			scene = Scene::kTitle;
+		}
+
+
+
+		// シーン遷移関数
+		ChangeScene();
+
+		// シーン更新関数
+		UpdateScene();
+
+		// ImGui受付終了
+		imguiManager->End();
+
+		//-----------
+		// 描画処理
+		//-----------
 		dxComon->PreDraw();
-		// ここに描画処理を記述する
 
-		// ゲームシーンの描画
-		gameScene->Draw();
+		// シーン描画
+		DrawScene();
 
+		// ImGui描画
+		imguiManager->Draw();
 		// 描画終了
 		dxComon->PostDraw();
-
-		// ゲームシーンの解放
-		delete gameScene;
-		// nullptrの代入
-		gameScene = nullptr;
 	}
 	// エンジンの終了処理
 	KamataEngine::Finalize();
-
+	// ゲームシーンの解放
+	delete gameScene;
+	// nullptrの代入
+	gameScene = nullptr;
 	return 0;
 }
