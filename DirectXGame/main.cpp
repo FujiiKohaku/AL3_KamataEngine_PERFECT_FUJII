@@ -124,6 +124,28 @@ void DrawScene() {
 		break;
 	}
 }
+// ==============
+// シーン全削除関数
+// ==============
+
+void DeleteAllScenes() {
+	if (titleScene) {
+		delete titleScene;
+		titleScene = nullptr;
+	}
+	if (gameScene) {
+		delete gameScene;
+		gameScene = nullptr;
+	}
+	if (gameoverScene) {
+		delete gameoverScene;
+		gameoverScene = nullptr;
+	}
+	if (clearScene) {
+		delete clearScene;
+		clearScene = nullptr;
+	}
+}
 
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
@@ -157,12 +179,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		ImGui::Begin("Scene Controller");
 		if (ImGui::Button("Go Title")) {
 
-			delete gameScene;
-			gameScene = nullptr;
-			delete gameoverScene;
-			gameoverScene = nullptr;
-			delete clearScene;
-			clearScene = nullptr;
+			DeleteAllScenes();
 
 			titleScene = new TitleScene;
 			titleScene->Initialize();
@@ -170,12 +187,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		}
 		if (ImGui::Button("Go Game")) {
 
-			delete titleScene;
-			titleScene = nullptr;
-			delete gameoverScene;
-			gameoverScene = nullptr;
-			delete clearScene;
-			clearScene = nullptr;
+		DeleteAllScenes();
 
 			gameScene = new GameScene;
 			gameScene->Initialize();
@@ -183,12 +195,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		}
 		if (ImGui::Button("Go GameOver")) {
 
-			delete titleScene;
-			titleScene = nullptr;
-			delete gameScene;
-			gameScene = nullptr;
-			delete clearScene;
-			clearScene = nullptr;
+		DeleteAllScenes();
 
 			gameoverScene = new GameOverScene;
 			gameoverScene->Initialize();
@@ -196,12 +203,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			scene = Scene::kGameOver;
 		}
 		if (ImGui::Button("Go ClearScene")) {
-			delete titleScene;
-			titleScene = nullptr;
-			delete gameScene;
-			gameScene = nullptr;
-			delete gameoverScene;
-			gameoverScene = nullptr;
+			DeleteAllScenes();
 
 			clearScene = new ClearScene;
 			clearScene->Initialize();
