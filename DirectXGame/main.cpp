@@ -150,8 +150,29 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			titleScene->Initialize();
 			scene = Scene::kTitle;
 		}
+		if (ImGui::Button("Go Game")) {
 
+			delete titleScene;
+			titleScene = nullptr;
+			delete gameoverScene;
+			gameoverScene = nullptr;
 
+			gameScene = new GameScene;
+			gameScene->Initialize();
+			scene = Scene::kGame;
+		}
+		if (ImGui::Button("Go GameOver")) {
+
+			delete titleScene;
+			titleScene = nullptr;
+			delete gameScene;
+			gameScene = nullptr;
+
+			gameoverScene = new GameOverScene;
+			gameoverScene->Initialize();
+
+			scene = Scene::kGameOver;
+		}
 
 		// シーン遷移関数
 		ChangeScene();
