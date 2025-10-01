@@ -1,3 +1,4 @@
+#include "ClearScene.h"
 #include "GameOverScene.h"
 #include "GameScene.h"
 #include "KamataEngine.h"
@@ -25,6 +26,9 @@ GameScene* gameScene = nullptr;
 
 // ゲームオーバーシーン
 GameOverScene* gameoverScene = nullptr;
+
+// クリアシーン
+ClearScene* clearScene = nullptr;
 // 初期化で現在のタイトルシーンを固定
 Scene scene = Scene::kTitle;
 
@@ -61,7 +65,17 @@ void ChangeScene() {
 		break;
 
 	case Scene::kGameOver:
+		if (gameoverScene->Finished()) {
 
+			delete gameoverScene;
+			gameoverScene = nullptr;
+
+			clearScene = new ClearScene;
+			clearScene->Initialize();
+			scene = Scene::kClear;
+		}
+		break;
+	case Scene::kClear:
 		break;
 	}
 }
@@ -82,6 +96,7 @@ void UpdateScene() {
 		gameoverScene->Update();
 		break;
 	case Scene::kClear:
+		clearScene->Update();
 		break;
 	default:
 		break;
@@ -103,6 +118,7 @@ void DrawScene() {
 		gameoverScene->Draw();
 		break;
 	case Scene::kClear:
+		clearScene->Draw();
 		break;
 	default:
 		break;
@@ -145,6 +161,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			gameScene = nullptr;
 			delete gameoverScene;
 			gameoverScene = nullptr;
+			delete clearScene;
+			clearScene = nullptr;
 
 			titleScene = new TitleScene;
 			titleScene->Initialize();
@@ -156,6 +174,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			titleScene = nullptr;
 			delete gameoverScene;
 			gameoverScene = nullptr;
+			delete clearScene;
+			clearScene = nullptr;
 
 			gameScene = new GameScene;
 			gameScene->Initialize();
@@ -167,11 +187,26 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			titleScene = nullptr;
 			delete gameScene;
 			gameScene = nullptr;
+			delete clearScene;
+			clearScene = nullptr;
 
 			gameoverScene = new GameOverScene;
 			gameoverScene->Initialize();
 
 			scene = Scene::kGameOver;
+		}
+		if (ImGui::Button("Go ClearScene")) {
+			delete titleScene;
+			titleScene = nullptr;
+			delete gameScene;
+			gameScene = nullptr;
+			delete gameoverScene;
+			gameoverScene = nullptr;
+
+			clearScene = new ClearScene;
+			clearScene->Initialize();
+
+			scene = Scene::kClear;
 		}
 
 		// シーン遷移関数
