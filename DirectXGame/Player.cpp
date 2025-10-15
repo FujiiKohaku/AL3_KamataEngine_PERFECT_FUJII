@@ -47,7 +47,7 @@ void Player::Update() {
 	
 
 	// --- 行列更新 ---
-	worldTransform_.TransferMatrix(worldTransform_);
+	worldTransform_.TransferMatrix()
 
 
 }
