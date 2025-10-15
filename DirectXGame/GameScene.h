@@ -1,6 +1,6 @@
 #pragma once
 #include "KamataEngine.h"
-
+#include "Player.h"
 // ゲームシーン
 class GameScene {
 public:
@@ -19,4 +19,9 @@ private:
 	// 状態管理
 	//============
 	bool finished_ = false;
+	Player* player_;
+	// プレイヤーモデル
+	KamataEngine::Model* playerModel_ = nullptr;
+	// カメラ
+	KamataEngine::Camera camera_;
 };

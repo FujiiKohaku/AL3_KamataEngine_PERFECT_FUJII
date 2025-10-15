@@ -1,4 +1,5 @@
 #pragma once
+#include "Player.h"
 #include "kamataEngine.h"
 class ClearScene {
 public:
@@ -17,4 +18,6 @@ private:
 	// 状態管理
 	//============
 	bool finished_ = false;
+
+	
 };

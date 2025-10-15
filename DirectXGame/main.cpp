@@ -105,6 +105,8 @@ void UpdateScene() {
 //===================
 // シーン描画関数
 //===================
+
+
 void DrawScene() {
 	switch (scene) {
 

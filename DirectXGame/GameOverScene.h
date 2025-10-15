@@ -17,4 +17,6 @@ private:
 	// 状態管理
 	//============
 	bool finished_ = false;
+
+
 };
