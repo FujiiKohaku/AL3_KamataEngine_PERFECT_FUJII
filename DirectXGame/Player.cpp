@@ -45,10 +45,14 @@ void Player::Update() {
 	}
 
 	// ===== 向き変更 =====
-	worldTransform_.rotation_.y = facingRight_ ? std::numbers::pi_v<float> / 2.0f : std::numbers::pi_v<float> * 3.0f / 2.0f;
+	if (facingRight_) {
+		worldTransform_.rotation_.y = std::numbers::pi_v<float> / 2.0f;
+	} else {
+		worldTransform_.rotation_.y = std::numbers::pi_v<float> * 3.0f / 2.0f;
+	}
 
 	// ===== 行列更新 =====
-	worldTransform_.TransferMatrix();
+	WorldTransformUpdate(worldTransform_);
 	// --- ImGui デバッグ表示 ---
 	ImGui::Begin("Player Debug");
 	ImGui::Text("Position: (%.2f, %.2f, %.2f)", worldTransform_.translation_.x, worldTransform_.translation_.y, worldTransform_.translation_.z);

@@ -2,6 +2,7 @@
 #include "KamataEngine.h"
 #include "Player.h"
 #include "Skydome.h"
+#include <vector>
 // ゲームシーン
 class GameScene {
 public:
@@ -22,12 +23,13 @@ private:
 	// 状態管理
 	//============
 	bool finished_ = false;
-	// 3Dモデルデータ
-	KamataEngine::Model* model_ = nullptr;
-	// カメラ
-	KamataEngine::Camera* camera_;
-	// 自キャラ
-	Player* player_ = nullptr;
+
+	//============
+	// player
+	//============
+	KamataEngine::Model* model_ = nullptr; // 3Dモデルデータ
+	KamataEngine::Camera* camera_;         // カメラ
+	Player* player_ = nullptr;             // 自キャラ
 
 	KamataEngine::Vector3 pos_;
 
@@ -37,4 +39,17 @@ private:
 	Skydome* skydome_ = nullptr;
 
 	KamataEngine::Model* modelSkydome_ = nullptr;
+
+	//---------------
+	// debugCamera
+	//---------------
+	// デバックカメラ有効
+	bool isDebugCameraActive_ = false;
+	KamataEngine::DebugCamera* debugCamera_ = nullptr;
+	//---------------
+	// block
+	//---------------
+
+	KamataEngine::Model* modelBlock_;
+	std::vector<std::vector<KamataEngine::WorldTransform*>> worldTransformBlocks_;//二次元配列
 };

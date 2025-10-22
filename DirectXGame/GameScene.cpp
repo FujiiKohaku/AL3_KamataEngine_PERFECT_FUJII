@@ -24,12 +24,77 @@ void GameScene::Initialize() {
 
 	skydome_ = new Skydome();
 	skydome_->Initialize(modelSkydome_, camera_);
+	//------------------
+	// デバックカメラ
+	//------------------
+	// デバックカメラの生成
+	debugCamera_ = new DebugCamera(1280, 720);
+	//------------------
+	// ブロック
+	//------------------
+
+	modelBlock_ = Model::CreateFromOBJ("cube", true);
+
+	// 要素数
+	const uint32_t kNumBlockVirtial = 10;
+	const uint32_t kNumBlockHorizontatl = 20;
+	// ブロック一個分の横幅
+	const float kBlockWidth = 2.0f;
+	const float kBlockHeight = 2.0f;
+	// 要素数を変更する
+	worldTransformBlocks_.resize(kNumBlockHorizontatl);
+	for (uint32_t i = 0; i < kNumBlockVirtial; ++i) {
+		// 一列の要素数を設定(縦方向のブロック数)
+		worldTransformBlocks_[i].resize(kNumBlockHorizontatl);
+	}
+	// キューブの生成
+	for (uint32_t i = 0; i < kNumBlockVirtial; ++i) {
+
+		for (uint32_t j = 0; j < kNumBlockHorizontatl; ++j) {
+
+			worldTransformBlocks_[i][j] = new WorldTransform();
+			worldTransformBlocks_[i][j]->Initialize();
+			worldTransformBlocks_[i][j]->translation_.x = kBlockWidth * j;
+			worldTransformBlocks_[i][j]->translation_.y = kBlockHeight * i;
+		}
+	}
 }
 // 更新
 void GameScene::Update() {
 	// 自キャラの更新
 	player_->Update();
 	skydome_->Update();
+	// ブロックの更新
+	// ブロックの更新
+	for (std::vector<KamataEngine::WorldTransform*>& blockLine : worldTransformBlocks_) {
+		for (KamataEngine::WorldTransform* block : blockLine) {
+
+			// スケール・回転・平行移動からアフィン変換行列を作成
+			block->matWorld_ = MakeAffineMatrix(block->scale_, block->rotation_, block->translation_);
+
+			// 行列を定数バッファへ転送（GPUに送る）
+			block->TransferMatrix();
+		}
+	}
+
+#ifdef _DEBUG
+
+	if (Input::GetInstance()->TriggerKey(DIK_C)) {
+		isDebugCameraActive_ = !isDebugCameraActive_;
+	}
+#endif // DEBUG
+
+	if (isDebugCameraActive_) {
+		debugCamera_->Update();
+		camera_->matView = debugCamera_->GetCamera().matView;
+		camera_->matProjection = debugCamera_->GetCamera().matProjection;
+		// ビュープロジェクション行列の転送AL3_02_02*/
+		camera_->TransferMatrix();
+	} else {
+		// ビュープロジェクション行列の更新と転送AL3_02_02*/
+
+		camera_->UpdateMatrix();
+	}
 }
 // 描画
 void GameScene::Draw() {
@@ -40,12 +105,21 @@ void GameScene::Draw() {
 	model_->PreDraw(dxCommon->GetCommandList());
 	player_->Draw();
 	skydome_->Draw();
+
+	// ブロックの描画
+	for (std::vector<KamataEngine::WorldTransform*>& blockLine : worldTransformBlocks_) {
+		for (KamataEngine::WorldTransform* block : blockLine) {
+			modelBlock_->Draw(*block, *camera_, nullptr);
+		}
+	}
+
 	model_->PostDraw();
 }
 // コンストラクタ
 GameScene::GameScene() {}
 // デストラクタ
 GameScene::~GameScene() {
+
 	// 3Dモデルデータの解散
 	delete model_;
 	// 自キャラの解散
@@ -54,4 +128,18 @@ GameScene::~GameScene() {
 	delete camera_;
 	// スカイドームモデルの解放
 	delete modelSkydome_;
+	// デバックカメラを開放
+	delete debugCamera_;
+	// ブロックの解放
+	delete modelBlock_;
+
+	// ブロック（2次元配列）の解放
+	for (std::vector<KamataEngine::WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
+		for (KamataEngine::WorldTransform* worldTransformBlock : worldTransformBlockLine) {
+			delete worldTransformBlock;
+		}
+	}
+
+	worldTransformBlocks_.clear();
+	worldTransformBlocks_.clear();
 }
