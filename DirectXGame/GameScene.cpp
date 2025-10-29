@@ -38,7 +38,7 @@ void GameScene::Initialize() {
 	GenerateBlocks();
 
 	// ブロックモデルのロード
-	modelBlock_ = Model::CreateFromOBJ("cube", true);
+	modelBlock_ = Model::CreateFromOBJ("block", true);
 
 	//------------------
 	// 実際のブロック配置
