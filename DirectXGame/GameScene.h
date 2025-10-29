@@ -1,5 +1,6 @@
 #pragma once
 #include "KamataEngine.h"
+#include "MapChipField.h"
 #include "Player.h"
 #include "Skydome.h"
 #include <vector>
@@ -17,6 +18,8 @@ public:
 	~GameScene();
 	// シーンが終了したかのゲッター
 	bool Finished() const { return finished_; }
+
+	void GenerateBlocks();
 
 private:
 	//============
@@ -51,5 +54,12 @@ private:
 	//---------------
 
 	KamataEngine::Model* modelBlock_;
-	std::vector<std::vector<KamataEngine::WorldTransform*>> worldTransformBlocks_;//二次元配列
+	std::vector<std::vector<KamataEngine::WorldTransform*>> worldTransformBlocks_; // 二次元配列
+
+	//---------------
+	// MapChipField
+	//---------------
+
+	// マップチップフィールド
+	MapChipField* mapChipField_;
 };

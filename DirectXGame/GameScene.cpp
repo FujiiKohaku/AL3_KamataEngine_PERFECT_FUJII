@@ -4,6 +4,8 @@ using namespace KamataEngine;
 // 初期化
 void GameScene::Initialize() {
 
+	// ブロック生成
+	GenerateBlocks();
 	// 初期位置を確定
 	pos_ = {0, 0, 0};
 	// 3Dモデルデータの生成
@@ -35,29 +37,26 @@ void GameScene::Initialize() {
 
 	modelBlock_ = Model::CreateFromOBJ("cube", true);
 
-	// 要素数
-	const uint32_t kNumBlockVirtial = 10;
-	const uint32_t kNumBlockHorizontatl = 20;
-	// ブロック一個分の横幅
-	const float kBlockWidth = 2.0f;
-	const float kBlockHeight = 2.0f;
-	// 要素数を変更する
-	worldTransformBlocks_.resize(kNumBlockHorizontatl);
-	for (uint32_t i = 0; i < kNumBlockVirtial; ++i) {
-		// 一列の要素数を設定(縦方向のブロック数)
-		worldTransformBlocks_[i].resize(kNumBlockHorizontatl);
-	}
-	// キューブの生成
-	for (uint32_t i = 0; i < kNumBlockVirtial; ++i) {
+	for (uint32_t i = 0; i < mapChipField_->GetNumBlockVirtical(); ++i) {
+		for (uint32_t j = 0; j < mapChipField_->GetNumBlockHorizontal(); ++j) {
 
-		for (uint32_t j = 0; j < kNumBlockHorizontatl; ++j) {
+			// マップチップがブロックなら生成、それ以外はスキップ
+			if (mapChipField_->GetMapChipTypeByIndex(j, i) == MapChipType::kBlock) {
 
-			worldTransformBlocks_[i][j] = new WorldTransform();
-			worldTransformBlocks_[i][j]->Initialize();
-			worldTransformBlocks_[i][j]->translation_.x = kBlockWidth * j;
-			worldTransformBlocks_[i][j]->translation_.y = kBlockHeight * i;
+				// ブロック生成
+				WorldTransform* worldTransform = new WorldTransform();
+				worldTransform->Initialize();
+				worldTransformBlocks_[i][j] = worldTransform;
+				worldTransformBlocks_[i][j]->translation_ = mapChipField_->GetMapChipPositionbyIndex(j, i);
+			}
 		}
 	}
+
+	//------------------
+	// マップチップフィールド
+	//------------------
+	mapChipField_ = new MapChipField;
+	mapChipField_->LoadMapChipCsv("Resources/blocks.csv");
 }
 // 更新
 void GameScene::Update() {
@@ -132,7 +131,8 @@ GameScene::~GameScene() {
 	delete debugCamera_;
 	// ブロックの解放
 	delete modelBlock_;
-
+	// マップチップフィールドの解放
+	delete mapChipField_;
 	// ブロック（2次元配列）の解放
 	for (std::vector<KamataEngine::WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
 		for (KamataEngine::WorldTransform* worldTransformBlock : worldTransformBlockLine) {
@@ -142,4 +142,24 @@ GameScene::~GameScene() {
 
 	worldTransformBlocks_.clear();
 	worldTransformBlocks_.clear();
+}
+
+// ===============================================
+// ブロック配列（worldTransformBlocks_）の要素数を設定
+// -----------------------------------------------
+// ・MapChipFieldから取得したブロック数（縦×横）を使って
+//   二次元配列をリサイズする
+// ・ここではまだ中身（WorldTransform本体）は生成しない
+// ===============================================
+void GameScene::GenerateBlocks() {
+	uint32_t numBlockVirtical = mapChipField_->GetNumBlockVirtical();
+	uint32_t numBlockHorizontal = mapChipField_->GetNumBlockHorizontal();
+
+	// 外側vectorを縦方向（行）にリサイズ
+	worldTransformBlocks_.resize(numBlockVirtical);
+
+	// 各行の中を横方向（列）にリサイズ
+	for (uint32_t i = 0; i < numBlockVirtical; ++i) {
+		worldTransformBlocks_[i].resize(numBlockHorizontal);
+	}
 }
