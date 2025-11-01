@@ -2,43 +2,47 @@
 #include <cstdint>
 #include <kamataEngine.h>
 
-// マップチップ種別の定義
+// ============================
+// マップチップ関連
+// ============================
+
+// マップチップの種類
 enum class MapChipType {
 	kBlank, // 空白
 	kBlock, // ブロック
 };
-// MapChipDataの構造体
+
+// マップ全体のデータ構造
 struct MapChipData {
-	std::vector<std::vector<MapChipType>> data;
+	std::vector<std::vector<MapChipType>> data; // [行][列]の二次元配列
 };
 
+// ============================
+// マップチップフィールド本体
+// ============================
 class MapChipField {
-
 public:
-	// CSV読み込み関数
+	// === CSV読み込み ===
 	void LoadMapChipCsv(const std::string& filepath);
 
-	// Indexからマップチップの種類を判別する関数
-	MapChipType GetMapChipTypeByIndex(uint32_t xIndex, uint32_t yIndex);
+	// === 情報取得 ===
+	MapChipType GetMapChipTypeByIndex(uint32_t xIndex, uint32_t yIndex);               // チップ種別を取得
+	KamataEngine::Vector3 GetMapChipPositionbyIndex(uint32_t xIndex, uint32_t yIndex); // インデックスから座標取得
 
-	// indexから座標を計算する関数
-	KamataEngine::Vector3 GetMapChipPositionbyIndex(uint32_t xIndex, uint32_t yIndex);
-	// 縦方向(Y方向)のブロック数を取得
-	uint32_t GetNumBlockVirtical() const { return kNumBlockVirtical; }
-
-	// 横方向(X方向)のブロック数を取得
-	uint32_t GetNumBlockHorizontal() const { return kNumBlockHorizontal; }
+	// === 定数ゲッター ===
+	uint32_t GetNumBlockVirtical() const { return kNumBlockVirtical; }     // 縦方向(Y方向)のブロック数
+	uint32_t GetNumBlockHorizontal() const { return kNumBlockHorizontal; } // 横方向(X方向)のブロック数
 
 private:
-	// マップ全体を初期化して、縦×横サイズ分のマップチップを確保する
-	void ResetMapChipData();
-	// 1ブロックのサイズ
-	static inline const float kBlockWidth = 1.0f;
-	static inline const float kBlockHeight = 1.0f;
-	// ブロックの個数
-	static inline const uint32_t kNumBlockVirtical = 20;    // 縦方向(Y方向)のブロック
-	static inline const uint32_t kNumBlockHorizontal = 100; // 横方向(X方向)のブロック
+	// === 内部処理 ===
+	void ResetMapChipData(); // マップ全体を初期化（縦×横サイズ確保）
 
-	// マップチップデータ
-	MapChipData mapChipData_;
+	// === 定数 ===
+	static inline const float kBlockWidth = 1.0f;           // 1ブロックの幅
+	static inline const float kBlockHeight = 1.0f;          // 1ブロックの高さ
+	static inline const uint32_t kNumBlockVirtical = 20;    // 縦ブロック数
+	static inline const uint32_t kNumBlockHorizontal = 100; // 横ブロック数
+
+	// === データ ===
+	MapChipData mapChipData_; // マップチップの二次元データ
 };

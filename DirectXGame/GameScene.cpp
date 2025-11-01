@@ -13,7 +13,7 @@ GameScene::~GameScene() {
 	delete debugCamera_;
 	delete modelBlock_;
 	delete mapChipField_;
-
+	delete cController_;
 	// ブロック（2次元配列）の解放
 	for (auto& line : worldTransformBlocks_) {
 		for (auto* block : line) {
@@ -80,6 +80,15 @@ void GameScene::Initialize() {
 	// デバッグカメラ
 	//------------------
 	debugCamera_ = new DebugCamera(1280, 720);
+
+	//------------------
+	// カメラコントローラー
+	//------------------
+
+	cController_ = new CameraController();
+	cController_->Initialize(camera_);
+	cController_->SetTarget(player_);
+	cController_->Reset();
 }
 
 // 更新
@@ -88,7 +97,7 @@ void GameScene::Update() {
 	skydome_->Update();
 
 	// -----------------------
-	// ブロック更新（安全版）
+	// ブロック更新
 	// -----------------------
 	for (auto& blockLine : worldTransformBlocks_) {
 		for (auto* block : blockLine) {
@@ -114,6 +123,12 @@ void GameScene::Update() {
 	} else {
 		camera_->UpdateMatrix();
 	}
+
+	// -----------------------
+	// カメラコントローラー更新
+	// -----------------------
+
+	cController_->Update();
 }
 
 // 描画

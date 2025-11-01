@@ -11,6 +11,10 @@ public:
 	void Initialize(KamataEngine::Model* model, KamataEngine::Camera* camera, const KamataEngine::Vector3 position);
 	void Update();
 	void Draw();
+	//=============
+	// getter
+	//=============
+	const KamataEngine::WorldTransform& GetWorldTransform() const { return worldTransform_; }
 
 private:
 	KamataEngine::WorldTransform worldTransform_;
@@ -20,7 +24,7 @@ private:
 	KamataEngine::Vector3 velocity_ = {0, 0, 0};
 
 	// 定数
-	const float kMoveSpeed = 0.1f; // 移動速度
+	const float kMoveSpeed = 0.3f; // 移動速度
 	const float kJumpPower = 0.4f; // ジャンプ力
 	const float kGravity = 0.02f;  // 重力加速度
 	const float kGroundY = 0.0f;   // 地面の高さ
