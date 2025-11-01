@@ -18,12 +18,14 @@ void Player::Initialize(Model* model, Camera* camera, const Vector3 position) {
 void Player::Update() {
 
 	// ===== 入力処理 =====
+	velocity_.x = 0.0f; // ← 毎フレーム初期化（これが重要）
+
 	if (Input::GetInstance()->PushKey(DIK_D)) { // →キー
-		worldTransform_.translation_.x += kMoveSpeed;
+		velocity_.x += kMoveSpeed;
 		facingRight_ = true;
 	}
 	if (Input::GetInstance()->PushKey(DIK_A)) { // ←キー
-		worldTransform_.translation_.x -= kMoveSpeed;
+		velocity_.x -= kMoveSpeed;
 		facingRight_ = false;
 	}
 
@@ -35,7 +37,9 @@ void Player::Update() {
 
 	// ===== 重力 =====
 	velocity_.y -= kGravity;
-	worldTransform_.translation_.y += velocity_.y;
+
+	// ===== 座標更新 =====
+	worldTransform_.translation_ += velocity_; // ← 位置はvelocityでまとめて更新！
 
 	// ===== 地面との判定 =====
 	if (worldTransform_.translation_.y <= kGroundY) {
@@ -53,10 +57,11 @@ void Player::Update() {
 
 	// ===== 行列更新 =====
 	WorldTransformUpdate(worldTransform_);
+
 	// --- ImGui デバッグ表示 ---
 	ImGui::Begin("Player Debug");
 	ImGui::Text("Position: (%.2f, %.2f, %.2f)", worldTransform_.translation_.x, worldTransform_.translation_.y, worldTransform_.translation_.z);
-	ImGui::Text("Rotation Y: %.2f", worldTransform_.rotation_.y);
+	ImGui::Text("Velocity: (%.2f, %.2f, %.2f)", velocity_.x, velocity_.y, velocity_.z);
 	ImGui::End();
 }
 
