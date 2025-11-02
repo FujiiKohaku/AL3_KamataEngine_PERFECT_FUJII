@@ -68,7 +68,7 @@ void GameScene::Initialize() {
 
 	player_ = new Player();
 	player_->Initialize(model_, camera_, pos_);
-
+	player_->SetMapChipField(mapChipField_);
 	//------------------
 	// スカイドーム
 	//------------------
