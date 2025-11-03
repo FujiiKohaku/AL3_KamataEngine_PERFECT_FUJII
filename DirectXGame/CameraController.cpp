@@ -1,4 +1,5 @@
 #include "CameraController.h "
+#include "Math.h"
 #include "Player.h"
 #include <algorithm>
 void CameraController::Initialize(KamataEngine::Camera* camera) { camera_ = camera; }

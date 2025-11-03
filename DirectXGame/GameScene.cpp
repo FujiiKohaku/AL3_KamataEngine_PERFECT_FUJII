@@ -60,7 +60,7 @@ void GameScene::Initialize() {
 	//------------------
 	// プレイヤー関連
 	//------------------
-	pos_ = {0, 0, 0};
+	pos_ = {10, 5, 0};
 	model_ = Model::CreateFromOBJ("player");
 
 	camera_ = new Camera();

@@ -99,3 +99,26 @@ KamataEngine::Vector3 MapChipField::GetMapChipPositionbyIndex(uint32_t xIndex, u
 
 	return KamataEngine::Vector3(kBlockWidth * xIndex, kBlockHeight * (kNumBlockVirtical - 1 - yIndex), 0);
 }
+
+// ワールド座標positionをもとに、該当するマップチップのインデックス座標を返す
+MapChipField::IndexSet MapChipField::GetMapChipIndexSetByPosition(const KamataEngine::Vector3& position) {
+	IndexSet indexSet = {};
+
+	indexSet.xIndex = static_cast<uint32_t>((position.x + kBlockWidth / 2.0f) / kBlockWidth);
+	indexSet.yIndex = kNumBlockVirtical - 1 - static_cast<uint32_t>(position.y + kBlockHeight / 2.0f / kBlockHeight);
+
+	return indexSet;
+}
+
+// 指定インデックスのマップチップ中心座標から、ブロック幅と高さを用いて当たり判定用の矩形(Rect)を生成して返す
+MapChipField::Rect MapChipField::GetRectByIndex(uint32_t xIndex, uint32_t yIndex) {
+
+	// 指定ブロックの中心座標を取得する
+	KamataEngine::Vector3 center = GetMapChipPositionbyIndex(xIndex, yIndex);
+	Rect rect;
+	rect.left = center.x - kBlockWidth / 2.0f;
+	rect.right = center.x + kBlockWidth / 2.0f;
+	rect.bottom = center.y - kBlockHeight / 2.0f;
+	rect.top = center.y + kBlockHeight / 2.0f;
+	return rect;
+}

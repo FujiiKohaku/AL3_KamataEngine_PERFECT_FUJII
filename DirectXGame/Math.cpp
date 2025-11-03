@@ -1,11 +1,6 @@
-
 #include "Math.h"
 #include <cmath>
 #include <numbers>
-
-// 02_14 29枚目 単項演算子オーバーロード
-Vector3 operator+(const Vector3& v) { return v; }
-Vector3 operator-(const Vector3& v) { return Vector3(-v.x, -v.y, -v.z); }
 
 // 02_06の29枚目(CameraControllerのUpdate)で必要
 const Vector3 operator*(const Vector3& v1, const float f) {
@@ -149,40 +144,8 @@ void WorldTransformUpdate(WorldTransform& worldTransform) {
 
 float Lerp(float x1, float x2, float t) { return (1.0f - t) * x1 + t * x2; }
 
-float EaseIn(float x1, float x2, float t) {
-	float easedT = t * t;
-
-	return Lerp(x1, x2, easedT);
-}
-
-float EaseOut(float x1, float x2, float t) {
-	float easedT = 1.0f - std::powf(1.0f - t, 3.0f);
-
-	return Lerp(x1, x2, easedT);
-}
-
 float EaseInOut(float x1, float x2, float t) {
 	float easedT = -(std::cosf(std::numbers::pi_v<float> * t) - 1.0f) / 2.0f;
 
 	return Lerp(x1, x2, easedT);
-}
-
-bool IsCollision(const AABB& aabb1, const AABB& aabb2) {
-	return (aabb1.min.x <= aabb2.max.x && aabb1.max.x >= aabb2.min.x) && // x軸
-	       (aabb1.min.y <= aabb2.max.y && aabb1.max.y >= aabb2.min.y) && // y軸
-	       (aabb1.min.z <= aabb2.max.z && aabb1.max.z >= aabb2.min.z);   // z軸
-}
-
-Vector3 Transform(const Vector3& vector, const Matrix4x4& matrix) {
-	Vector3 result; // w=1がデカルト座標系であるので(x,y,1)のベクトルとしてmatrixとの積をとる
-	result.x = vector.x * matrix.m[0][0] + vector.y * matrix.m[1][0] + vector.z * matrix.m[2][0] + 1.0f * matrix.m[3][0];
-	result.y = vector.x * matrix.m[0][1] + vector.y * matrix.m[1][1] + vector.z * matrix.m[2][1] + 1.0f * matrix.m[3][1];
-	result.z = vector.x * matrix.m[0][2] + vector.y * matrix.m[1][2] + vector.z * matrix.m[2][2] + 1.0f * matrix.m[3][2];
-	float w = vector.x * matrix.m[0][3] + vector.y * matrix.m[1][3] + vector.z * matrix.m[2][3] + 1.0f * matrix.m[3][3];
-	assert(w != 0.0f); // ベクトルに対して基本的な操作を行う行列でwが0になることはありえない
-	// w=1がデカルト座標系であるので、w除算することで同次座標をデカルト座標に戻す
-	result.x /= w;
-	result.y /= w;
-	result.z /= w;
-	return result;
 }
