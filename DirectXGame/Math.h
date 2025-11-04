@@ -45,7 +45,8 @@ Vector3& operator+=(Vector3& lhs, const Vector3& rhv);
 Vector3& operator-=(Vector3& lhs, const Vector3& rhv);
 Vector3& operator*=(Vector3& v, float s);
 Vector3& operator/=(Vector3& v, float s);
-
+const Vector3 operator-(const Vector3& lhs, const Vector3& rhs);
+const Vector3 operator-(const Vector3& v);
 // 単位行列の作成
 Matrix4x4 MakeIdentityMatrix();
 // スケーリング行列の作成

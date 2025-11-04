@@ -14,6 +14,7 @@ GameScene::~GameScene() {
 	delete modelBlock_;
 	delete mapChipField_;
 	delete cController_;
+	delete goal_;
 	// ブロック（2次元配列）の解放
 	for (auto& line : worldTransformBlocks_) {
 		for (auto* block : line) {
@@ -89,6 +90,13 @@ void GameScene::Initialize() {
 	cController_->Initialize(camera_);
 	cController_->SetTarget(player_);
 	cController_->Reset();
+
+	//------------------
+	// ゴール
+	//------------------
+
+	goal_ = new Goal();
+	goal_->Initialize(Model::CreateFromOBJ("player"), Vector3(3, 3, 0));
 }
 
 // 更新
@@ -129,6 +137,15 @@ void GameScene::Update() {
 	// -----------------------
 
 	cController_->Update();
+
+	// -----------------------
+	// ゴール更新
+	// -----------------------
+	goal_->Update();
+	// ゴール判定
+	if (goal_->CheckCollision(player_)) {
+		finished_ = true;
+	}
 }
 
 // 描画
@@ -150,6 +167,8 @@ void GameScene::Draw() {
 			modelBlock_->Draw(*block, *camera_, nullptr);
 		}
 	}
+	// ゴール描画
+	goal_->Draw(camera_);
 
 	model_->PostDraw();
 }

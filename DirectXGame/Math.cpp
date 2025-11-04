@@ -149,3 +149,12 @@ float EaseInOut(float x1, float x2, float t) {
 
 	return Lerp(x1, x2, easedT);
 }
+// Vector3 の二項マイナス演算子
+const Vector3 operator-(const Vector3& lhs, const Vector3& rhs) {
+	Vector3 temp(lhs);
+	temp -= rhs;
+	return temp;
+}
+
+// 単項マイナス
+const Vector3 operator-(const Vector3& v) { return {-v.x, -v.y, -v.z}; }

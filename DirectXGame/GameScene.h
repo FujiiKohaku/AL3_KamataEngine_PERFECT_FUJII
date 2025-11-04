@@ -1,5 +1,6 @@
 #pragma once
 #include "CameraController.h"
+#include "Goal.h"
 #include "KamataEngine.h"
 #include "MapChipField.h"
 #include "Player.h"
@@ -68,8 +69,11 @@ private:
 	// カメラコントローラー
 	//---------------
 
-	//カメラコントローラー
+	// カメラコントローラー
 	CameraController* cController_;
+	//---------------
+	// ゴール
+	//---------------
 
-
+	Goal* goal_ = nullptr;
 };
