@@ -243,7 +243,7 @@ void Player::UpdateOnGround(const CollisionMapInfo& info) {
 
 			// 落下開始
 			if (!hit) {
-				//				
+				//
 				onGround_ = false;
 			}
 		}
@@ -364,7 +364,7 @@ void Player::CheckMapCollisionLeft(CollisionMapInfo& info) {
 			MapChipField::Rect rect = mapChipField_->GetRectByIndex(indexSet.xIndex, indexSet.yIndex);
 			info.move.x = std::max(0.0f, rect.right - worldTransform_.translation_.x - (kWidth / 2.0f + kBlank));
 			info.hitWall = true;
-			velocity_.x = 0.0f; 
+			velocity_.x = 0.0f;
 		}
 	}
 }
@@ -409,7 +409,7 @@ void Player ::Update() {
 
 	// 接地判定
 	UpdateOnGround(collisionMapInfo);
-	
+
 	// 旋回制御
 	if (turnTimer_ > 0.0f) {
 		// タイマーを進める

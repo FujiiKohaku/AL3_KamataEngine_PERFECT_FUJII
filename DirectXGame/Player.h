@@ -64,7 +64,10 @@ private:
 	static inline const float kJumpAcceleration = 20.0f;
 	static inline const float kGravityAcceleration = 0.98f;
 	static inline const float kLimitFallSpeed = 0.5f;
-
+	// ぽよぽよアニメーション用
+	float squishTimer_ = 0.0f;
+	float squishDuration_ = 0.2f;            // 1回の変形時間（秒）
+	Vector3 baseScale_ = {1.0f, 1.0f, 1.0f}; // 元の大きさ
 	// 02_07 マップチップによるフィールド
 	MapChipField* mapChipField_ = nullptr;
 	// 02_07 キャラクターの当たり判定サイズ
