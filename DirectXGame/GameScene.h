@@ -23,6 +23,10 @@ public:
 
 	void GenerateBlocks();
 
+	void CreateBlocksFromMap();
+
+	void CreateGoalFromMap();
+
 private:
 	//============
 	// 状態管理

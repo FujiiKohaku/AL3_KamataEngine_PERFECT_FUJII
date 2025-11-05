@@ -41,22 +41,8 @@ void GameScene::Initialize() {
 	// ブロックモデルのロード
 	modelBlock_ = Model::CreateFromOBJ("block", true);
 
-	//------------------
-	// 実際のブロック配置
-	//------------------
-	for (uint32_t i = 0; i < mapChipField_->GetNumBlockVirtical(); ++i) {
-		for (uint32_t j = 0; j < mapChipField_->GetNumBlockHorizontal(); ++j) {
-
-			if (mapChipField_->GetMapChipTypeByIndex(j, i) == MapChipType::kBlock) {
-				WorldTransform* worldTransform = new WorldTransform();
-				worldTransform->Initialize();
-				worldTransform->translation_ = mapChipField_->GetMapChipPositionbyIndex(j, i);
-				worldTransformBlocks_[i][j] = worldTransform;
-			} else {
-				worldTransformBlocks_[i][j] = nullptr; // ← 空白マスは明示的にnullptr
-			}
-		}
-	}
+	CreateBlocksFromMap();
+	CreateGoalFromMap();
 
 	//------------------
 	// プレイヤー関連
@@ -90,13 +76,6 @@ void GameScene::Initialize() {
 	cController_->Initialize(camera_);
 	cController_->SetTarget(player_);
 	cController_->Reset();
-
-	//------------------
-	// ゴール
-	//------------------
-
-	goal_ = new Goal();
-	goal_->Initialize(Model::CreateFromOBJ("player"), Vector3(3, 3, 0));
 }
 
 // 更新
@@ -142,7 +121,7 @@ void GameScene::Update() {
 	// ゴール更新
 	// -----------------------
 	goal_->Update();
-	// ゴール判定
+	// ゴール判定ゴールは固定なのでplayerを渡すだけで平気
 	if (goal_->CheckCollision(player_)) {
 		finished_ = true;
 	}
@@ -183,5 +162,37 @@ void GameScene::GenerateBlocks() {
 	worldTransformBlocks_.resize(numBlockVirtical);
 	for (uint32_t i = 0; i < numBlockVirtical; ++i) {
 		worldTransformBlocks_[i].resize(numBlockHorizontal);
+	}
+}
+
+// マップからブロックを生成
+void GameScene::CreateBlocksFromMap() {
+	for (uint32_t i = 0; i < mapChipField_->GetNumBlockVirtical(); ++i) {
+		for (uint32_t j = 0; j < mapChipField_->GetNumBlockHorizontal(); ++j) {
+
+			if (mapChipField_->GetMapChipTypeByIndex(j, i) == MapChipType::kBlock) {
+				WorldTransform* worldTransform = new WorldTransform();
+				worldTransform->Initialize();
+				worldTransform->translation_ = mapChipField_->GetMapChipPositionbyIndex(j, i);
+				worldTransformBlocks_[i][j] = worldTransform;
+			} else {
+				worldTransformBlocks_[i][j] = nullptr;
+			}
+		}
+	}
+}
+
+// マップからゴールを生成
+void GameScene::CreateGoalFromMap() {
+	for (uint32_t i = 0; i < mapChipField_->GetNumBlockVirtical(); ++i) {
+		for (uint32_t j = 0; j < mapChipField_->GetNumBlockHorizontal(); ++j) {
+
+			if (mapChipField_->GetMapChipTypeByIndex(j, i) == MapChipType::kGoal) {
+				Vector3 goalPos = mapChipField_->GetMapChipPositionbyIndex(j, i);
+				goal_ = new Goal();
+				goal_->Initialize(Model::CreateFromOBJ("player"), goalPos);
+				return; // ゴールは1つだけならすぐ抜ける
+			}
+		}
 	}
 }

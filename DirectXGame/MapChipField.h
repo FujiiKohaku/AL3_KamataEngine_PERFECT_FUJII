@@ -10,6 +10,7 @@
 enum class MapChipType {
 	kBlank, // 空白
 	kBlock, // ブロック
+	kGoal,  // ゴール
 };
 
 // マップ全体のデータ構造
