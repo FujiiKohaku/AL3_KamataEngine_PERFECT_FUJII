@@ -421,7 +421,10 @@ void Player ::Update() {
 
 		worldTransform_.rotation_.y = EaseInOut(destinationRotationY, turnFirstRotationY_, turnTimer_ / kTimeTurn);
 	}
-
+	// 一定以下に落下したら死亡
+	if (worldTransform_.translation_.y < -20.0f) { // ←好きな閾値に
+		isDead_ = true;
+	}
 	// ワールド行列更新（アフィン変換～DirectXに転送）
 	WorldTransformUpdate(worldTransform_);
 }

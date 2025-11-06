@@ -1,5 +1,6 @@
 #pragma once
 #include "CameraController.h"
+#include "Coin.h"
 #include "Goal.h"
 #include "KamataEngine.h"
 #include "MapChipField.h"
@@ -26,6 +27,8 @@ public:
 	void CreateBlocksFromMap();
 
 	void CreateGoalFromMap();
+
+	void CreateCoinsFromMap();
 
 private:
 	//============
@@ -80,4 +83,8 @@ private:
 	//---------------
 
 	Goal* goal_ = nullptr;
+	//---------------
+	// コイン
+	//---------------
+	std::vector<Coin*> coins_;
 };

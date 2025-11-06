@@ -33,6 +33,7 @@ public:
 
 	// 02_07 スライド4枚目
 	void SetMapChipField(MapChipField* mapChipField) { mapChipField_ = mapChipField; }
+	bool IsDead() const { return isDead_; }
 
 private:
 	// ワールド変換データ
@@ -65,9 +66,7 @@ private:
 	static inline const float kGravityAcceleration = 0.98f;
 	static inline const float kLimitFallSpeed = 0.5f;
 	// ぽよぽよアニメーション用
-	float squishTimer_ = 0.0f;
-	float squishDuration_ = 0.2f;            // 1回の変形時間（秒）
-	Vector3 baseScale_ = {1.0f, 1.0f, 1.0f}; // 元の大きさ
+
 	// 02_07 マップチップによるフィールド
 	MapChipField* mapChipField_ = nullptr;
 	// 02_07 キャラクターの当たり判定サイズ
@@ -107,4 +106,5 @@ private:
 	static inline const float kGroundSearchHeight = 0.06f;
 	// 02_08スライド27枚目 着地時の速度減衰率
 	static inline const float kAttenuationWall = 0.2f;
+	bool isDead_ = false; // ←死亡フラグ追加
 };

@@ -14,7 +14,11 @@ GameScene::~GameScene() {
 	delete modelBlock_;
 	delete mapChipField_;
 	delete cController_;
-	delete goal_;
+
+	for (auto* coin : coins_) {
+		delete coin;
+	}
+	coins_.clear();
 	// ブロック（2次元配列）の解放
 	for (auto& line : worldTransformBlocks_) {
 		for (auto* block : line) {
@@ -41,13 +45,16 @@ void GameScene::Initialize() {
 	// ブロックモデルのロード
 	modelBlock_ = Model::CreateFromOBJ("block", true);
 
+	// ブロック生成
 	CreateBlocksFromMap();
+	// ゴール生成
 	CreateGoalFromMap();
-
+	// コイン生成
+	CreateCoinsFromMap();
 	//------------------
 	// プレイヤー関連
 	//------------------
-	pos_ = {10, 5, 0};
+	pos_ = {2, 2, 0};
 	model_ = Model::CreateFromOBJ("player");
 
 	camera_ = new Camera();
@@ -109,22 +116,38 @@ void GameScene::Update() {
 		camera_->TransferMatrix();
 	} else {
 		camera_->UpdateMatrix();
+		// -----------------------
+		// カメラコントローラー更新
+		// -----------------------
+		cController_->Update();
 	}
-
-	// -----------------------
-	// カメラコントローラー更新
-	// -----------------------
-
-	cController_->Update();
 
 	// -----------------------
 	// ゴール更新
 	// -----------------------
 	goal_->Update();
+
+	// -----------------------
+	// コイン更新
+	// -----------------------
+	for (auto* coin : coins_) {
+		coin->Update();
+		if (coin->CheckCollision(player_)) {
+			coin->SetCollected(true);
+		}
+	}
+
 	// ゴール判定ゴールは固定なのでplayerを渡すだけで平気
 	if (goal_->CheckCollision(player_)) {
 		finished_ = true;
 	}
+	// 死亡チェック
+	if (player_->IsDead()) {
+		finished_ = true; // GameOverSceneへ遷移
+	}
+	ImGui::Begin("gamePlayScene Debug");
+	ImGui::Text("This is gamePlayScene!");
+	ImGui::End();
 }
 
 // 描画
@@ -149,6 +172,10 @@ void GameScene::Draw() {
 	// ゴール描画
 	goal_->Draw(camera_);
 
+	// コイン描画
+	for (auto* coin : coins_) {
+		coin->Draw(camera_);
+	}
 	model_->PostDraw();
 }
 
@@ -192,6 +219,23 @@ void GameScene::CreateGoalFromMap() {
 				goal_ = new Goal();
 				goal_->Initialize(Model::CreateFromOBJ("player"), goalPos);
 				return; // ゴールは1つだけならすぐ抜ける
+			}
+		}
+	}
+}
+// マップからコインを生成
+void GameScene::CreateCoinsFromMap() {
+
+	for (uint32_t i = 0; i < mapChipField_->GetNumBlockVirtical(); ++i) {
+		for (uint32_t j = 0; j < mapChipField_->GetNumBlockHorizontal(); ++j) {
+
+			if (mapChipField_->GetMapChipTypeByIndex(j, i) == MapChipType::kCoin) {
+				Vector3 pos = mapChipField_->GetMapChipPositionbyIndex(j, i);
+
+				Coin* coin = new Coin();
+				coin->Initialize(Model::CreateFromOBJ("player"), pos);
+
+				coins_.push_back(coin);
 			}
 		}
 	}
