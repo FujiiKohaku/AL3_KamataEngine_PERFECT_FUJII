@@ -1,9 +1,11 @@
 #include "Coin.h"
 #include "Math.h"
-
+#include <numbers>
 void Coin::Initialize(Model* model, const Vector3& position) {
 	model_ = model;
 	worldTransform_.Initialize();
+	worldTransform_.rotation_.y = std::numbers::pi_v<float> / 2.0f; // 45度傾けておく
+	worldTransform_.scale_ = {0.5f * kCoinRadius, 0.5f * kCoinRadius, 0.5f * kCoinRadius}; // モデル見た目固定
 	worldTransform_.translation_ = position;
 }
 

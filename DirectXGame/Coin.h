@@ -25,5 +25,5 @@ private:
 	float rotateSpeed_ = 180.0f; // 回転速度（度/秒）
 
 public:
-	static inline const float kCoinRadius = 1.0f;
+	static inline const float kCoinRadius = 0.9f;
 };

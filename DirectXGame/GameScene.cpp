@@ -233,7 +233,7 @@ void GameScene::CreateCoinsFromMap() {
 				Vector3 pos = mapChipField_->GetMapChipPositionbyIndex(j, i);
 
 				Coin* coin = new Coin();
-				coin->Initialize(Model::CreateFromOBJ("player"), pos);
+				coin->Initialize(Model::CreateFromOBJ("Coin"), pos);
 
 				coins_.push_back(coin);
 			}
