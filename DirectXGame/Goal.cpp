@@ -5,6 +5,7 @@ void Goal::Initialize(Model* model, const Vector3& position) {
 	model_ = model;
 	worldTransform_.Initialize();
 	worldTransform_.translation_ = position;
+	worldTransform_.scale_ = {0.5f, 0.5f, 0.5f};
 }
 
 void Goal::Update() {

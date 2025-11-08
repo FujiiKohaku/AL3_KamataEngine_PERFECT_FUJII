@@ -97,7 +97,7 @@ void GameScene::Initialize() {
 void GameScene::Update() {
 	player_->Update();
 	skydome_->Update();
-
+	fade_.Update(); 
 	// -----------------------
 	// ブロック更新
 	// -----------------------
@@ -158,7 +158,7 @@ void GameScene::Update() {
 	}
 	// 死亡チェック
 	if (player_->IsDead()) {
-		finished_ = true; // GameOverSceneへ遷移
+		isGameOver_ = true; // GameOverSceneへ遷移
 	}
 	ImGui::Begin("gamePlayScene Debug");
 	ImGui::Text("This is gamePlayScene!");
@@ -195,7 +195,11 @@ void GameScene::Draw() {
 	for (auto& spike : spikes_) {
 		spike->Draw(camera_);
 	}
+
 	model_->PostDraw();
+
+
+	  fade_.Draw();
 }
 
 // ===============================================
@@ -236,7 +240,7 @@ void GameScene::CreateGoalFromMap() {
 			if (mapChipField_->GetMapChipTypeByIndex(j, i) == MapChipType::kGoal) {
 				Vector3 goalPos = mapChipField_->GetMapChipPositionbyIndex(j, i);
 				goal_ = new Goal();
-				goal_->Initialize(Model::CreateFromOBJ("player"), goalPos);
+				goal_->Initialize(Model::CreateFromOBJ("goal"), goalPos);
 				return; // ゴールは1つだけならすぐ抜ける
 			}
 		}
@@ -267,7 +271,7 @@ void GameScene::CreateSpikesFromMap() {
 			if (mapChipField_->GetMapChipTypeByIndex(j, i) == MapChipType::kSpike) {
 				Vector3 pos = mapChipField_->GetMapChipPositionbyIndex(j, i);
 				Spike* spike = new Spike();
-				spike->Initialize(Model::CreateFromOBJ("cube"), pos);
+				spike->Initialize(Model::CreateFromOBJ("spike"), pos);
 				spikes_.push_back(spike);
 			}
 		}

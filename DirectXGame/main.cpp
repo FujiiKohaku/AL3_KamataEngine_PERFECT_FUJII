@@ -54,12 +54,11 @@ void ChangeScene() {
 	case Scene::kGame:
 
 		if (gameScene->Finished()) {
-
 			delete gameScene;
 			gameScene = nullptr;
 
-			gameoverScene = new GameOverScene;
-			gameoverScene->Initialize();
+			clearScene = new ClearScene;
+			clearScene->Initialize();
 			scene = Scene::kClear;
 		}
 
@@ -86,6 +85,15 @@ void ChangeScene() {
 		}
 		break;
 	case Scene::kClear:
+		if (clearScene->Finished()) {
+
+			delete gameScene;
+			gameScene = nullptr;
+
+			titleScene = new TitleScene;
+			titleScene->Initialize();
+			scene = Scene::kTitle;
+		}
 		break;
 	}
 }

@@ -2,6 +2,7 @@
 #include "BreakBlock.h"
 #include "CameraController.h"
 #include "Coin.h"
+#include "Fade.h"
 #include "Goal.h"
 #include "KamataEngine.h"
 #include "MapChipField.h"
@@ -24,7 +25,6 @@ public:
 	// シーンが終了したかのゲッター
 	bool Finished() const { return finished_; }
 	bool IsGameOver() const { return isGameOver_; }
-
 
 	void GenerateBlocks();
 
@@ -101,4 +101,9 @@ private:
 	// とげ
 	//---------------
 	std::vector<Spike*> spikes_;
+	//---------------
+	// フェード
+	//---------------
+	Fade fade_;                // フェードクラス
+	bool isFadingOut_ = false; // フェードアウト中かどうか
 };

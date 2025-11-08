@@ -21,7 +21,7 @@ private:
 	WorldTransform worldTransform_;
 	Model* model_ = nullptr;
 	bool goalReached_ = false;
-	float rotateSpeed_ = 90.0f;
+	float rotateSpeed_ = 1.0f;
 
 public:
 	static inline const float kGoalRadius = 1.0f;
