@@ -19,12 +19,18 @@ GameScene::~GameScene() {
 		delete coin;
 	}
 	coins_.clear();
+
 	// ブロック（2次元配列）の解放
 	for (auto& line : worldTransformBlocks_) {
 		for (auto* block : line) {
 			delete block;
 		}
 	}
+	// スパイクの解放
+	for (auto* spike : spikes_) {
+		delete spike;
+	}
+	spikes_.clear();
 	worldTransformBlocks_.clear();
 }
 
@@ -51,6 +57,8 @@ void GameScene::Initialize() {
 	CreateGoalFromMap();
 	// コイン生成
 	CreateCoinsFromMap();
+	// トゲ生成
+	CreateSpikesFromMap();
 	//------------------
 	// プレイヤー関連
 	//------------------
@@ -137,6 +145,13 @@ void GameScene::Update() {
 		}
 	}
 
+	for (auto& spike : spikes_) {
+		spike->Update();
+		if (spike->CheckCollision(player_)) {
+			isGameOver_ = true; // GameOverSceneへ遷移
+		}
+	}
+
 	// ゴール判定ゴールは固定なのでplayerを渡すだけで平気
 	if (goal_->CheckCollision(player_)) {
 		finished_ = true;
@@ -175,6 +190,10 @@ void GameScene::Draw() {
 	// コイン描画
 	for (auto* coin : coins_) {
 		coin->Draw(camera_);
+	}
+
+	for (auto& spike : spikes_) {
+		spike->Draw(camera_);
 	}
 	model_->PostDraw();
 }
@@ -223,6 +242,7 @@ void GameScene::CreateGoalFromMap() {
 		}
 	}
 }
+
 // マップからコインを生成
 void GameScene::CreateCoinsFromMap() {
 
@@ -236,6 +256,19 @@ void GameScene::CreateCoinsFromMap() {
 				coin->Initialize(Model::CreateFromOBJ("Coin"), pos);
 
 				coins_.push_back(coin);
+			}
+		}
+	}
+}
+// マップからトゲを生成
+void GameScene::CreateSpikesFromMap() {
+	for (uint32_t i = 0; i < mapChipField_->GetNumBlockVirtical(); ++i) {
+		for (uint32_t j = 0; j < mapChipField_->GetNumBlockHorizontal(); ++j) {
+			if (mapChipField_->GetMapChipTypeByIndex(j, i) == MapChipType::kSpike) {
+				Vector3 pos = mapChipField_->GetMapChipPositionbyIndex(j, i);
+				Spike* spike = new Spike();
+				spike->Initialize(Model::CreateFromOBJ("cube"), pos);
+				spikes_.push_back(spike);
 			}
 		}
 	}

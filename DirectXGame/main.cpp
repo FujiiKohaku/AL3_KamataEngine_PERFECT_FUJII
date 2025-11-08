@@ -60,8 +60,18 @@ void ChangeScene() {
 
 			gameoverScene = new GameOverScene;
 			gameoverScene->Initialize();
+			scene = Scene::kClear;
+		}
+
+		if (gameScene && gameScene->IsGameOver()) {
+			delete gameScene;
+			gameScene = nullptr;
+
+			gameoverScene = new GameOverScene;
+			gameoverScene->Initialize();
 			scene = Scene::kGameOver;
 		}
+
 		break;
 
 	case Scene::kGameOver:
@@ -105,7 +115,6 @@ void UpdateScene() {
 //===================
 // シーン描画関数
 //===================
-
 
 void DrawScene() {
 	switch (scene) {
@@ -189,7 +198,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		}
 		if (ImGui::Button("Go Game")) {
 
-		DeleteAllScenes();
+			DeleteAllScenes();
 
 			gameScene = new GameScene;
 			gameScene->Initialize();
@@ -197,7 +206,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		}
 		if (ImGui::Button("Go GameOver")) {
 
-		DeleteAllScenes();
+			DeleteAllScenes();
 
 			gameoverScene = new GameOverScene;
 			gameoverScene->Initialize();

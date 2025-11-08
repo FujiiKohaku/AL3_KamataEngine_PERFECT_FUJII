@@ -1,4 +1,5 @@
 #pragma once
+#include "BreakBlock.h"
 #include "CameraController.h"
 #include "Coin.h"
 #include "Goal.h"
@@ -6,6 +7,7 @@
 #include "MapChipField.h"
 #include "Player.h"
 #include "Skydome.h"
+#include "Spike.h"
 #include <vector>
 // ゲームシーン
 class GameScene {
@@ -21,6 +23,8 @@ public:
 	~GameScene();
 	// シーンが終了したかのゲッター
 	bool Finished() const { return finished_; }
+	bool IsGameOver() const { return isGameOver_; }
+
 
 	void GenerateBlocks();
 
@@ -30,12 +34,14 @@ public:
 
 	void CreateCoinsFromMap();
 
+	void CreateSpikesFromMap();
+
 private:
 	//============
 	// 状態管理
 	//============
 	bool finished_ = false;
-
+	bool isGameOver_ = false; // ←シーン終了フラグ
 	//============
 	// player
 	//============
@@ -87,4 +93,12 @@ private:
 	// コイン
 	//---------------
 	std::vector<Coin*> coins_;
+	//---------------
+	// 壊れるブロック
+	//---------------
+	std::vector<BreakBlock*> breakBlocks_;
+	//---------------
+	// とげ
+	//---------------
+	std::vector<Spike*> spikes_;
 };

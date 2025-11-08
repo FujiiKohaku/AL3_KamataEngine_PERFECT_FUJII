@@ -21,58 +21,64 @@ void Player::Initialize(Model* model, Camera* camera, const Vector3& position) {
 	camera_ = camera;
 }
 
-// 移動入力(02_07 スライド10枚目)
 void Player::InputMove() {
 
-	if (onGround_) {
+	// 左右移動処理（地上・空中共通）
+	Vector3 acceleration = {};
 
-		// 左右移動操作
-		if (Input::GetInstance()->PushKey(DIK_RIGHT) || Input::GetInstance()->PushKey(DIK_LEFT)) {
+	if (Input::GetInstance()->PushKey(DIK_RIGHT)) {
 
-			// 左右加速
-			Vector3 acceleration = {};
-			if (Input::GetInstance()->PushKey(DIK_RIGHT)) {
+		if (velocity_.x < 0.0f) {
+			velocity_.x *= (1.0f - kAttenuation); // 方向転換時の減衰
+		}
 
-				if (velocity_.x < 0.0f) {
-					// 旋回の最初は移動減衰をかける
-					velocity_.x *= (1.0f - kAttenuation);
-				}
-				acceleration.x += kAcceleration / 60.0f;
-				if (lrDirection_ != LRDirection::kRight) {
-					lrDirection_ = LRDirection::kRight;
-					turnFirstRotationY_ = worldTransform_.rotation_.y;
-					turnTimer_ = kTimeTurn;
-				}
-			} else if (Input::GetInstance()->PushKey(DIK_LEFT)) {
-				if (velocity_.x > 0.0f) {
-					// 旋回の最初は移動減衰をかける
-					velocity_.x *= (1.0f - kAttenuation);
-				}
-				acceleration.x -= kAcceleration / 60.0f;
-				if (lrDirection_ != LRDirection::kLeft) {
-					lrDirection_ = LRDirection::kLeft;
-					turnFirstRotationY_ = worldTransform_.rotation_.y;
-					turnTimer_ = kTimeTurn;
-				}
-			}
-			velocity_ += acceleration;
-			velocity_.x = std::clamp(velocity_.x, -kLimitRunSpeed, kLimitRunSpeed);
-		} else {
-			// 非入力時は移動減衰をかける
+		acceleration.x += kAcceleration / 60.0f;
+
+		if (lrDirection_ != LRDirection::kRight) {
+			lrDirection_ = LRDirection::kRight;
+			turnFirstRotationY_ = worldTransform_.rotation_.y;
+			turnTimer_ = kTimeTurn;
+		}
+
+	} else if (Input::GetInstance()->PushKey(DIK_LEFT)) {
+
+		if (velocity_.x > 0.0f) {
 			velocity_.x *= (1.0f - kAttenuation);
 		}
 
-		// ほぼ0の場合に0にする
-		if (std::abs(velocity_.x) <= 0.0001f) {
-			velocity_.x = 0.0f;
-		}
+		acceleration.x -= kAcceleration / 60.0f;
 
-		if (Input::GetInstance()->PushKey(DIK_UP)) {
-			// ジャンプ初速
-			velocity_ += Vector3(0, kJumpAcceleration / 60.0f, 0);
+		if (lrDirection_ != LRDirection::kLeft) {
+			lrDirection_ = LRDirection::kLeft;
+			turnFirstRotationY_ = worldTransform_.rotation_.y;
+			turnTimer_ = kTimeTurn;
 		}
 	} else {
-		// 落下速度
+		// 入力なしなら減速
+		velocity_.x *= (1.0f - kAttenuation);
+	}
+
+	// 空中では操作を少し効きにくくする（自然な慣性）
+	if (!onGround_) {
+		acceleration.x *= 0.5f; // 空中は加速半分
+	}
+
+	// 速度に加算してクランプ
+	velocity_ += acceleration;
+	velocity_.x = std::clamp(velocity_.x, -kLimitRunSpeed, kLimitRunSpeed);
+
+	// ほぼ停止なら0
+	if (std::abs(velocity_.x) <= 0.0001f) {
+		velocity_.x = 0.0f;
+	}
+
+	// ジャンプ入力（地上のみ）
+	if (onGround_ && Input::GetInstance()->PushKey(DIK_UP)) {
+		velocity_ += Vector3(0, kJumpAcceleration / 60.0f, 0);
+	}
+
+	// 重力（空中のみ）
+	if (!onGround_) {
 		velocity_ += Vector3(0, -kGravityAcceleration / 60.0f, 0);
 		velocity_.y = std::max(velocity_.y, -kLimitFallSpeed);
 	}
