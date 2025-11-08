@@ -8,7 +8,7 @@ std::map<std::string, MapChipType> mapChipTable = {
     {"1", MapChipType::kBlock     },
     {"2", MapChipType::kGoal      }, // ゴール
     {"3", MapChipType::kCoin      }, // コイン
-    {"4", MapChipType::kSpike}, // 壊れるブロック
+    {"4", MapChipType::kSpike}, // 壊れるブロックzz
 };
 }
 

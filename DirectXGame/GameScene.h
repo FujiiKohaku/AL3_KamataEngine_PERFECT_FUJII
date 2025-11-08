@@ -2,6 +2,7 @@
 #include "BreakBlock.h"
 #include "CameraController.h"
 #include "Coin.h"
+#include "Enemy.h"
 #include "Fade.h"
 #include "Goal.h"
 #include "KamataEngine.h"
@@ -35,6 +36,8 @@ public:
 	void CreateCoinsFromMap();
 
 	void CreateSpikesFromMap();
+
+	void CreateEnemiesFromMap();
 
 private:
 	//============
@@ -106,4 +109,10 @@ private:
 	//---------------
 	Fade fade_;                // フェードクラス
 	bool isFadingOut_ = false; // フェードアウト中かどうか
+
+	//---------------
+	// エネミー
+	//---------------
+	std::vector<Enemy*> enemies_; // 敵を複数管理
+	Model* modelEnemy_ = nullptr; // 敵モデル
 };

@@ -35,6 +35,8 @@ public:
 	void SetMapChipField(MapChipField* mapChipField) { mapChipField_ = mapChipField; }
 	bool IsDead() const { return isDead_; }
 
+	
+
 private:
 	// ワールド変換データ
 	WorldTransform worldTransform_;

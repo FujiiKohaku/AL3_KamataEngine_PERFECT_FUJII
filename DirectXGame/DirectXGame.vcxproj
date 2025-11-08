@@ -110,6 +110,7 @@
     <ClCompile Include="CameraController.cpp" />
     <ClCompile Include="ClearScene.cpp" />
     <ClCompile Include="Coin.cpp" />
+    <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="Fade.cpp" />
     <ClCompile Include="GameOverScene.cpp" />
     <ClCompile Include="GameScene.cpp" />
@@ -202,6 +203,7 @@
     <ClInclude Include="CameraController.h" />
     <ClInclude Include="ClearScene.h" />
     <ClInclude Include="Coin.h" />
+    <ClInclude Include="Enemy.h" />
     <ClInclude Include="Fade.h" />
     <ClInclude Include="GameOverScene.h" />
     <ClInclude Include="GameScene.h" />
