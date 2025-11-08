@@ -1,47 +1,39 @@
 #pragma once
 #include "KamataEngine.h"
-
 class Fade {
 public:
 	void Initialize();
+
 	void Update();
+
 	void Draw();
 
+	// フェードの状態
 	enum class Status {
-		None,
-		FadeIn,
-		FadeOut,
+		None,    // フェードなし
+		FadeIn,  // フェードイン中
+		FadeOut, // フェードアウト中
 	};
 
-	void Start(Status status, float duration);
+	// フェード開始関数
+	void Start(Status status, float duratiom);
+	// フェード終了関数
 	void Stop();
+
+	// フェード終了判定
 	bool IsFinished() const;
 
-
-	Status GetStatus() const { return status_; }
-
-	struct Tile {
-		KamataEngine::Sprite* sprite;
-		float delay;
-	};
-
 private:
+	// Spriteの生成タイミング制御のためポインタで保持
+	KamataEngine::Sprite* sprite_ = nullptr;
+
 	static const int kWidth = 1280;
 	static const int kHeight = 720;
 
+	// 現在のフェードの状態
 	Status status_ = Status::None;
+	// フェードの持続時間
 	float duration_ = 0.0f;
+	// 経過時間カウンター
 	float counter_ = 0.0f;
-	uint32_t textureHandle_ = 0;
-
-	KamataEngine::Sprite* sprite_ = nullptr;
-
-	const int screenWidth = 1280;
-	const int screenHeight = 720;
-	const int tileSize = 80;
-
-	int tileCountX = screenWidth / tileSize + 1;
-	int tileCountY = screenHeight / tileSize + 1;
-
-	std::vector<Tile*> tiles_;
 };
