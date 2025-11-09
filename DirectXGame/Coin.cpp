@@ -12,7 +12,7 @@ void Coin::Initialize(Model* model, const Vector3& position) {
 void Coin::Update() {
 	if (collected_)
 		return;
-
+	worldTransform_.rotation_.y += rotateSpeed_ * (1.0f / 60.0f) * (std::numbers::pi_v<float> / 180.0f);
 	WorldTransformUpdate(worldTransform_);
 }
 

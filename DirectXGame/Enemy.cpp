@@ -1,7 +1,8 @@
 #include "Enemy.h"
 #include "Math.h"
 #include <cmath>
-
+#include <cstdlib>  // rand(), srand()
+#include <ctime>    // time()
 void Enemy::Initialize(Model* model, const Vector3& position) {
 	model_ = model;
 	worldTransform_.Initialize();
@@ -14,17 +15,32 @@ void Enemy::Initialize(Model* model, const Vector3& position) {
 }
 
 void Enemy::Update() {
-	// 移動量
+	// --- 一度だけ乱数初期化（もしまだなら） ---
+	static bool initialized = false;
+	if (!initialized) {
+		srand(static_cast<unsigned int>(time(nullptr)));
+		initialized = true;
+	}
+
+	// --- ランダムで方向を変える ---
+	// 1/50 の確率で反転（毎フレーム判定）
+	if (rand() % 50 == 0) {
+		direction_ *= -1.0f;
+	}
+
+	// --- 移動 ---
 	worldTransform_.translation_.x += direction_ * kMoveSpeed;
 
-	// 一定範囲に来たら方向反転
+	// --- 範囲制限（はみ出したら戻す）---
 	if (worldTransform_.translation_.x > startPos_.x + kMoveRange) {
+		worldTransform_.translation_.x = startPos_.x + kMoveRange;
 		direction_ = -1.0f;
 	} else if (worldTransform_.translation_.x < startPos_.x - kMoveRange) {
+		worldTransform_.translation_.x = startPos_.x - kMoveRange;
 		direction_ = 1.0f;
 	}
 
-	// 行列更新
+	// --- 行列更新 ---
 	WorldTransformUpdate(worldTransform_);
 }
 void Enemy::Draw(Camera* camera) {

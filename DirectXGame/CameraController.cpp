@@ -1,30 +1,45 @@
-#include "CameraController.h "
-#include "Math.h"
+#include "CameraController.h"
 #include "Player.h"
-#include <algorithm>
+
+#include <algorithm> // std::max, std::min を使用するために必要
+
 void CameraController::Initialize(KamataEngine::Camera* camera) { camera_ = camera; }
 
 void CameraController::Update() {
+	// プレイヤーの現在位置を取得
+	const WorldTransform& targetWorldTransform = target_->GetWorldTransform();
 
-	// 追従ターゲットのワールドトランスフォームを参照
-	const KamataEngine::WorldTransform& targetWorldTransform = target_->GetWorldTransform();
-	// 追従対象とオフセットと追従対象の速度からカメラの目標座標を計算//playerの少し先の距離を取得する
-	targetPosition_ = targetWorldTransform.translation_ + targetOffset_ + target_->GetVelocity() * kVelocityBias;
-	// 座標補間によりゆったり追従 （取得した目標座標と現在のカメラ座標をLerpでなめらかに近づける）
-	camera_->translation_ = Lerp(camera_->translation_, targetPosition_, kInterpolationRate);
+	// プレイヤーの現在速度を取得
+	const KamataEngine::Vector3& targetvelocity = target_->GetVelocity();
 
-	// 追従対象が画面買いに出ないように補正
-	camera_->translation_.x = max(camera_->translation_.x, targetPosition_.x + targetMargin.left);
-	camera_->translation_.x = min(camera_->translation_.x, targetPosition_.x + targetMargin.right);
-	camera_->translation_.y = max(camera_->translation_.y, targetPosition_.y + targetMargin.bottom);
-	camera_->translation_.y = min(camera_->translation_.y, targetPosition_.y + targetMargin.top);
-	// 行列を更新する
+	// カメラの目的地 = プレイヤー位置 + オフセット + (速度 × バイアス)
+	destination_.x = targetWorldTransform.translation_.x + targetOffset_.x + targetvelocity.x * kVelocityBias;
+	destination_.y = camera_->translation_.y; // ← ジャンプしてもYは動かさない
+	destination_.z = targetWorldTransform.translation_.z + targetOffset_.z;
+
+
+	// 補間でなめらかに目的地へ近づける（ゆったり追従）
+	camera_->translation_ = Lerp(camera_->translation_, destination_, kinterpolationRate);
+
+	// プレイヤーとのマージン制御（画面からはみ出さないように）
+	camera_->translation_.x = std::max(camera_->translation_.x, destination_.x + targetMargin.left);
+	camera_->translation_.x = std::min(camera_->translation_.x, destination_.x + targetMargin.right);
+	camera_->translation_.y = std::max(camera_->translation_.y, destination_.y + targetMargin.bottom);
+	camera_->translation_.y = std::min(camera_->translation_.y, destination_.y + targetMargin.top);
+
+	// ステージ全体の移動範囲制限（外に出ないように）
+	camera_->translation_.x = std::max(camera_->translation_.x, movableArea_.left);
+	camera_->translation_.x = std::min(camera_->translation_.x, movableArea_.right);
+	camera_->translation_.y = std::max(camera_->translation_.y, movableArea_.bottom);
+	camera_->translation_.y = std::min(camera_->translation_.y, movableArea_.top);
+
+	// 最終的に行列を更新
 	camera_->UpdateMatrix();
 }
 
 void CameraController::Reset() {
-	// 追従ターゲットのワールドトランスフォームを参照
-	const KamataEngine::WorldTransform& targetWorldTransform = target_->GetWorldTransform();
-	// 追従対象とオフセットからカメラの座標を計算
+	// 追従対象の和０ルドトランスフォームを参照
+	const WorldTransform& targetWorldTransform = target_->GetWorldTransform();
+	// 追従対象とオフセットからカメラの位置を計算
 	camera_->translation_ = targetWorldTransform.translation_ + targetOffset_;
 }

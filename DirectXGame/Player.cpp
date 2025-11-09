@@ -394,6 +394,8 @@ Vector3 Player::CornerPosition(const Vector3& center, Corner corner) {
 void Player ::Update() {
 	if (isDead_)
 		return;
+	if (isGoal_)
+		return;
 	// 移動入力(02_07 スライド10枚目)
 	InputMove();
 
