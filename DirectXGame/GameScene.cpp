@@ -310,7 +310,7 @@ void GameScene::CreateEnemiesFromMap() {
 			if (mapChipField_->GetMapChipTypeByIndex(j, i) == MapChipType::kEnemy) {
 				Vector3 pos = mapChipField_->GetMapChipPositionbyIndex(j, i);
 				Enemy* enemy = new Enemy();
-				enemy->Initialize(Model::CreateFromOBJ("player"), pos);
+				enemy->Initialize(Model::CreateFromOBJ("spike"), pos);
 				enemies_.push_back(enemy);
 			}
 		}

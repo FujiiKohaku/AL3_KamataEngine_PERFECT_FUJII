@@ -5,6 +5,7 @@
 void Enemy::Initialize(Model* model, const Vector3& position) {
 	model_ = model;
 	worldTransform_.Initialize();
+	worldTransform_.scale_ = {kEnemyRadius, kEnemyRadius, kEnemyRadius}; // 当たり判定に合わせてスケーリング
 	worldTransform_.translation_ = position;
 
 
