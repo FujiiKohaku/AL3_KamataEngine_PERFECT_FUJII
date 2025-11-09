@@ -113,6 +113,5 @@ private:
 	//---------------
 	// エネミー
 	//---------------
-	std::vector<Enemy*> enemies_; // 敵を複数管理
-	Model* modelEnemy_ = nullptr; // 敵モデル
+	std::vector<Enemy*> enemies_;
 };

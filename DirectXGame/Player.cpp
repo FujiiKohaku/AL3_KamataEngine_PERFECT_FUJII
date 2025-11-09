@@ -8,6 +8,9 @@
 #include <cassert>
 #include <numbers>
 
+#include "Coin.h"
+#include "Spike.h"
+#include "Goal.h"
 void Player::Initialize(Model* model, Camera* camera, const Vector3& position) {
 
 	assert(model);
@@ -439,4 +442,33 @@ void Player::Draw() {
 
 	// モデル描画
 	model_->Draw(worldTransform_, *camera_);
+}
+
+void Player::OnCollision(Coin* coin) {
+	if (coin) {
+		coin->SetCollected(true);
+		// 例: コイン取得音を再生
+		// SoundManager::GetInstance()->PlaySE("coin");
+	}
+}
+
+void Player::OnCollision(Spike* spike) {
+	if (spike) {
+		isDead_ = true;
+		// 例: ダメージSE
+		// SoundManager::GetInstance()->PlaySE("damage");
+	}
+}
+
+void Player::OnCollision(Goal* goal) {
+	if (goal) {
+		isGoal_ = true;
+		// 例: ゴールSE
+		// SoundManager::GetInstance()->PlaySE("goal");
+	}
+}
+void Player::OnCollision(Enemy* enemy) {
+	if (enemy) {
+		isDead_ = true; // 敵に触れたら死亡
+	}
 }

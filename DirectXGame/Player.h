@@ -4,7 +4,10 @@
 using namespace KamataEngine;
 
 class MapChipField;
-
+class Coin;
+class Spike;
+class Goal;
+class Enemy;
 class Player {
 public:
 	// 左右
@@ -34,8 +37,12 @@ public:
 	// 02_07 スライド4枚目
 	void SetMapChipField(MapChipField* mapChipField) { mapChipField_ = mapChipField; }
 	bool IsDead() const { return isDead_; }
+	bool IsGoal() const { return isGoal_; }
 
-	
+	void OnCollision(Coin* coin);
+	void OnCollision(Spike* spike);
+	void OnCollision(Goal* goal);
+	void OnCollision(Enemy* enemy);
 
 private:
 	// ワールド変換データ
@@ -109,4 +116,5 @@ private:
 	// 02_08スライド27枚目 着地時の速度減衰率
 	static inline const float kAttenuationWall = 0.2f;
 	bool isDead_ = false; // 死亡フラグ
+	bool isGoal_ = false; // ゴールフラグ
 };

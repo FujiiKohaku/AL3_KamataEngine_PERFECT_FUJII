@@ -31,6 +31,10 @@ GameScene::~GameScene() {
 		delete spike;
 	}
 	spikes_.clear();
+	for (auto* enemy : enemies_) {
+		delete enemy;
+	}
+	enemies_.clear();
 	worldTransformBlocks_.clear();
 }
 
@@ -59,6 +63,8 @@ void GameScene::Initialize() {
 	CreateCoinsFromMap();
 	// トゲ生成
 	CreateSpikesFromMap();
+	// 敵生成
+	CreateEnemiesFromMap();
 	//------------------
 	// プレイヤー関連
 	//------------------
@@ -97,7 +103,7 @@ void GameScene::Initialize() {
 void GameScene::Update() {
 	player_->Update();
 	skydome_->Update();
-	fade_.Update(); 
+	fade_.Update();
 	// -----------------------
 	// ブロック更新
 	// -----------------------
@@ -105,7 +111,7 @@ void GameScene::Update() {
 		for (auto* block : blockLine) {
 
 			if (!block)
-				continue; // ← nullチェック
+				continue; //  nullチェック
 
 			WorldTransformUpdate(*block);
 		}
@@ -141,25 +147,43 @@ void GameScene::Update() {
 	for (auto* coin : coins_) {
 		coin->Update();
 		if (coin->CheckCollision(player_)) {
-			coin->SetCollected(true);
+			player_->OnCollision(coin);
 		}
 	}
 
-	for (auto& spike : spikes_) {
+	// -----------------------
+	// スパイク更新
+	// -----------------------
+	for (auto* spike : spikes_) {
 		spike->Update();
 		if (spike->CheckCollision(player_)) {
-			isGameOver_ = true; // GameOverSceneへ遷移
+			player_->OnCollision(spike);
 		}
 	}
 
-	// ゴール判定ゴールは固定なのでplayerを渡すだけで平気
+	// -----------------------
+	// エネミー更新
+	// -----------------------
+	for (auto* enemy : enemies_) {
+		enemy->Update();
+		if (enemy->CheckCollision(player_)) {
+			enemy->OnCollision(player_);
+		}
+	}
+	// -----------------------
+	// ゴール判定
+	// -----------------------
 	if (goal_->CheckCollision(player_)) {
-		finished_ = true;
+		player_->OnCollision(goal_);
 	}
-	// 死亡チェック
+
+	// -----------------------
+	// プレイヤー死亡チェック
+	// -----------------------
 	if (player_->IsDead()) {
-		isGameOver_ = true; // GameOverSceneへ遷移
+		isGameOver_ = true;
 	}
+
 	ImGui::Begin("gamePlayScene Debug");
 	ImGui::Text("This is gamePlayScene!");
 	ImGui::End();
@@ -196,10 +220,12 @@ void GameScene::Draw() {
 		spike->Draw(camera_);
 	}
 
+	for (auto* enemy : enemies_) {
+		enemy->Draw(camera_);
+	}
 	model_->PostDraw();
 
-
-	  fade_.Draw();
+	fade_.Draw();
 }
 
 // ===============================================
@@ -273,6 +299,19 @@ void GameScene::CreateSpikesFromMap() {
 				Spike* spike = new Spike();
 				spike->Initialize(Model::CreateFromOBJ("spike"), pos);
 				spikes_.push_back(spike);
+			}
+		}
+	}
+}
+// マップからエネミーを生成
+void GameScene::CreateEnemiesFromMap() {
+	for (uint32_t i = 0; i < mapChipField_->GetNumBlockVirtical(); ++i) {
+		for (uint32_t j = 0; j < mapChipField_->GetNumBlockHorizontal(); ++j) {
+			if (mapChipField_->GetMapChipTypeByIndex(j, i) == MapChipType::kEnemy) {
+				Vector3 pos = mapChipField_->GetMapChipPositionbyIndex(j, i);
+				Enemy* enemy = new Enemy();
+				enemy->Initialize(Model::CreateFromOBJ("enemy"), pos);
+				enemies_.push_back(enemy);
 			}
 		}
 	}

@@ -13,6 +13,7 @@ enum class MapChipType {
 	kGoal,  // ゴール
 	kCoin,  // コイン
 	kSpike, // トゲzz
+	kEnemy, // 敵	
 };
 
 // マップ全体のデータ構造

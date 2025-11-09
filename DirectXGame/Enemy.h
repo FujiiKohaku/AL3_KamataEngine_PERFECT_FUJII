@@ -1,57 +1,28 @@
 #pragma once
-#define NOMINMAX
 #include "KamataEngine.h"
-#include "Math.h"
+#include "Player.h"
 
-class Player;
-class MapChipField; // 前方宣言
+using namespace KamataEngine;
 
 class Enemy {
 public:
-	// 初期化
-	void Initialize(KamataEngine::Model* model, KamataEngine::Camera* camera, const KamataEngine::Vector3& position, MapChipField* mapChipField);
-
-	// 更新
-	void UpDate();
-
-	// 描画
-	void Draw();
+	void Initialize(Model* model, const Vector3& position);
+	void Update();
+	void Draw(Camera* camera);
 
 	// 当たり判定
-	AABB GetAABB();
-	KamataEngine::Vector3 GetWorldPosition();
+	bool CheckCollision(Player* player) const;
+	void OnCollision(Player* player); // 双方向対応
 
-	
-
-	// 生存判定
+	// 死亡状態
 	bool IsDead() const { return isDead_; }
-	bool IsDefeated() const;
 
 private:
-	KamataEngine::WorldTransform worldTransform_;
-	KamataEngine::Model* model_ = nullptr;
-	KamataEngine::Camera* camera_ = nullptr;
-
-	MapChipField* mapChipField_ = nullptr;
-
-	// 歩行速度
-	static inline const float kWalkSpeed = 0.01f;
-
-	// サイズ
-	static inline const float kWidth = 0.8f;
-	static inline const float kHeight = 0.8f;
-
-	// 速度
-	KamataEngine::Vector3 velocity_ = {};
-
-	// 行動状態
-	enum class Behavior { kNormal, kDefeated };
-	Behavior behavior_ = Behavior::kNormal;
-
-	// 管理フラグ
+	WorldTransform worldTransform_;
+	Model* model_ = nullptr;
+	Vector3 velocity_ = {};
 	bool isDead_ = false;
-	bool isCollisionDisabled_ = false;
 
-	// デス演出用
-	int deathTimer_ = 0;
+	// 判定用半径
+	static inline const float kEnemyRadius = 1.0f;
 };
