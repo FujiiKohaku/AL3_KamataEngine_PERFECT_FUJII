@@ -183,6 +183,13 @@ void GameScene::Update() {
 	if (player_->IsDead()) {
 		isGameOver_ = true;
 	}
+	// -----------------------
+	// プレイヤークリアチェック
+	// -----------------------
+
+	if (player_->IsGoal()) {
+		finished_ = true;
+	}
 
 	ImGui::Begin("gamePlayScene Debug");
 	ImGui::Text("This is gamePlayScene!");
