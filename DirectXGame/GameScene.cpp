@@ -168,6 +168,7 @@ void GameScene::Update() {
 		enemy->Update();
 		if (enemy->CheckCollision(player_)) {
 			enemy->OnCollision(player_);
+			player_->OnCollision(enemy);
 		}
 	}
 	// -----------------------
@@ -206,7 +207,7 @@ void GameScene::Draw() {
 	skydome_->Draw();
 
 	// -----------------------
-	// ブロック描画（安全版）
+	// ブロック描画
 	// -----------------------
 	for (auto& blockLine : worldTransformBlocks_) {
 		for (auto* block : blockLine) {

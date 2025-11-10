@@ -201,7 +201,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 		imguiManager->Begin();
 
-		// ✅ Scene Controller復活版
+	
 		ImGui::Begin("Scene Controller");
 		if (ImGui::Button("Go Title")) {
 			DeleteAllScenes();

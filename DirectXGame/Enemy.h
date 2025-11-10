@@ -24,4 +24,5 @@ private:
 	static inline const float kMoveSpeed = 0.05f;  // 移動スピード
 	static inline const float kMoveRange = 3.0f;   // 往復距離
 	static inline const float kEnemyRadius = 1.0f; // 当たり判定半径
+	float velocity_ = 0.0f;                       // 垂直方向の速度
 };

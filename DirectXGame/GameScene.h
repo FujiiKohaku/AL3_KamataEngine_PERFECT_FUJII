@@ -38,6 +38,7 @@ public:
 	void CreateSpikesFromMap();
 
 	void CreateEnemiesFromMap();
+	bool CheckCollision(const Enemy* enemy, const Player* player);
 
 private:
 	//============
