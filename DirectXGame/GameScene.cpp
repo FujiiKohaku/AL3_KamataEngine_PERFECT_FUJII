@@ -192,9 +192,9 @@ void GameScene::Update() {
 		finished_ = true;
 	}
 
-	ImGui::Begin("gamePlayScene Debug");
-	ImGui::Text("This is gamePlayScene!");
-	ImGui::End();
+	//ImGui::Begin("gamePlayScene Debug");
+	//ImGui::Text("This is gamePlayScene!");
+	//ImGui::End();
 }
 
 // 描画

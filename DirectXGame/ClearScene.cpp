@@ -7,8 +7,6 @@ void ClearScene::Update() {
 
 		finished_ = true;
 	}
-	ImGui::Begin("TitleScene Debug");
-	ImGui::Text("This is ClearScene!");
-	ImGui::End();
+
 }
 void ClearScene::Draw() {}

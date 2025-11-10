@@ -185,8 +185,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	KamataEngine::Initialize();
 
 	DirectXCommon* dxCommon = DirectXCommon::GetInstance();
-	ImGuiManager* imguiManager = ImGuiManager::GetInstance();
-
+	
 	scene = Scene::kTitle;
 	titleScene = new TitleScene;
 	titleScene->Initialize();
@@ -195,13 +194,13 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	fade.Start(Fade::Status::FadeIn, 1.0f);
 
 	while (true) {
-
+		
 		if (KamataEngine::Update())
 			break;
 
-		imguiManager->Begin();
+		
 
-	
+	/*
 		ImGui::Begin("Scene Controller");
 		if (ImGui::Button("Go Title")) {
 			DeleteAllScenes();
@@ -231,18 +230,18 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			scene = Scene::kClear;
 			fade.Start(Fade::Status::FadeIn, 1.0f);
 		}
-		ImGui::End();
+		ImGui::End();*/
 
 		ChangeScene();
 		UpdateScene();
 		fade.Update();
 
-		imguiManager->End();
+	/*	imguiManager->End();*/
 
 		dxCommon->PreDraw();
 		DrawScene();
 		fade.Draw(); 
-		imguiManager->Draw();
+		/*imguiManager->Draw();*/
 		dxCommon->PostDraw();
 	}
 

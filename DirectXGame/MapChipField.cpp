@@ -2,6 +2,7 @@
 #include <fstream>
 #include <map>
 #include <sstream>
+#include <cassert>
 namespace {
 std::map<std::string, MapChipType> mapChipTable = {
     {"0", MapChipType::kBlank},
