@@ -182,7 +182,7 @@ void DrawScene() {
 //===================
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
-	KamataEngine::Initialize();
+	KamataEngine::Initialize(L"LE2C_フジイ_コハク_TestGame");
 
 	DirectXCommon* dxCommon = DirectXCommon::GetInstance();
 	
