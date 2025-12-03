@@ -40,6 +40,8 @@ public:
 	void CreateEnemiesFromMap();
 	bool CheckCollision(const Enemy* enemy, const Player* player);
 
+	void SetMapCsvPath(const std::string& path) { mapCsvPath_ = path; }
+
 private:
 	//============
 	// 状態管理
@@ -115,4 +117,7 @@ private:
 	// エネミー
 	//---------------
 	std::vector<Enemy*> enemies_;
+
+	// map
+	std::string mapCsvPath_ = "Resources/map/blocks.csv";
 };

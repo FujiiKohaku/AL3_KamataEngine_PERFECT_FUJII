@@ -4,6 +4,8 @@
 #include "GameScene.h"
 #include "KamataEngine.h"
 #include "TitleScene.h"
+
+#include "SelectScene.h"
 #include <Windows.h>
 using namespace KamataEngine;
 
@@ -13,6 +15,7 @@ using namespace KamataEngine;
 enum class Scene {
 	kUnknown = 0,
 	kTitle,
+	kSceneSelect,
 	kGame,
 	kGameOver,
 	kClear,
@@ -22,6 +25,7 @@ enum class Scene {
 // グローバル変数
 //===================
 TitleScene* titleScene = nullptr;
+SceneSelectScene* selectScene = nullptr;
 GameScene* gameScene = nullptr;
 GameOverScene* gameoverScene = nullptr;
 ClearScene* clearScene = nullptr;
@@ -31,6 +35,7 @@ Scene nextScene = Scene::kUnknown;
 
 Fade fade;
 bool isSceneChanging = false;
+std::string selectedStagePath = "";
 
 //===================
 // シーン全削除関数
@@ -52,6 +57,10 @@ void DeleteAllScenes() {
 		delete clearScene;
 		clearScene = nullptr;
 	}
+	if (selectScene) {
+		delete selectScene;
+		selectScene = nullptr;
+	}
 }
 
 //===================
@@ -66,6 +75,17 @@ void ChangeScene() {
 		switch (scene) {
 		case Scene::kTitle:
 			if (titleScene->Finished()) {
+				fade.Start(Fade::Status::FadeOut, 1.0f);
+				isSceneChanging = true;
+				nextScene = Scene::kSceneSelect;
+			}
+			break;
+
+		case Scene::kSceneSelect:
+			if (selectScene->Finished()) {
+
+				selectedStagePath = selectScene->GetSelectedStagePath();
+
 				fade.Start(Fade::Status::FadeOut, 1.0f);
 				isSceneChanging = true;
 				nextScene = Scene::kGame;
@@ -110,8 +130,14 @@ void ChangeScene() {
 				titleScene->Initialize();
 				scene = Scene::kTitle;
 				break;
+			case Scene::kSceneSelect:
+				selectScene = new SceneSelectScene;
+				selectScene->Initialize();
+				scene = Scene::kSceneSelect;
+				break;
 			case Scene::kGame:
 				gameScene = new GameScene;
+				gameScene->SetMapCsvPath(selectedStagePath);
 				gameScene->Initialize();
 				scene = Scene::kGame;
 				break;
@@ -141,6 +167,9 @@ void UpdateScene() {
 	case Scene::kTitle:
 		titleScene->Update();
 		break;
+	case Scene::kSceneSelect:
+		selectScene->Update();
+		break;
 	case Scene::kGame:
 		gameScene->Update();
 		break;
@@ -162,6 +191,9 @@ void DrawScene() {
 	switch (scene) {
 	case Scene::kTitle:
 		titleScene->Draw();
+		break;
+	case Scene::kSceneSelect:
+		selectScene->Draw();
 		break;
 	case Scene::kGame:
 		gameScene->Draw();
@@ -185,7 +217,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	KamataEngine::Initialize(L"LE2C_21_フジイ_コハク_TestGame");
 
 	DirectXCommon* dxCommon = DirectXCommon::GetInstance();
-	
+
 	scene = Scene::kTitle;
 	titleScene = new TitleScene;
 	titleScene->Initialize();
@@ -194,53 +226,51 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	fade.Start(Fade::Status::FadeIn, 1.0f);
 
 	while (true) {
-		
+
 		if (KamataEngine::Update())
 			break;
 
-		
-
-	/*
-		ImGui::Begin("Scene Controller");
-		if (ImGui::Button("Go Title")) {
-			DeleteAllScenes();
-			titleScene = new TitleScene;
-			titleScene->Initialize();
-			scene = Scene::kTitle;
-			fade.Start(Fade::Status::FadeIn, 1.0f);
-		}
-		if (ImGui::Button("Go Game")) {
-			DeleteAllScenes();
-			gameScene = new GameScene;
-			gameScene->Initialize();
-			scene = Scene::kGame;
-			fade.Start(Fade::Status::FadeIn, 1.0f);
-		}
-		if (ImGui::Button("Go GameOver")) {
-			DeleteAllScenes();
-			gameoverScene = new GameOverScene;
-			gameoverScene->Initialize();
-			scene = Scene::kGameOver;
-			fade.Start(Fade::Status::FadeIn, 1.0f);
-		}
-		if (ImGui::Button("Go ClearScene")) {
-			DeleteAllScenes();
-			clearScene = new ClearScene;
-			clearScene->Initialize();
-			scene = Scene::kClear;
-			fade.Start(Fade::Status::FadeIn, 1.0f);
-		}
-		ImGui::End();*/
+		/*
+		    ImGui::Begin("Scene Controller");
+		    if (ImGui::Button("Go Title")) {
+		        DeleteAllScenes();
+		        titleScene = new TitleScene;
+		        titleScene->Initialize();
+		        scene = Scene::kTitle;
+		        fade.Start(Fade::Status::FadeIn, 1.0f);
+		    }
+		    if (ImGui::Button("Go Game")) {
+		        DeleteAllScenes();
+		        gameScene = new GameScene;
+		        gameScene->Initialize();
+		        scene = Scene::kGame;
+		        fade.Start(Fade::Status::FadeIn, 1.0f);
+		    }
+		    if (ImGui::Button("Go GameOver")) {
+		        DeleteAllScenes();
+		        gameoverScene = new GameOverScene;
+		        gameoverScene->Initialize();
+		        scene = Scene::kGameOver;
+		        fade.Start(Fade::Status::FadeIn, 1.0f);
+		    }
+		    if (ImGui::Button("Go ClearScene")) {
+		        DeleteAllScenes();
+		        clearScene = new ClearScene;
+		        clearScene->Initialize();
+		        scene = Scene::kClear;
+		        fade.Start(Fade::Status::FadeIn, 1.0f);
+		    }
+		    ImGui::End();*/
 
 		ChangeScene();
 		UpdateScene();
 		fade.Update();
 
-	/*	imguiManager->End();*/
+		/*	imguiManager->End();*/
 
 		dxCommon->PreDraw();
 		DrawScene();
-		fade.Draw(); 
+		fade.Draw();
 		/*imguiManager->Draw();*/
 		dxCommon->PostDraw();
 	}

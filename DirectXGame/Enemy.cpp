@@ -6,7 +6,7 @@
 void Enemy::Initialize(Model* model, const Vector3& position) {
 	model_ = model;
 	worldTransform_.Initialize();
-	worldTransform_.scale_ = {0.5f, 0.5f, 0.5f}; // 当たり判定に合わせてスケーリング
+	worldTransform_.scale_ = {1.0f, 1.0f, 1.0f}; 
 	worldTransform_.translation_ = position;
 
 

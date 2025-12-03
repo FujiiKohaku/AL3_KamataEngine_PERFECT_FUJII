@@ -45,7 +45,7 @@ void GameScene::Initialize() {
 	// マップチップフィールド
 	//------------------
 	mapChipField_ = new MapChipField();
-	mapChipField_->LoadMapChipCsv("Resources/map/blocks.csv");
+	mapChipField_->LoadMapChipCsv(mapCsvPath_);
 
 	//------------------
 	// ブロック配列の生成（要素サイズだけ確保）
@@ -318,7 +318,8 @@ void GameScene::CreateEnemiesFromMap() {
 			if (mapChipField_->GetMapChipTypeByIndex(j, i) == MapChipType::kEnemy) {
 				Vector3 pos = mapChipField_->GetMapChipPositionbyIndex(j, i);
 				Enemy* enemy = new Enemy();
-				enemy->Initialize(Model::CreateFromOBJ("spike"), pos);
+				enemy->Initialize(Model::CreateFromOBJ("enemy"), pos);
+			
 				enemies_.push_back(enemy);
 			}
 		}
