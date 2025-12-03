@@ -1,19 +1,20 @@
 #pragma once
 #include "KamataEngine.h"
+
+
+using namespace KamataEngine;
+
 class TitleScene {
 public:
-	// 初期化
 	void Initialize();
-	// 更新
 	void Update();
-	// 描画
 	void Draw();
-	// シーンが終了したかのゲッター
 	bool Finished() const { return finished_; }
 
 private:
-	//============
-	// 状態管理
-	//============
 	bool finished_ = false;
+
+	Model* model_ = nullptr;
+	WorldTransform worldTransform_;
+	Camera camera_;
 };
