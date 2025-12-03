@@ -1,13 +1,13 @@
 #define NOMINMAX
 #include "Player.h"
+#include "Coin.h"
+#include "Goal.h"
 #include "MapChipField.h"
 #include "Math.h"
+#include "Spike.h"
 #include <algorithm>
 #include <cassert>
 #include <numbers>
-#include "Coin.h"
-#include "Spike.h"
-#include "Goal.h"
 void Player::Initialize(Model* model, Camera* camera, const Vector3& position) {
 
 	assert(model);
@@ -72,10 +72,29 @@ void Player::InputMove() {
 		velocity_.x = 0.0f;
 	}
 
-	// ジャンプ入力（地上のみ）
-	if (onGround_ && Input::GetInstance()->PushKey(DIK_UP)) {
-		velocity_ += Vector3(0, kJumpAcceleration / 60.0f, 0);
+	// ==========================
+	//  二段ジャンプ処理（2段目弱くする）
+	// ==========================
+	bool canJump = (jumpCount_ < kMaxJumpCount);
+
+	if (canJump && Input::GetInstance()->TriggerKey(DIK_UP)) {
+
+		float jumpPower = kJumpAcceleration;
+
+		// === 2段目なら弱く＆回転開始 ===
+		if (jumpCount_ > 0) {
+			jumpPower *= kSecondJumpPowerScale;
+
+			//  回転演出開始 
+			spinActive_ = true;
+			spinTimer_ = 0.0f;
+		}
+
+		velocity_.y = jumpPower / 60.0f;
+		jumpCount_++;
+		onGround_ = false;
 	}
+
 
 	// 重力（空中のみ）
 	if (!onGround_) {
@@ -211,28 +230,24 @@ void Player::CheckMapCollisionDown(CollisionMapInfo& info) {
 // 02_08スライド14枚目 設置状態の切り替え処理
 void Player::UpdateOnGround(const CollisionMapInfo& info) {
 
-	info;
-
 	if (onGround_) {
-		// 02_08スライド18枚目 ジャンプ開始
+
+		// 上向き速度が出たら「ジャンプ開始」とみなして空中へ
 		if (velocity_.y > 0.0f) {
 			onGround_ = false;
 		} else {
-			// 落下判定
-			// 落下なら空中状態に切り替え
 
-			// 02_08スライド19枚目(このelseブロック全部)
+			// ここから「まだ地面があるか？」のチェック（落下開始判定）
+
 			std::array<Vector3, kNumCorner> positionsNew;
-
 			for (uint32_t i = 0; i < positionsNew.size(); ++i) {
 				positionsNew[i] = CornerPosition(worldTransform_.translation_ + info.move, static_cast<Corner>(i));
 			}
 
 			bool hit = false;
-
 			MapChipType mapChipType;
 
-			// 左下点の判定
+			// 左下
 			MapChipField::IndexSet indexSet;
 			indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionsNew[kLeftBottom] + Vector3(0, -kGroundSearchHeight, 0));
 			mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
@@ -240,29 +255,42 @@ void Player::UpdateOnGround(const CollisionMapInfo& info) {
 				hit = true;
 			}
 
-			// 右下点の判定
+			// 右下
 			indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionsNew[kRightBottom] + Vector3(0, -kGroundSearchHeight, 0));
 			mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
 			if (mapChipType == MapChipType::kBlock) {
 				hit = true;
 			}
 
-			// 落下開始
+			// 足元にブロックが無くなったら落下開始
 			if (!hit) {
-				//
 				onGround_ = false;
 			}
 		}
+
 	} else {
-		// 02_08スライド16枚目 地面に接触している場合の処理
+		// 空中にいた状態から、今フレームで着地したか？
 		if (info.landing) {
-			// 着地状態に切り替える（落下を止める）
 			onGround_ = true;
-			// 着地時にX速度を減衰
+
+			// 着地演算（横速度減衰など）
 			velocity_.x *= (1.0f - kAttenuationLanding);
-			// Y速度をゼロに
 			velocity_.y = 0.0f;
+
+			// ここでジャンプ回数リセット
+			jumpCount_ = 0;
 		}
+	}
+	if (info.landing) {
+
+		onGround_ = true;
+		velocity_.x *= (1.0f - kAttenuationLanding);
+		velocity_.y = 0.0f;
+		jumpCount_ = 0;
+
+		// ===== 姿勢リセット =====
+		worldTransform_.rotation_.x = 0.0f;
+		spinActive_ = false;
 	}
 }
 
@@ -417,7 +445,6 @@ void Player::Update() {
 		return;
 	}
 
-
 	//==========================
 	// ゴール時も通常処理しない
 	//==========================
@@ -461,10 +488,32 @@ void Player::Update() {
 	if (worldTransform_.translation_.y < -20.0f) {
 		StartDeath();
 	}
+	//=====================================================
+	// 二段ジャンプ演出： X軸一回転（EaseOut）
+	//=====================================================
+	if (spinActive_) {
+
+		// 経過時間更新
+		spinTimer_ += 1.0f / 60.0f;
+
+		// 0 ~ 1 に正規化
+		float t = std::clamp(spinTimer_ / spinDuration_, 0.0f, 1.0f);
+
+		// イージング適用
+		float eased = EaseOutCubic(t);
+
+		// 1回転分(360°)を X軸回転
+		worldTransform_.rotation_.x = eased * (std::numbers::pi_v<float> * 2.0f);
+
+		// 完走した？
+		if (t >= 1.0f) {
+			spinActive_ = false;
+		}
+	}
+
 
 	WorldTransformUpdate(worldTransform_);
 }
-
 
 void Player::Draw() {
 
@@ -509,4 +558,8 @@ void Player::StartDeath() {
 	deathTimer_ = 1.5f;
 	deathVelocity_ = {0, 0.25f, 0};
 	velocity_ = {0, 0, 0}; // ゲーム操作の速度は無効
+}
+float Player::EaseOutCubic(float t) { // t = [0.0f, 1.0f]
+	float inv = 1.0f - t;
+	return 1.0f - inv * inv * inv;
 }

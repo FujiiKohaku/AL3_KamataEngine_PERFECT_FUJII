@@ -126,9 +126,14 @@ private:
 	// 02_08スライド27枚目 着地時の速度減衰率
 	static inline const float kAttenuationWall = 0.2f;
 	bool isGoal_ = false; // ゴールフラグ
-	float jumpRotateTimer_ = 0.0f;
-	float jumpRotateDuration_ = 0.25f; // 揺れ時間(秒)
-	float jumpRotateAngle_ = 0.35f;    // 最大回転量(ラジアン) : 約20°
+	int jumpCount_ = 0;
+	static inline const int kMaxJumpCount = 2;
+	static inline const float kSecondJumpPowerScale = 0.75f;
+	// 二段ジャンプ専用回転演出
+	bool spinActive_ = false;    // 回転アニメ中？
+	float spinTimer_ = 0.0f;     // 経過時間
+	float spinDuration_ = 0.35f; // 回転完了までの時間(秒)
 
 	void StartDeath();
+	float EaseOutCubic(float t);
 };
