@@ -36,7 +36,8 @@ public:
 
 	// 02_07 スライド4枚目
 	void SetMapChipField(MapChipField* mapChipField) { mapChipField_ = mapChipField; }
-	bool IsDead() const { return isDead_; }
+	bool IsDead() const { return deathState_ == DeathState::DeadFinish; }
+
 	bool IsGoal() const { return isGoal_; }
 
 	void OnCollision(Coin* coin);
@@ -45,6 +46,15 @@ public:
 	void OnCollision(Enemy* enemy);
 
 private:
+	enum class DeathState {
+		Alive,      // 生きてる
+		Dying,      // 演出中
+		DeadFinish, // 完全終了
+	};
+	DeathState deathState_ = DeathState::Alive;
+	float deathTimer_ = 0.0f;
+	Vector3 deathVelocity_ = {};
+
 	// ワールド変換データ
 	WorldTransform worldTransform_;
 	// モデル
@@ -115,6 +125,10 @@ private:
 	static inline const float kGroundSearchHeight = 0.06f;
 	// 02_08スライド27枚目 着地時の速度減衰率
 	static inline const float kAttenuationWall = 0.2f;
-	bool isDead_ = false; // 死亡フラグ
 	bool isGoal_ = false; // ゴールフラグ
+	float jumpRotateTimer_ = 0.0f;
+	float jumpRotateDuration_ = 0.25f; // 揺れ時間(秒)
+	float jumpRotateAngle_ = 0.35f;    // 最大回転量(ラジアン) : 約20°
+
+	void StartDeath();
 };

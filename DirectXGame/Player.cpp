@@ -1,13 +1,10 @@
 #define NOMINMAX
-
 #include "Player.h"
 #include "MapChipField.h"
 #include "Math.h"
-
 #include <algorithm>
 #include <cassert>
 #include <numbers>
-
 #include "Coin.h"
 #include "Spike.h"
 #include "Goal.h"
@@ -391,55 +388,83 @@ Vector3 Player::CornerPosition(const Vector3& center, Corner corner) {
 	return center + offsetTable[static_cast<uint32_t>(corner)];
 }
 
-void Player ::Update() {
-	if (isDead_)
+void Player::Update() {
+
+	//==========================
+	//  死亡演出状態の処理
+	//==========================
+	if (deathState_ == DeathState::Dying) {
+
+		// 演出時間更新
+		deathTimer_ -= 1.0f / 60.0f;
+
+		// 浮く演出 → 落下
+		worldTransform_.translation_ += deathVelocity_;
+		deathVelocity_.y -= 0.01f;
+
+		// 回転演出
+		worldTransform_.rotation_.z += 0.15f;
+		worldTransform_.rotation_.x += 0.05f;
+
+		// DirectX に転送
+		WorldTransformUpdate(worldTransform_);
+
+		// 演出が終わったら完全死亡
+		if (deathTimer_ <= 0.0f) {
+			deathState_ = DeathState::DeadFinish;
+		}
+
 		return;
-	if (isGoal_)
+	}
+
+
+	//==========================
+	// ゴール時も通常処理しない
+	//==========================
+	if (isGoal_) {
 		return;
-	// 移動入力(02_07 スライド10枚目)
+	}
+
+	//==========================
+	//  生存中の通常処理
+	//==========================
 	InputMove();
 
-	// 衝突情報を初期化(02_07 スライド13枚目)
 	CollisionMapInfo collisionMapInfo = {};
 	collisionMapInfo.move = velocity_;
 	collisionMapInfo.landing = false;
 	collisionMapInfo.hitWall = false;
 
-	// マップ衝突チェック(02_07 スライド13枚目)
 	CheckMapCollision(collisionMapInfo);
 
-	// 移動(02_07 スライド36枚目)
 	worldTransform_.translation_ += collisionMapInfo.move;
 
-	// 天井接触による落下開始(02_07 スライド38枚目)
 	if (collisionMapInfo.ceiling) {
 		velocity_.y = 0;
 	}
 
-	// 02_08 スライド27枚目 壁接触している場合の処理
 	UpdateOnWall(collisionMapInfo);
-
-	// 接地判定
 	UpdateOnGround(collisionMapInfo);
 
-	// 旋回制御
 	if (turnTimer_ > 0.0f) {
-		// タイマーを進める
 		turnTimer_ = std::max(turnTimer_ - (1.0f / 60.0f), 0.0f);
 
 		float destinationRotationYTable[] = {std::numbers::pi_v<float> / 2.0f, std::numbers::pi_v<float> * 3.0f / 2.0f};
-
 		float destinationRotationY = destinationRotationYTable[static_cast<uint32_t>(lrDirection_)];
 
 		worldTransform_.rotation_.y = EaseInOut(destinationRotationY, turnFirstRotationY_, turnTimer_ / kTimeTurn);
 	}
-	// 一定以下に落下したら死亡
-	if (worldTransform_.translation_.y < -20.0f) { // ←好きな閾値に
-		isDead_ = true;
+
+	//==========================
+	//  落下死を演出に変える
+	//==========================
+	if (worldTransform_.translation_.y < -20.0f) {
+		StartDeath();
 	}
-	// ワールド行列更新（アフィン変換～DirectXに転送）
+
 	WorldTransformUpdate(worldTransform_);
 }
+
 
 void Player::Draw() {
 
@@ -457,9 +482,7 @@ void Player::OnCollision(Coin* coin) {
 
 void Player::OnCollision(Spike* spike) {
 	if (spike) {
-		isDead_ = true;
-		// 例: ダメージSE
-		// SoundManager::GetInstance()->PlaySE("damage");
+		StartDeath();
 	}
 }
 
@@ -472,6 +495,18 @@ void Player::OnCollision(Goal* goal) {
 }
 void Player::OnCollision(Enemy* enemy) {
 	if (enemy) {
-		isDead_ = true; // 敵に触れたら死亡
+		StartDeath();
 	}
+}
+
+// 死亡開始
+void Player::StartDeath() {
+
+	if (deathState_ != DeathState::Alive)
+		return;
+
+	deathState_ = DeathState::Dying;
+	deathTimer_ = 1.5f;
+	deathVelocity_ = {0, 0.25f, 0};
+	velocity_ = {0, 0, 0}; // ゲーム操作の速度は無効
 }
