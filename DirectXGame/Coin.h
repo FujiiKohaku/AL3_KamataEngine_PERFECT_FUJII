@@ -17,6 +17,8 @@ public:
 
 	// 位置情報（外部アクセス用）
 	const Vector3& GetPosition() const { return worldTransform_.translation_; }
+	const WorldTransform& GetWorldTransform() const { return worldTransform_; }
+	
 
 private:
 	WorldTransform worldTransform_;

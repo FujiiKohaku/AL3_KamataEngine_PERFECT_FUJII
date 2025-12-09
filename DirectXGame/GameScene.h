@@ -41,6 +41,8 @@ public:
 	bool CheckCollision(const Enemy* enemy, const Player* player);
 
 	void SetMapCsvPath(const std::string& path) { mapCsvPath_ = path; }
+	void UpdateCoins();
+	bool IsNearPlayer(const Vector3& pos, float range);
 
 private:
 	//============

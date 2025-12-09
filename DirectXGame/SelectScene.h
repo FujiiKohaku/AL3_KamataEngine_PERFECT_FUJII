@@ -1,6 +1,8 @@
 #pragma once
-#include <string>
 #include "KamataEngine.h"
+#include <string>
+using namespace KamataEngine;
+
 class SceneSelectScene {
 public:
 	// 初期化
@@ -21,4 +23,16 @@ public:
 private:
 	bool isFinished_ = false;
 	std::string selectedStagePath_ = "";
+	std::vector<std::string> stagePaths_;
+	int selectedIndex_;
+
+	Camera* camera_;
+	float blockY_[3] = {0, 0, 0};
+	float blockTargetY_[3] = {0, 0, 0};
+
+	
+	WorldTransform worldTransforms_[3] = {};
+	Model* stageModel1_;
+	Model* stageModel2_;
+	Model* stageModel3_;
 };

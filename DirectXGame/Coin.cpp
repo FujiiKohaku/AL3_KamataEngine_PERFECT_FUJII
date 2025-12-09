@@ -18,7 +18,7 @@ void Coin::Update() {
 
 void Coin::Draw(Camera* camera) {
 	if (collected_)
-		return; // 取得済みなら描画しない
+		return;
 	model_->Draw(worldTransform_, *camera);
 }
 

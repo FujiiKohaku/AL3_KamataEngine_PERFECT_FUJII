@@ -4,7 +4,6 @@
 #include "GameScene.h"
 #include "KamataEngine.h"
 #include "TitleScene.h"
-
 #include "SelectScene.h"
 #include <Windows.h>
 using namespace KamataEngine;

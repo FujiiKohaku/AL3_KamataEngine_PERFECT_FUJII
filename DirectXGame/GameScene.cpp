@@ -144,12 +144,7 @@ void GameScene::Update() {
 	// -----------------------
 	// コイン更新
 	// -----------------------
-	for (auto* coin : coins_) {
-		coin->Update();
-		if (coin->CheckCollision(player_)) {
-			player_->OnCollision(coin);
-		}
-	}
+	UpdateCoins();
 
 	// -----------------------
 	// スパイク更新
@@ -192,23 +187,23 @@ void GameScene::Update() {
 		finished_ = true;
 	}
 
-	//ImGui::Begin("gamePlayScene Debug");
-	//ImGui::Text("This is gamePlayScene!");
-	//ImGui::End();
+	// ImGui::Begin("gamePlayScene Debug");
+	// ImGui::Text("This is gamePlayScene!");
+	// ImGui::End();
 }
 
 // 描画
 void GameScene::Draw() {
+
 	DirectXCommon* dxCommon = DirectXCommon::GetInstance();
 
+	// ========= プレイヤー&スカイドーム =========
 	model_->PreDraw(dxCommon->GetCommandList());
-
 	player_->Draw();
 	skydome_->Draw();
 
-	// -----------------------
-	// ブロック描画
-	// -----------------------
+	// ========= ブロック =========
+	modelBlock_->PreDraw(dxCommon->GetCommandList());
 	for (auto& blockLine : worldTransformBlocks_) {
 		for (auto* block : blockLine) {
 			if (!block)
@@ -216,21 +211,31 @@ void GameScene::Draw() {
 			modelBlock_->Draw(*block, *camera_, nullptr);
 		}
 	}
-	// ゴール描画
+
+	// ========= ゴール =========
 	goal_->Draw(camera_);
 
-	// コイン描画
+	// ========= コイン =========
+	Model::PreDraw(dxCommon->GetCommandList());
+
 	for (auto* coin : coins_) {
+		if (!IsNearPlayer(coin->GetPosition(), 25.0f))
+			continue;
 		coin->Draw(camera_);
 	}
 
+	Model::PostDraw();
+
+	// ========= スパイク =========
 	for (auto& spike : spikes_) {
 		spike->Draw(camera_);
 	}
 
+	// ========= エネミー =========
 	for (auto* enemy : enemies_) {
 		enemy->Draw(camera_);
 	}
+
 	model_->PostDraw();
 
 	fade_.Draw();
@@ -319,9 +324,30 @@ void GameScene::CreateEnemiesFromMap() {
 				Vector3 pos = mapChipField_->GetMapChipPositionbyIndex(j, i);
 				Enemy* enemy = new Enemy();
 				enemy->Initialize(Model::CreateFromOBJ("enemy"), pos);
-			
 				enemies_.push_back(enemy);
 			}
 		}
 	}
+}
+void GameScene::UpdateCoins() {
+
+	for (auto* coin : coins_) {
+
+		// 遠いコインは処理しない
+		if (!IsNearPlayer(coin->GetPosition(), 20.0f))
+			continue;
+
+		coin->Update();
+
+		if (coin->CheckCollision(player_)) {
+			player_->OnCollision(coin);
+		}
+	}
+}
+
+bool GameScene::IsNearPlayer(const Vector3& pos, float range) {
+	Vector3 p = player_->GetWorldTransform().translation_;
+	float dx = pos.x - p.x;
+	float dz = pos.z - p.z;
+	return (dx * dx + dz * dz) <= (range * range);
 }
