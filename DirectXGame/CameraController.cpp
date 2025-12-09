@@ -2,7 +2,20 @@
 #include "Player.h"
 
 #include <algorithm> // std::max, std::min を使用するために必要
+CameraController* CameraController::instance_ = nullptr;
 
+CameraController* CameraController::GetInstance() {
+	if (!instance_) {
+		instance_ = new CameraController();
+	}
+	return instance_;
+}
+void CameraController::Finalize() {
+    if (instance_) {
+        delete instance_;
+        instance_ = nullptr;
+    }
+}
 void CameraController::Initialize(KamataEngine::Camera* camera) { camera_ = camera; }
 
 void CameraController::Update() {
@@ -33,6 +46,16 @@ void CameraController::Update() {
 	camera_->translation_.y = std::max(camera_->translation_.y, movableArea_.bottom);
 	camera_->translation_.y = std::min(camera_->translation_.y, movableArea_.top);
 
+	if (shakeTimer_ > 0.0f) {
+		shakeTimer_ -= 1.0f / 60.0f;
+
+		// ランダムに揺らす（XZ）
+		float sx = ((float)rand() / RAND_MAX - 0.5f) * shakePower_;
+		float sy = ((float)rand() / RAND_MAX - 0.5f) * shakePower_;
+
+		camera_->translation_.x += sx;
+		camera_->translation_.z += sy;
+	}
 	// 最終的に行列を更新
 	camera_->UpdateMatrix();
 }
@@ -42,4 +65,8 @@ void CameraController::Reset() {
 	const WorldTransform& targetWorldTransform = target_->GetWorldTransform();
 	// 追従対象とオフセットからカメラの位置を計算
 	camera_->translation_ = targetWorldTransform.translation_ + targetOffset_;
+}
+void CameraController::StartShake(float power, float time) {
+	shakePower_ = power;
+	shakeTimer_ = time;
 }

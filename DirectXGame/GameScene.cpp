@@ -13,7 +13,6 @@ GameScene::~GameScene() {
 	delete debugCamera_;
 	delete modelBlock_;
 	delete mapChipField_;
-	delete cController_;
 
 	for (auto* coin : coins_) {
 		delete coin;
@@ -93,10 +92,9 @@ void GameScene::Initialize() {
 	// カメラコントローラー
 	//------------------
 
-	cController_ = new CameraController();
-	cController_->Initialize(camera_);
-	cController_->SetTarget(player_);
-	cController_->Reset();
+	CameraController::GetInstance()->Initialize(camera_);
+	CameraController::GetInstance()->SetTarget(player_);
+	CameraController::GetInstance()->Reset();
 }
 
 // 更新
@@ -133,7 +131,7 @@ void GameScene::Update() {
 		// -----------------------
 		// カメラコントローラー更新
 		// -----------------------
-		cController_->Update();
+		CameraController::GetInstance()->Update();
 	}
 
 	// -----------------------
@@ -187,6 +185,10 @@ void GameScene::Update() {
 		finished_ = true;
 	}
 
+	// -----------------------
+	// ImGuiデバッグ表示
+	// -----------------------
+
 	// ImGui::Begin("gamePlayScene Debug");
 	// ImGui::Text("This is gamePlayScene!");
 	// ImGui::End();
@@ -195,15 +197,14 @@ void GameScene::Update() {
 // 描画
 void GameScene::Draw() {
 
-	DirectXCommon* dxCommon = DirectXCommon::GetInstance();
+	auto* dx = DirectXCommon::GetInstance();
 
-	// ========= プレイヤー&スカイドーム =========
-	model_->PreDraw(dxCommon->GetCommandList());
+	Model::PreDraw(dx->GetCommandList());
+
+	// ---- 描画したいもの全部 ----
 	player_->Draw();
 	skydome_->Draw();
 
-	// ========= ブロック =========
-	modelBlock_->PreDraw(dxCommon->GetCommandList());
 	for (auto& blockLine : worldTransformBlocks_) {
 		for (auto* block : blockLine) {
 			if (!block)
@@ -212,31 +213,23 @@ void GameScene::Draw() {
 		}
 	}
 
-	// ========= ゴール =========
 	goal_->Draw(camera_);
 
-	// ========= コイン =========
-	Model::PreDraw(dxCommon->GetCommandList());
-
 	for (auto* coin : coins_) {
-		if (!IsNearPlayer(coin->GetPosition(), 25.0f))
-			continue;
-		coin->Draw(camera_);
+		if (IsNearPlayer(coin->GetPosition(), 25.0f)) {
+			coin->Draw(camera_);
+		}
 	}
 
-	Model::PostDraw();
-
-	// ========= スパイク =========
-	for (auto& spike : spikes_) {
+	for (auto* spike : spikes_) {
 		spike->Draw(camera_);
 	}
 
-	// ========= エネミー =========
 	for (auto* enemy : enemies_) {
 		enemy->Draw(camera_);
 	}
 
-	model_->PostDraw();
+	Model::PostDraw();
 
 	fade_.Draw();
 }

@@ -165,3 +165,13 @@ bool IsCollision(const AABB& aabb1, const AABB& aabb2) {
 	       (aabb1.min.y <= aabb2.max.y && aabb1.max.y >= aabb2.min.y) && // y軸
 	       (aabb1.min.z <= aabb2.max.z && aabb1.max.z >= aabb2.min.z);   // z軸
 }
+// ベクトルを正規化する
+Vector3 Normalize(const Vector3& v) {
+	float len = std::sqrtf(v.x * v.x + v.y * v.y + v.z * v.z);
+
+	if (len == 0.0f) {
+		return {0.0f, 0.0f, 0.0f}; // 長さゼロの時はゼロ返す
+	}
+
+	return {v.x / len, v.y / len, v.z / len};
+}

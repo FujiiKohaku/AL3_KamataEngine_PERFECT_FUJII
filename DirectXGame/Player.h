@@ -1,6 +1,9 @@
 #pragma once
 #include "KamataEngine.h"
 
+#include <vector>
+#include "Bullet.h"
+
 using namespace KamataEngine;
 
 class MapChipField;
@@ -8,8 +11,12 @@ class Coin;
 class Spike;
 class Goal;
 class Enemy;
+class Math;
 class Player {
 public:
+
+	
+	
 	// 左右
 	enum class LRDirection {
 		kRight,
@@ -44,6 +51,8 @@ public:
 	void OnCollision(Spike* spike);
 	void OnCollision(Goal* goal);
 	void OnCollision(Enemy* enemy);
+	bool GetHitEnemy() const { return hitEnemy_; }
+	std::vector<Bullet*>& GetBullets() { return bullets_; }
 
 private:
 	enum class DeathState {
@@ -136,4 +145,15 @@ private:
 
 	void StartDeath();
 	float EaseOutCubic(float t);
+	int hp_ = 3;
+	bool invincible_ = false;
+	bool visible_ = true;
+	float invincibleTimer_ = 0.0f;
+	void TakeDamage(const Vector3& enemyPos);
+
+	bool hitEnemy_ = false;
+	// 弾管理
+	std::vector<Bullet*> bullets_;
+	Model* bulletModel_ = nullptr;
+	
 };

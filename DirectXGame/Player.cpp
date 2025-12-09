@@ -1,6 +1,8 @@
 #define NOMINMAX
 #include "Player.h"
+#include "CameraController.h"
 #include "Coin.h"
+#include "Enemy.h"
 #include "Goal.h"
 #include "MapChipField.h"
 #include "Math.h"
@@ -19,6 +21,8 @@ void Player::Initialize(Model* model, Camera* camera, const Vector3& position) {
 	worldTransform_.rotation_.y = std::numbers::pi_v<float> / 2.0f;
 
 	camera_ = camera;
+	// 弾モデルの読み込み
+	bulletModel_ = Model::CreateFromOBJ("cube");
 }
 
 void Player::InputMove() {
@@ -85,7 +89,7 @@ void Player::InputMove() {
 		if (jumpCount_ > 0) {
 			jumpPower *= kSecondJumpPowerScale;
 
-			//  回転演出開始 
+			//  回転演出開始
 			spinActive_ = true;
 			spinTimer_ = 0.0f;
 		}
@@ -94,7 +98,6 @@ void Player::InputMove() {
 		jumpCount_++;
 		onGround_ = false;
 	}
-
 
 	// 重力（空中のみ）
 	if (!onGround_) {
@@ -418,6 +421,7 @@ Vector3 Player::CornerPosition(const Vector3& center, Corner corner) {
 
 void Player::Update() {
 
+
 	//==========================
 	//  死亡演出状態の処理
 	//==========================
@@ -469,7 +473,22 @@ void Player::Update() {
 	if (collisionMapInfo.ceiling) {
 		velocity_.y = 0;
 	}
+	// 無敵中
+	if (invincible_) {
+		invincibleTimer_ -= (1.0f / 60.0f);
 
+		// 点滅（描画スキップ）
+		if (((int)(invincibleTimer_ * 10) % 2) == 0) {
+			visible_ = false;
+		} else {
+			visible_ = true;
+		}
+
+		if (invincibleTimer_ <= 0) {
+			invincible_ = false;
+			visible_ = true;
+		}
+	}
 	UpdateOnWall(collisionMapInfo);
 	UpdateOnGround(collisionMapInfo);
 
@@ -511,14 +530,18 @@ void Player::Update() {
 		}
 	}
 
-
 	WorldTransformUpdate(worldTransform_);
 }
 
 void Player::Draw() {
+	if (!visible_)
+		return;
 
-	// モデル描画
 	model_->Draw(worldTransform_, *camera_);
+
+	for (size_t i = 0; i < bullets_.size(); i++) {
+		bullets_[i]->Draw(camera_);
+	}
 }
 
 void Player::OnCollision(Coin* coin) {
@@ -543,11 +566,11 @@ void Player::OnCollision(Goal* goal) {
 	}
 }
 void Player::OnCollision(Enemy* enemy) {
-	if (enemy) {
-		StartDeath();
-	}
-}
+	if (!enemy || invincible_)
+		return;
 
+	TakeDamage(enemy->GetPosition());
+}
 // 死亡開始
 void Player::StartDeath() {
 
@@ -562,4 +585,24 @@ void Player::StartDeath() {
 float Player::EaseOutCubic(float t) { // t = [0.0f, 1.0f]
 	float inv = 1.0f - t;
 	return 1.0f - inv * inv * inv;
+}
+void Player::TakeDamage(const Vector3& enemyPos) {
+
+	hp_--;
+
+	// ノックバック
+	Vector3 dir = worldTransform_.translation_ - enemyPos;
+	dir.y = 0;
+	dir = Normalize(dir);
+	velocity_ = dir * 0.2f; // ノックバック強さ
+
+	// 無敵開始
+	invincible_ = true;
+	invincibleTimer_ = 1.0f; // 1秒間無敵
+
+	// HP0なら死亡
+	if (hp_ <= 0) {
+		StartDeath();
+	}
+	CameraController::GetInstance()->StartShake(0.5f, 0.1f);
 }
