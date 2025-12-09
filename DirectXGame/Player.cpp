@@ -21,8 +21,8 @@ void Player::Initialize(Model* model, Camera* camera, const Vector3& position) {
 	worldTransform_.rotation_.y = std::numbers::pi_v<float> / 2.0f;
 
 	camera_ = camera;
-	// 弾モデルの読み込み
-	bulletModel_ = Model::CreateFromOBJ("cube");
+	
+	
 }
 
 void Player::InputMove() {
@@ -539,9 +539,7 @@ void Player::Draw() {
 
 	model_->Draw(worldTransform_, *camera_);
 
-	for (size_t i = 0; i < bullets_.size(); i++) {
-		bullets_[i]->Draw(camera_);
-	}
+
 }
 
 void Player::OnCollision(Coin* coin) {

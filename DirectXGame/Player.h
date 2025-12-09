@@ -52,7 +52,7 @@ public:
 	void OnCollision(Goal* goal);
 	void OnCollision(Enemy* enemy);
 	bool GetHitEnemy() const { return hitEnemy_; }
-	std::vector<Bullet*>& GetBullets() { return bullets_; }
+
 
 private:
 	enum class DeathState {
@@ -152,8 +152,6 @@ private:
 	void TakeDamage(const Vector3& enemyPos);
 
 	bool hitEnemy_ = false;
-	// 弾管理
-	std::vector<Bullet*> bullets_;
-	Model* bulletModel_ = nullptr;
+	
 	
 };

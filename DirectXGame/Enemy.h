@@ -12,13 +12,14 @@ public:
 	bool CheckCollision(Player* player) const;
 	void OnCollision(Player* player);
 	bool IsDead() const { return isDead_; }
+	Vector3 GetPosition() const { return worldTransform_.translation_; }
 
 private:
 	WorldTransform worldTransform_;
 	Model* model_ = nullptr;
 	bool isDead_ = false;
 
-	// 👇追加ここから
+
 	Vector3 startPos_;                             // 初期位置
 	float direction_ = 1.0f;                       // 移動方向（1:右, -1:左）
 	static inline const float kMoveSpeed = 0.05f;  // 移動スピード
