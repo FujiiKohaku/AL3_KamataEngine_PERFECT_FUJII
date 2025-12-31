@@ -85,19 +85,17 @@ void MapChipField::LoadMapChipCsv(const std::string& filepath) {
 // ============================================================
 MapChipType MapChipField::GetMapChipTypeByIndex(uint32_t xIndex, uint32_t yIndex) {
 
-	// 横方向の範囲外チェック（マップ外なら空白を返す）
-	if (xIndex < 0 || kNumBlockHorizontal - 1 < xIndex) {
+	if (xIndex >= kNumBlockHorizontal) {
 		return MapChipType::kBlank;
 	}
 
-	// 縦方向の範囲外チェック（マップ外なら空白を返す）
-	if (yIndex < 0 || kNumBlockVirtical - 1 < yIndex) {
+	if (yIndex >= kNumBlockVirtical) {
 		return MapChipType::kBlank;
 	}
 
-	// 範囲内であれば、該当マスのマップチップ種別を返す
 	return mapChipData_.data[yIndex][xIndex];
 }
+
 
 // マップ配列のインデックスからワールド座標を計算
 KamataEngine::Vector3 MapChipField::GetMapChipPositionbyIndex(uint32_t xIndex, uint32_t yIndex) {

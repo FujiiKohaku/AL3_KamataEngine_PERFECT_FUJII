@@ -102,6 +102,7 @@ private:
 	// コイン
 	//---------------
 	std::vector<Coin*> coins_;
+	Model* coinModel_ = nullptr;
 	//---------------
 	// 壊れるブロック
 	//---------------

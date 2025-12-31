@@ -59,6 +59,7 @@ void GameScene::Initialize() {
 	// ゴール生成
 	CreateGoalFromMap();
 	// コイン生成
+	coinModel_ = Model::CreateFromOBJ("Coin");
 	CreateCoinsFromMap();
 	// トゲ生成
 	CreateSpikesFromMap();
@@ -68,7 +69,7 @@ void GameScene::Initialize() {
 	// プレイヤー関連
 	//------------------
 	pos_ = {2, 2, 0};
-	model_ = Model::CreateFromOBJ("player");
+	model_ = Model::CreateFromOBJ("Alplayer");
 
 	camera_ = new Camera();
 	camera_->Initialize();
@@ -286,16 +287,19 @@ void GameScene::CreateCoinsFromMap() {
 		for (uint32_t j = 0; j < mapChipField_->GetNumBlockHorizontal(); ++j) {
 
 			if (mapChipField_->GetMapChipTypeByIndex(j, i) == MapChipType::kCoin) {
+
 				Vector3 pos = mapChipField_->GetMapChipPositionbyIndex(j, i);
 
 				Coin* coin = new Coin();
-				coin->Initialize(Model::CreateFromOBJ("Coin"), pos);
+				coin->Initialize(coinModel_, pos); 
 
 				coins_.push_back(coin);
 			}
 		}
 	}
 }
+
+
 // マップからトゲを生成
 void GameScene::CreateSpikesFromMap() {
 	for (uint32_t i = 0; i < mapChipField_->GetNumBlockVirtical(); ++i) {
@@ -326,9 +330,9 @@ void GameScene::UpdateCoins() {
 
 	for (auto* coin : coins_) {
 
-		// 遠いコインは処理しない
-		if (!IsNearPlayer(coin->GetPosition(), 20.0f))
-			continue;
+		//// 遠いコインは処理しない
+		//if (!IsNearPlayer(coin->GetPosition(), 20.0f))
+		//	continue;
 
 		coin->Update();
 

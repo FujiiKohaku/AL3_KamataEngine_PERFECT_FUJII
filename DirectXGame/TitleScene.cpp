@@ -2,17 +2,35 @@
 #include "Math.h"
 #include "imgui.h"
 
+#include <numbers>
 using namespace KamataEngine;
 
 void TitleScene::Initialize() {
 	// モデルを読み込む
-	model_ = Model::CreateFromOBJ("pushSpace", true);
-	worldTransform_.Initialize();
-	worldTransform_.rotation_.x = PI / 2.0f; // X軸90度回転
+	modelTitle_ = Model::CreateFromOBJ("pushSpace", true);
+	worldTransformTitle_.Initialize();
+	worldTransformTitle_.rotation_.x = std::numbers::pi_v<float> / 2.0f;
+
+	worldTransformTitle_.rotation_.y = std::numbers::pi_v<float>;
+
 	// カメラ初期化
 	camera_.Initialize();
 	camera_.translation_ = {0.0f, 0.0f, -15.0f};
 	camera_.UpdateMatrix();
+	// Initialize
+	basePos_ = worldTransformTitle_.translation_;
+
+	modelGuru_ = Model::CreateFromOBJ("guruguru", true);
+	worldTransformGuruGuru_.Initialize();
+	worldTransformGuruGuru_.rotation_.x = std::numbers::pi_v<float> / 2.0f;
+	worldTransformGuruGuru_.rotation_.y = std::numbers::pi_v<float>;
+	worldTransformGuruGuru_.scale_ = {2.0f, 2.0f, 2.0f};
+	worldTransformGuruGuru_.translation_.y = 2.0f;
+	worldTransformGuruGuru_.translation_.z = -5.0f;
+
+	modelSkydome_ = Model::CreateFromOBJ("skydome", true);
+	skydome_ = new Skydome();
+	skydome_->Initialize(modelSkydome_, &camera_);
 }
 
 void TitleScene::Update() {
@@ -21,14 +39,19 @@ void TitleScene::Update() {
 		finished_ = true;
 	}
 
-	// 回転アニメーション
-	worldTransform_.rotation_.y += 0.01f;
-
+	// Update
+	animTime_ += 0.05f;
+	// 移動する対象　= 移動する対象の初期位置+ sin(対象を上下に)* 上下する幅
+	worldTransformTitle_.translation_.y = basePos_.y + std::sinf(animTime_) * 0.3f;
+	worldTransformGuruGuru_.rotation_.x+=0.02f;
+	worldTransformGuruGuru_.rotation_.y += 0.03f;
+	worldTransformGuruGuru_.rotation_.z += 0.01f;
 	// 行列更新
-	WorldTransformUpdate(worldTransform_);
+	WorldTransformUpdate(worldTransformTitle_);
+	WorldTransformUpdate(worldTransformGuruGuru_);
 	camera_.UpdateMatrix();
 
-
+	skydome_->Update();
 }
 
 void TitleScene::Draw() {
@@ -40,8 +63,9 @@ void TitleScene::Draw() {
 	Model::PreDraw(commandList);
 
 	// モデル描画
-	model_->Draw(worldTransform_, camera_);
-
+	modelTitle_->Draw(worldTransformTitle_, camera_);
+	modelGuru_->Draw(worldTransformGuruGuru_, camera_);
+	skydome_->Draw();
 	// 描画終了
 	Model::PostDraw();
 }

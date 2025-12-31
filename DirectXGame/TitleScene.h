@@ -1,7 +1,6 @@
 #pragma once
 #include "KamataEngine.h"
-
-
+#include "Skydome.h"
 using namespace KamataEngine;
 
 class TitleScene {
@@ -13,8 +12,17 @@ public:
 
 private:
 	bool finished_ = false;
-
-	Model* model_ = nullptr;
-	WorldTransform worldTransform_;
+	float animTime_ = 0.0f;
+	Vector3 basePos_;
+	Model* modelTitle_ = nullptr;
+	WorldTransform worldTransformTitle_;
 	Camera camera_;
+	//タイトルロゴ
+	Model* modelGuru_ = nullptr;
+	WorldTransform worldTransformGuruGuru_;
+	//---------------
+	// skydome
+	//---------------
+	Skydome* skydome_ = nullptr;
+	Model* modelSkydome_ = nullptr;
 };
