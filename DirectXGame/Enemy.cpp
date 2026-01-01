@@ -39,12 +39,34 @@ void Enemy::Update() {
 		worldTransform_.translation_.x = startPos_.x - kMoveRange;
 		direction_ = 1.0f;
 	}
+	if (state_ == EnemyState::Pulled) {
+
+		// 1) プレイヤー方向
+		Vector3 dir = Normalize(target_->GetWorldTransform().translation_ - worldTransform_.translation_);
+
+		// 2) 近づく
+		worldTransform_.translation_ += dir * 0.12f;
+
+		// 3) 小さくなる演出
+		worldTransform_.scale_.x *= 0.9f;
+		worldTransform_.scale_.y *= 0.9f;
+		worldTransform_.scale_.z *= 0.9f;
+
+		// 4) 近づききったら消える
+		Vector3 diff = target_->GetWorldTransform().translation_ - worldTransform_.translation_;
+
+		float dist = std::sqrtf(diff.x * diff.x + diff.y * diff.y + diff.z * diff.z);
+
+		if (dist < 0.25f) {
+			isDead_ = true;
+		}
+	}
 
 	// --- 行列更新 ---
 	WorldTransformUpdate(worldTransform_);
 }
 void Enemy::Draw(Camera* camera) {
-	if (model_) {
+	if (model_&&!isDead_) {
 		model_->Draw(worldTransform_, *camera, nullptr);
 	}
 }
@@ -59,10 +81,9 @@ bool Enemy::CheckCollision(Player* player) const {
 	return dist < kEnemyRadius;
 }
 
-void Enemy::OnCollision(Player* player) {
-	if (player) {
-		player->OnCollision(this);
-		// ここでは敵は消えず、動き続ける場合もOK
-		// isDead_ = true;
-	}
+void Enemy::OnCollision(Player* player) { (void)player; }
+void Enemy::StartPulled(Player* player) {
+	state_ = EnemyState::Pulled;
+	target_ = player;
 }
+

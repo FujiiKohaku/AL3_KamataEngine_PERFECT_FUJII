@@ -1,8 +1,8 @@
 #pragma once
 #include "KamataEngine.h"
 
-#include <vector>
 #include "Bullet.h"
+#include <vector>
 
 using namespace KamataEngine;
 
@@ -14,9 +14,6 @@ class Enemy;
 class Math;
 class Player {
 public:
-
-	
-	
 	// 左右
 	enum class LRDirection {
 		kRight,
@@ -53,13 +50,32 @@ public:
 	void OnCollision(Enemy* enemy);
 	bool GetHitEnemy() const { return hitEnemy_; }
 
+	float GetRadius() const { return radius_; }
+	void StartInhale();
+
+	void StopInhale();
 
 private:
+	struct HitBox {
+		Vector3 pos;
+		float radius = 1.0f; // 吸い込み範囲
+		bool active = false;
+	};
+
+	HitBox inhaleHitBox_;
 	enum class DeathState {
 		Alive,      // 生きてる
 		Dying,      // 演出中
 		DeadFinish, // 完全終了
 	};
+
+	enum class PlayerState {
+		Normal,  // ふつう
+		Inhale,  // 吸い込み中
+		Swallow, // 食べた後（将来用）
+	};
+
+	PlayerState state_ = PlayerState::Normal;
 	DeathState deathState_ = DeathState::Alive;
 	float deathTimer_ = 0.0f;
 	Vector3 deathVelocity_ = {};
@@ -103,6 +119,7 @@ private:
 	// 02_07スライド34枚目
 	static inline const float kBlank = 0.04f;
 
+	float radius_ = 0.4f;
 	// 02_07スライド10枚目 移動入力
 	void InputMove();
 	// 02_07 スライド12枚目
@@ -127,7 +144,7 @@ private:
 
 	// 02_08 スライド27枚目 壁接触している場合の処理
 	void UpdateOnWall(const CollisionMapInfo& info);
-
+	void AbsorbEnemy(Enemy* enemy);
 	// 02_08スライド16枚目 着地時の速度減衰率
 	static inline const float kAttenuationLanding = 0.0f;
 	// 02_08スライド21枚目 微小な数値
@@ -142,7 +159,7 @@ private:
 	bool spinActive_ = false;    // 回転アニメ中？
 	float spinTimer_ = 0.0f;     // 経過時間
 	float spinDuration_ = 0.35f; // 回転完了までの時間(秒)
-
+	bool inhaling_ = false;
 	void StartDeath();
 	float EaseOutCubic(float t);
 	int hp_ = 3;
@@ -152,6 +169,7 @@ private:
 	void TakeDamage(const Vector3& enemyPos);
 
 	bool hitEnemy_ = false;
-	
-	
+
+public:
+	const HitBox& GetInhaleHitBox() const { return inhaleHitBox_; }
 };

@@ -157,14 +157,39 @@ void GameScene::Update() {
 
 	// -----------------------
 	// エネミー更新
-	// -----------------------
 	for (auto* enemy : enemies_) {
 		enemy->Update();
-		if (enemy->CheckCollision(player_)) {
-			enemy->OnCollision(player_);
+
+		// ===============================
+		//  吸い込み判定（前にある円）
+		// ===============================
+		if (player_->GetInhaleHitBox().active) {
+
+			auto hb = player_->GetInhaleHitBox();
+
+			Vector3 e = enemy->GetWorldTransform().translation_;
+			Vector3 diff = e - hb.pos;
+
+			// ★ 距離を自前で計算
+			float dist = std::sqrtf(diff.x * diff.x + diff.y * diff.y + diff.z * diff.z);
+
+			if (dist < hb.radius) {
+				enemy->StartPulled(player_);
+			}
+
+		}
+
+		// ===============================
+		// ② 体にぶつかったときの判定（今まで通り）
+		// ===============================
+		if (IsHitPlayerEnemy(player_, enemy)) {
+
 			player_->OnCollision(enemy);
+			enemy->OnCollision(player_);
 		}
 	}
+
+
 	// -----------------------
 	// ゴール判定
 	// -----------------------
@@ -291,14 +316,13 @@ void GameScene::CreateCoinsFromMap() {
 				Vector3 pos = mapChipField_->GetMapChipPositionbyIndex(j, i);
 
 				Coin* coin = new Coin();
-				coin->Initialize(coinModel_, pos); 
+				coin->Initialize(coinModel_, pos);
 
 				coins_.push_back(coin);
 			}
 		}
 	}
 }
-
 
 // マップからトゲを生成
 void GameScene::CreateSpikesFromMap() {
@@ -330,8 +354,6 @@ void GameScene::UpdateCoins() {
 
 	for (auto* coin : coins_) {
 
-	
-
 		coin->Update();
 
 		if (coin->CheckCollision(player_)) {
@@ -345,4 +367,17 @@ bool GameScene::IsNearPlayer(const Vector3& pos, float range) {
 	float dx = pos.x - p.x;
 	float dz = pos.z - p.z;
 	return (dx * dx + dz * dz) <= (range * range);
+}
+
+// playerとEnemyの当たり判定
+bool GameScene::IsHitPlayerEnemy(Player* player, Enemy* enemy) {
+	Vector3 p = player->GetWorldTransform().translation_;
+	Vector3 e = enemy->GetWorldTransform().translation_;
+
+	Vector3 diff = p - e;
+	float dist = std::sqrtf(diff.x * diff.x + diff.y * diff.y + diff.z * diff.z);
+
+	float r = player->GetRadius() + enemy->GetRadius();
+
+	return dist < r;
 }

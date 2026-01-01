@@ -40,7 +40,7 @@ public:
 
 	void CreateEnemiesFromMap();
 	bool CheckCollision(const Enemy* enemy, const Player* player);
-
+	bool IsHitPlayerEnemy(Player* player, Enemy* enemy);
 	void SetMapCsvPath(const std::string& path) { mapCsvPath_ = path; }
 	void UpdateCoins();
 	bool IsNearPlayer(const Vector3& pos, float range);

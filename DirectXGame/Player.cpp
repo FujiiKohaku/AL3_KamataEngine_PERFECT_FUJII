@@ -104,6 +104,7 @@ void Player::InputMove() {
 	}
 }
 
+#pragma region マップの当たり判定をまとめたもの
 // 02_07 スライド13枚目
 void Player::CheckMapCollision(CollisionMapInfo& info) {
 
@@ -113,6 +114,9 @@ void Player::CheckMapCollision(CollisionMapInfo& info) {
 	CheckMapCollisionLeft(info);
 }
 
+#pragma endregion
+
+#pragma region 上の処理
 // 02_07 スライド14枚目(上下左右全て)
 void Player::CheckMapCollisionUp(CollisionMapInfo& info) {
 
@@ -164,6 +168,10 @@ void Player::CheckMapCollisionUp(CollisionMapInfo& info) {
 		}
 	}
 }
+
+#pragma endregion
+
+#pragma region 下の処理
 
 void Player::CheckMapCollisionDown(CollisionMapInfo& info) {
 
@@ -227,6 +235,9 @@ void Player::CheckMapCollisionDown(CollisionMapInfo& info) {
 		}
 	}
 }
+#pragma endregion
+
+#pragma region 地上にいるときの処理
 
 // 02_08スライド14枚目 設置状態の切り替え処理
 void Player::UpdateOnGround(const CollisionMapInfo& info) {
@@ -283,6 +294,9 @@ void Player::UpdateOnGround(const CollisionMapInfo& info) {
 	}
 }
 
+#pragma endregion
+
+#pragma region 壁当たっているときの処理
 // 02_08スライド27枚目 壁接地中の処理
 void Player::UpdateOnWall(const CollisionMapInfo& info) {
 
@@ -304,7 +318,9 @@ void Player::UpdateOnWall(const CollisionMapInfo& info) {
 			velocity_.x = 0.0f;
 	}
 }
+#pragma endregion
 
+#pragma region 右の当たり判定
 // 中身入れるのは02_08スライド25枚目
 void Player::CheckMapCollisionRight(CollisionMapInfo& info) {
 
@@ -367,6 +383,9 @@ void Player::CheckMapCollisionRight(CollisionMapInfo& info) {
 	}
 }
 
+#pragma endregion
+
+#pragma region 左の当たり判定
 // 中身入れるのは02_08スライド25枚目
 void Player::CheckMapCollisionLeft(CollisionMapInfo& info) {
 
@@ -432,6 +451,9 @@ void Player::CheckMapCollisionLeft(CollisionMapInfo& info) {
 	}
 }
 
+#pragma endregion
+
+#pragma region 角の位置を取得
 // 02_07 スライド17枚目
 Vector3 Player::CornerPosition(const Vector3& center, Corner corner) {
 
@@ -444,6 +466,8 @@ Vector3 Player::CornerPosition(const Vector3& center, Corner corner) {
 
 	return center + offsetTable[static_cast<uint32_t>(corner)];
 }
+
+#pragma endregion
 
 void Player::Update() {
 
@@ -554,6 +578,20 @@ void Player::Update() {
 			spinActive_ = false;
 		}
 	}
+	if (Input::GetInstance()->TriggerKey(DIK_V)) {
+		inhaling_ = !inhaling_;
+	}
+
+	if (inhaling_)
+		StartInhale();
+	Vector3 offset;
+
+	if (lrDirection_ == LRDirection::kRight)
+		offset = Vector3(+0.8f, 0, 0);
+	else
+		offset = Vector3(-0.8f, 0, 0);
+
+	inhaleHitBox_.pos = worldTransform_.translation_ + offset;
 
 	WorldTransformUpdate(worldTransform_);
 }
@@ -586,12 +624,30 @@ void Player::OnCollision(Goal* goal) {
 		// SoundManager::GetInstance()->PlaySE("goal");
 	}
 }
+
 void Player::OnCollision(Enemy* enemy) {
-	if (!enemy || invincible_)
+	switch (state_) {
+	case PlayerState::Normal:
+		TakeDamage(enemy->GetWorldTransform().translation_);
+		break;
+
+	case PlayerState::Inhale:
+		AbsorbEnemy(enemy); // が吸い込み処理
+		break;
+
+	case PlayerState::Swallow:
+		// 何もしない or 特殊処理
+		break;
+	}
+}
+
+void Player::AbsorbEnemy(Enemy* enemy) {
+	if (!enemy)
 		return;
 
-	TakeDamage(enemy->GetPosition());
+	enemy->StartPulled(this); // Enemyに吸い寄せを命令
 }
+
 // 死亡開始
 void Player::StartDeath() {
 
@@ -626,4 +682,12 @@ void Player::TakeDamage(const Vector3& enemyPos) {
 		StartDeath();
 	}
 	CameraController::GetInstance()->StartShake(0.5f, 0.1f);
+}
+void Player::StartInhale() {
+	state_ = PlayerState::Inhale;
+	inhaleHitBox_.active = true; // ← ここで有効化
+}
+void Player::StopInhale() {
+	state_ = PlayerState::Normal;
+	inhaleHitBox_.active = false; // ← ここで無効化
 }
