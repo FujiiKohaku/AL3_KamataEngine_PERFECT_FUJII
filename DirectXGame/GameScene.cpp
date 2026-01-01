@@ -330,9 +330,7 @@ void GameScene::UpdateCoins() {
 
 	for (auto* coin : coins_) {
 
-		//// 遠いコインは処理しない
-		//if (!IsNearPlayer(coin->GetPosition(), 20.0f))
-		//	continue;
+	
 
 		coin->Update();
 

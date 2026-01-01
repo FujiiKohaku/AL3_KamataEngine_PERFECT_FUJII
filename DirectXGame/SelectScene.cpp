@@ -46,7 +46,7 @@ void SceneSelectScene::Initialize() {
 	worldTransformA_.translation_.z = -30.0f;
 	worldTransformA_.translation_.y = 0.0f;
 	worldTransformA_.translation_.x = -6.0f;
-	modelB_ = Model::CreateFromOBJ("B", true);
+	modelB_ = Model::CreateFromOBJ("D", true);
 	worldTransformB_.Initialize();
 	worldTransformB_.rotation_.x = std::numbers::pi_v<float> / 2.0f;
 	worldTransformB_.rotation_.y = std::numbers::pi_v<float>;
