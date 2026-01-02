@@ -2,7 +2,7 @@
 #include "Player.h"
 #include "CameraController.h"
 #include "Coin.h"
-#include "Enemy.h"
+
 #include "Goal.h"
 #include "MapChipField.h"
 #include "Math.h"
@@ -10,6 +10,8 @@
 #include <algorithm>
 #include <cassert>
 #include <numbers>
+
+#include "EnemyBase.h"
 void Player::Initialize(Model* model, Camera* camera, const Vector3& position) {
 
 	assert(model);
@@ -629,7 +631,7 @@ void Player::OnCollision(Goal* goal) {
 	}
 }
 
-void Player::OnCollision(Enemy* enemy) {
+void Player::OnCollision(EnemyBase* enemy) {
 	switch (state_) {
 	case PlayerState::Normal:
 		TakeDamage(enemy->GetWorldTransform().translation_);
@@ -645,7 +647,7 @@ void Player::OnCollision(Enemy* enemy) {
 	}
 }
 
-void Player::AbsorbEnemy(Enemy* enemy) {
+void Player::AbsorbEnemy(EnemyBase* enemy) {
 	if (!enemy)
 		return;
 

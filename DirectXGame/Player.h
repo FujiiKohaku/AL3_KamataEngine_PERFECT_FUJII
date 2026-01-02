@@ -12,6 +12,7 @@ class Spike;
 class Goal;
 class Enemy;
 class Math;
+class EnemyBase;
 class Player {
 public:
 	// 左右
@@ -47,7 +48,7 @@ public:
 	void OnCollision(Coin* coin);
 	void OnCollision(Spike* spike);
 	void OnCollision(Goal* goal);
-	void OnCollision(Enemy* enemy);
+	void OnCollision(EnemyBase* enemy);
 	bool GetHitEnemy() const { return hitEnemy_; }
 
 	float GetRadius() const { return radius_; }
@@ -144,7 +145,7 @@ private:
 
 	// 02_08 スライド27枚目 壁接触している場合の処理
 	void UpdateOnWall(const CollisionMapInfo& info);
-	void AbsorbEnemy(Enemy* enemy);
+	void AbsorbEnemy(EnemyBase* enemy);
 	// 02_08スライド16枚目 着地時の速度減衰率
 	static inline const float kAttenuationLanding = 0.0f;
 	// 02_08スライド21枚目 微小な数値

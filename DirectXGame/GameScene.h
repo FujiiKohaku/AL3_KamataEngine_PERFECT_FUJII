@@ -2,7 +2,7 @@
 #include "BreakBlock.h"
 #include "CameraController.h"
 #include "Coin.h"
-#include "Enemy.h"
+#include "EnemyBase.h"
 #include "Fade.h"
 #include "Goal.h"
 #include "KamataEngine.h"
@@ -12,6 +12,7 @@
 #include "Spike.h"
 #include <vector>
 
+#include "WalkEnemy.h"
 // ゲームシーン
 class GameScene {
 public:
@@ -40,7 +41,7 @@ public:
 
 	void CreateEnemiesFromMap();
 
-	bool IsHitPlayerEnemy(Player* player, Enemy* enemy);
+	bool IsHitPlayerEnemy(Player* player, EnemyBase* enemy);
 	void SetMapCsvPath(const std::string& path) { mapCsvPath_ = path; }
 	void UpdateCoins();
 	bool IsNearPlayer(const Vector3& pos, float range);
@@ -120,10 +121,14 @@ private:
 	//---------------
 	// エネミー
 	//---------------
-	std::vector<Enemy*> enemies_;
+	std::vector<EnemyBase*> enemies_;
 
 	// map
 	std::string mapCsvPath_ = "Resources/map/blocks.csv";
+
+	// textureHandle
+
+	uint32_t textureHandleExp_ = 0;
 
 	Sprite* explanationSprite_ = nullptr;
 };

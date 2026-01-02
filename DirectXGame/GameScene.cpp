@@ -13,7 +13,7 @@ GameScene::~GameScene() {
 	delete debugCamera_;
 	delete modelBlock_;
 	delete mapChipField_;
-
+	delete explanationSprite_;
 	for (auto* coin : coins_) {
 		delete coin;
 	}
@@ -97,7 +97,11 @@ void GameScene::Initialize() {
 	CameraController::GetInstance()->SetTarget(player_);
 	CameraController::GetInstance()->Reset();
 
-	explanationSprite_ = Sprite:
+	//-----------------
+	// Sprite
+	//-----------------
+	textureHandleExp_ = TextureManager::Load("settingmoce.png");
+	explanationSprite_ = Sprite::Create(textureHandleExp_, {0.0});
 }
 
 // 更新
@@ -172,13 +176,12 @@ void GameScene::Update() {
 			Vector3 e = enemy->GetWorldTransform().translation_;
 			Vector3 diff = e - hb.pos;
 
-			// ★ 距離を自前で計算
+			//  距離を自前で計算
 			float dist = std::sqrtf(diff.x * diff.x + diff.y * diff.y + diff.z * diff.z);
 
 			if (dist < hb.radius) {
 				enemy->StartPulled(player_);
 			}
-
 		}
 
 		// ===============================
@@ -190,7 +193,6 @@ void GameScene::Update() {
 			enemy->OnCollision(player_);
 		}
 	}
-
 
 	// -----------------------
 	// ゴール判定
@@ -260,6 +262,12 @@ void GameScene::Draw() {
 	Model::PostDraw();
 
 	fade_.Draw();
+
+	Sprite::PreDraw(dx->GetCommandList());
+	// Sprite
+	explanationSprite_->Draw();
+
+	Sprite::PostDraw();
 }
 
 // ===============================================
@@ -339,19 +347,26 @@ void GameScene::CreateSpikesFromMap() {
 		}
 	}
 }
+
 // マップからエネミーを生成
 void GameScene::CreateEnemiesFromMap() {
 	for (uint32_t i = 0; i < mapChipField_->GetNumBlockVirtical(); ++i) {
 		for (uint32_t j = 0; j < mapChipField_->GetNumBlockHorizontal(); ++j) {
-			if (mapChipField_->GetMapChipTypeByIndex(j, i) == MapChipType::kEnemy) {
-				Vector3 pos = mapChipField_->GetMapChipPositionbyIndex(j, i);
-				Enemy* enemy = new Enemy();
-				enemy->Initialize(Model::CreateFromOBJ("enemy"), pos);
-				enemies_.push_back(enemy);
+
+			if (mapChipField_->GetMapChipTypeByIndex(j, i) != MapChipType::kEnemy) {
+				continue;
 			}
+
+			Vector3 pos = mapChipField_->GetMapChipPositionbyIndex(j, i);
+
+			EnemyBase* enemy = new WalkEnemy();
+			enemy->Initialize(Model::CreateFromOBJ("enemy"), pos);
+
+			enemies_.push_back(enemy);
 		}
 	}
 }
+
 void GameScene::UpdateCoins() {
 
 	for (auto* coin : coins_) {
@@ -372,7 +387,7 @@ bool GameScene::IsNearPlayer(const Vector3& pos, float range) {
 }
 
 // playerとEnemyの当たり判定
-bool GameScene::IsHitPlayerEnemy(Player* player, Enemy* enemy) {
+bool GameScene::IsHitPlayerEnemy(Player* player, EnemyBase* enemy) {
 	Vector3 p = player->GetWorldTransform().translation_;
 	Vector3 e = enemy->GetWorldTransform().translation_;
 
