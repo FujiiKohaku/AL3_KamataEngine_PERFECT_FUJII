@@ -79,7 +79,7 @@ void Player::InputMove() {
 	// ==========================
 	bool canJump = (jumpCount_ < kMaxJumpCount);
 
-	if (canJump && Input::GetInstance()->TriggerKey(DIK_W)) {
+	if (canJump && Input::GetInstance()->TriggerKey(DIK_SPACE)) {
 
 		float jumpPower = kJumpAcceleration;
 
@@ -578,19 +578,23 @@ void Player::Update() {
 			spinActive_ = false;
 		}
 	}
-	if (Input::GetInstance()->TriggerKey(DIK_V)) {
+	if (Input::GetInstance()->TriggerKey(DIK_W)) {
 		inhaling_ = !inhaling_;
 	}
 
-	if (inhaling_)
+	if (inhaling_) {
+
 		StartInhale();
+	}
 	Vector3 offset;
 
-	if (lrDirection_ == LRDirection::kRight)
-		offset = Vector3(+0.8f, 0, 0);
-	else
-		offset = Vector3(-0.8f, 0, 0);
+	if (lrDirection_ == LRDirection::kRight) {
 
+		offset = Vector3(+0.8f, 0, 0);
+	} else {
+
+		offset = Vector3(-0.8f, 0, 0);
+	}
 	inhaleHitBox_.pos = worldTransform_.translation_ + offset;
 
 	WorldTransformUpdate(worldTransform_);
@@ -632,7 +636,7 @@ void Player::OnCollision(Enemy* enemy) {
 		break;
 
 	case PlayerState::Inhale:
-		AbsorbEnemy(enemy); // が吸い込み処理
+		AbsorbEnemy(enemy); // 吸い込み処理
 		break;
 
 	case PlayerState::Swallow:

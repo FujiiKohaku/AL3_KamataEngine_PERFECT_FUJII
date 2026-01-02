@@ -39,7 +39,7 @@ public:
 	void CreateSpikesFromMap();
 
 	void CreateEnemiesFromMap();
-	bool CheckCollision(const Enemy* enemy, const Player* player);
+
 	bool IsHitPlayerEnemy(Player* player, Enemy* enemy);
 	void SetMapCsvPath(const std::string& path) { mapCsvPath_ = path; }
 	void UpdateCoins();
@@ -125,5 +125,5 @@ private:
 	// map
 	std::string mapCsvPath_ = "Resources/map/blocks.csv";
 
-	
+	Sprite* explanationSprite_ = nullptr;
 };

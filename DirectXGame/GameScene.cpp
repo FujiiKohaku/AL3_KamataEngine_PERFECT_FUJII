@@ -96,6 +96,8 @@ void GameScene::Initialize() {
 	CameraController::GetInstance()->Initialize(camera_);
 	CameraController::GetInstance()->SetTarget(player_);
 	CameraController::GetInstance()->Reset();
+
+	explanationSprite_ = Sprite:
 }
 
 // 更新
@@ -180,7 +182,7 @@ void GameScene::Update() {
 		}
 
 		// ===============================
-		// ② 体にぶつかったときの判定（今まで通り）
+		//  体にぶつかったときの判定（今まで通り）
 		// ===============================
 		if (IsHitPlayerEnemy(player_, enemy)) {
 
