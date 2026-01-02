@@ -171,6 +171,7 @@ private:
 
 	bool hitEnemy_ = false;
 	float bobbingTime_ = 0.0f;
+	float baseScale = 1.0f;
 
 public:
 	const HitBox& GetInhaleHitBox() const { return inhaleHitBox_; }

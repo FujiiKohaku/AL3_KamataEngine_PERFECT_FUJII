@@ -29,7 +29,7 @@ void Player::InputMove() {
 
 	// 左右移動処理（地上・空中共通）
 	Vector3 acceleration = {};
-	float baseScale = 1.0f;
+	
 	if (Input::GetInstance()->PushKey(DIK_D)) {
 
 		if (velocity_.x < 0.0f) {
@@ -44,12 +44,9 @@ void Player::InputMove() {
 			turnTimer_ = kTimeTurn;
 		}
 
-		bobbingTime_ += 0.1f;
-
-		worldTransform_.scale_.y = baseScale + sin(bobbingTime_) * 0.2f;
+		
 	} else if (Input::GetInstance()->PushKey(DIK_A)) {
-		bobbingTime_ += 0.1f;
-		worldTransform_.scale_.y = baseScale + sin(bobbingTime_) * 0.2f;
+		
 		if (velocity_.x > 0.0f) {
 			velocity_.x *= (1.0f - kAttenuation);
 		}
@@ -476,7 +473,8 @@ Vector3 Player::CornerPosition(const Vector3& center, Corner corner) {
 #pragma endregion
 
 void Player::Update() {
-
+	bobbingTime_ += 0.1f;
+	worldTransform_.scale_.y = baseScale + sin(bobbingTime_) * 0.2f;
 	//==========================
 	//  死亡演出状態の処理
 	//==========================
