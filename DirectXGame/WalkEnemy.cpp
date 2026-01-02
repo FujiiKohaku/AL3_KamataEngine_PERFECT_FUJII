@@ -8,6 +8,8 @@ void WalkEnemy::Initialize(Model* model, const Vector3& pos) {
 
 void WalkEnemy::UpdateNormal() {
 
+	
+
 	// 左右に往復
 	worldTransform_.translation_.x += direction_ * kMoveSpeed;
 

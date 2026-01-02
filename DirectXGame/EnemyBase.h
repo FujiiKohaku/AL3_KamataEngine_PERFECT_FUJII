@@ -16,6 +16,7 @@ public:
 	bool IsDead() const { return isDead_; }
 	const WorldTransform& GetWorldTransform() const { return worldTransform_; }
 	float GetRadius() const { return kEnemyRadius; }
+	bool IsPulled() const { return state_ == State::Pulled; }
 
 protected:
 	// 敵ごとに違う動きだけココで作る

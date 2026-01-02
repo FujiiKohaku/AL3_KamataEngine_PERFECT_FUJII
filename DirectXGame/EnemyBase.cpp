@@ -8,7 +8,9 @@ void EnemyBase::Initialize(Model* model, const Vector3& pos) {
 }
 
 void EnemyBase::Update() {
-
+	if (isDead_) {
+		return;
+	}
 	switch (state_) {
 	case State::Normal:
 		UpdateNormal();
@@ -51,7 +53,6 @@ void EnemyBase::UpdatePulled() {
 	Vector3 diff = target_->GetWorldTransform().translation_ - worldTransform_.translation_;
 
 	float dist = std::sqrtf(diff.x * diff.x + diff.y * diff.y + diff.z * diff.z);
-
 
 	if (dist < 0.25f) {
 		isDead_ = true;

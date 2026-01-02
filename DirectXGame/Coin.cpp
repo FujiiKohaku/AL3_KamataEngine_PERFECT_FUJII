@@ -75,3 +75,8 @@ void Coin::StartPulled(Player* player) {
 	target_ = player;
 	state_ = State::Pulled;
 }
+
+void Coin::Collect() {
+	collected_ = true;
+	state_ = State::Dead;
+}

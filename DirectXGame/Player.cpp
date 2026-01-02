@@ -580,13 +580,16 @@ void Player::Update() {
 			spinActive_ = false;
 		}
 	}
+
+
 	if (Input::GetInstance()->TriggerKey(DIK_W)) {
 		inhaling_ = !inhaling_;
 	}
 
 	if (inhaling_) {
-
 		StartInhale();
+	} else {
+		StopInhale();
 	}
 	Vector3 offset;
 
@@ -632,20 +635,32 @@ void Player::OnCollision(Goal* goal) {
 }
 
 void Player::OnCollision(EnemyBase* enemy) {
+	if (!enemy)
+		return;
+
+	// ★ 吸われ中の敵は無効（危険判定にしない）
+	if (enemy->IsPulled()) {
+		return;
+	}
+
+	if (invincible_) {
+		return;
+	}
+
 	switch (state_) {
 	case PlayerState::Normal:
 		TakeDamage(enemy->GetWorldTransform().translation_);
 		break;
 
 	case PlayerState::Inhale:
-		AbsorbEnemy(enemy); // 吸い込み処理
+		AbsorbEnemy(enemy);
 		break;
 
 	case PlayerState::Swallow:
-		// 何もしない or 特殊処理
 		break;
 	}
 }
+
 
 void Player::AbsorbEnemy(EnemyBase* enemy) {
 	if (!enemy)

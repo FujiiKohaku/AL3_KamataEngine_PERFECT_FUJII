@@ -369,16 +369,13 @@ void GameScene::CreateEnemiesFromMap() {
 		}
 	}
 }
-
+#pragma region コイン処理
 void GameScene::UpdateCoins() {
 
 	for (auto* coin : coins_) {
 
 		coin->Update();
-
-		// ==========================
-		// 吸い込み判定（敵と同じ）
-		// ==========================
+		// 吸い込み
 		if (player_->GetInhaleHitBox().active) {
 
 			auto hb = player_->GetInhaleHitBox();
@@ -392,16 +389,14 @@ void GameScene::UpdateCoins() {
 				coin->StartPulled(player_);
 			}
 		}
-
-		// ==========================
-		// 直接ぶつかった時
-		// ==========================
+		// 直ぶつかり
 		if (coin->CheckCollision(player_)) {
+			coin->Collect();            // ← 直接取得！
 			player_->OnCollision(coin); // スコア加算だけ
 		}
 	}
 }
-
+#pragma endregion
 
 bool GameScene::IsNearPlayer(const Vector3& pos, float range) {
 	Vector3 p = player_->GetWorldTransform().translation_;

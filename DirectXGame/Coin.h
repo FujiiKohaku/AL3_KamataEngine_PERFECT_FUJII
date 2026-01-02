@@ -14,7 +14,7 @@ public:
 	bool CheckCollision(const Player* player) const;
 	bool IsCollected() const { return collected_; }
 	void SetCollected(bool collected) { collected_ = collected; }
-
+	void Collect(); 
 	// 位置情報（外部アクセス用）
 	const Vector3& GetPosition() const { return worldTransform_.translation_; }
 	const WorldTransform& GetWorldTransform() const { return worldTransform_; }
