@@ -170,6 +170,7 @@ private:
 	void TakeDamage(const Vector3& enemyPos);
 
 	bool hitEnemy_ = false;
+	float bobbingTime_ = 0.0f;
 
 public:
 	const HitBox& GetInhaleHitBox() const { return inhaleHitBox_; }

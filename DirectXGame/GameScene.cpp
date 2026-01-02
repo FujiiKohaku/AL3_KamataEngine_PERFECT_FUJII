@@ -363,7 +363,7 @@ void GameScene::CreateEnemiesFromMap() {
 			Vector3 pos = mapChipField_->GetMapChipPositionbyIndex(j, i);
 
 			EnemyBase* enemy = new WalkEnemy();
-			enemy->Initialize(Model::CreateFromOBJ("enemy"), pos);
+			enemy->Initialize(Model::CreateFromOBJ("CircleEnemy"), pos);
 
 			enemies_.push_back(enemy);
 		}

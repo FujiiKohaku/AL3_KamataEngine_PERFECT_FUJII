@@ -29,7 +29,7 @@ void Player::InputMove() {
 
 	// 左右移動処理（地上・空中共通）
 	Vector3 acceleration = {};
-
+	float baseScale = 1.0f;
 	if (Input::GetInstance()->PushKey(DIK_D)) {
 
 		if (velocity_.x < 0.0f) {
@@ -44,8 +44,12 @@ void Player::InputMove() {
 			turnTimer_ = kTimeTurn;
 		}
 
-	} else if (Input::GetInstance()->PushKey(DIK_A)) {
+		bobbingTime_ += 0.1f;
 
+		worldTransform_.scale_.y = baseScale + sin(bobbingTime_) * 0.2f;
+	} else if (Input::GetInstance()->PushKey(DIK_A)) {
+		bobbingTime_ += 0.1f;
+		worldTransform_.scale_.y = baseScale + sin(bobbingTime_) * 0.2f;
 		if (velocity_.x > 0.0f) {
 			velocity_.x *= (1.0f - kAttenuation);
 		}
@@ -581,16 +585,16 @@ void Player::Update() {
 		}
 	}
 
+	bool now = Input::GetInstance()->PushKey(DIK_W);
 
-	if (Input::GetInstance()->TriggerKey(DIK_W)) {
-		inhaling_ = !inhaling_;
-	}
-
-	if (inhaling_) {
+	if (now) {
 		StartInhale();
 	} else {
 		StopInhale();
 	}
+
+	inhaling_ = now;
+
 	Vector3 offset;
 
 	if (lrDirection_ == LRDirection::kRight) {
@@ -614,9 +618,9 @@ void Player::Draw() {
 
 void Player::OnCollision(Coin* coin) {
 	if (coin) {
-		//coin->SetCollected(true);
-		// 例: コイン取得音を再生
-		// SoundManager::GetInstance()->PlaySE("coin");
+		// coin->SetCollected(true);
+		//  例: コイン取得音を再生
+		//  SoundManager::GetInstance()->PlaySE("coin");
 	}
 }
 
@@ -638,7 +642,7 @@ void Player::OnCollision(EnemyBase* enemy) {
 	if (!enemy)
 		return;
 
-	// ★ 吸われ中の敵は無効（危険判定にしない）
+	// 吸われ中の敵は無効（危険判定にしない）
 	if (enemy->IsPulled()) {
 		return;
 	}
@@ -660,7 +664,6 @@ void Player::OnCollision(EnemyBase* enemy) {
 		break;
 	}
 }
-
 
 void Player::AbsorbEnemy(EnemyBase* enemy) {
 	if (!enemy)
