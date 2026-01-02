@@ -16,11 +16,40 @@ void Coin::Initialize(Model* model, const Vector3& position) {
 }
 
 void Coin::Update() {
-	if (collected_)
+
+	switch (state_) {
+
+	case State::Normal:
+		// いつもの回転
+		worldTransform_.rotation_.y += 0.05f;
+		break;
+
+	case State::Pulled: {
+
+		Vector3 dir = Normalize(target_->GetWorldTransform().translation_ - worldTransform_.translation_);
+
+		worldTransform_.translation_ += dir * 0.15f;
+
+		worldTransform_.scale_ *= 0.92f;
+
+		Vector3 diff = target_->GetWorldTransform().translation_ - worldTransform_.translation_;
+
+		float dist = std::sqrtf(diff.x * diff.x + diff.y * diff.y + diff.z * diff.z);
+
+		if (dist < 0.25f) {
+			collected_ = true;
+			state_ = State::Dead;
+		}
+		break;
+	}
+
+	case State::Dead:
 		return;
-	worldTransform_.rotation_.y += rotateSpeed_ * (1.0f / 60.0f) * (std::numbers::pi_v<float> / 180.0f);
+	}
+
 	WorldTransformUpdate(worldTransform_);
 }
+
 
 void Coin::Draw(Camera* camera) {
 	if (collected_)
@@ -29,9 +58,10 @@ void Coin::Draw(Camera* camera) {
 }
 
 bool Coin::CheckCollision(const Player* player) const {
-	if (collected_) {
+	if (collected_)
 		return false;
-	}
+	if (state_ == State::Pulled)
+		return false; 
 
 	Vector3 p = player->GetWorldTransform().translation_;
 	Vector3 c = worldTransform_.translation_;
@@ -39,4 +69,9 @@ bool Coin::CheckCollision(const Player* player) const {
 
 	float dist = std::sqrtf(diff.x * diff.x + diff.y * diff.y + diff.z * diff.z);
 	return dist < kCoinRadius;
+}
+
+void Coin::StartPulled(Player* player) {
+	target_ = player;
+	state_ = State::Pulled;
 }

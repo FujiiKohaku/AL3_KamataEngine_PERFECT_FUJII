@@ -611,7 +611,7 @@ void Player::Draw() {
 
 void Player::OnCollision(Coin* coin) {
 	if (coin) {
-		coin->SetCollected(true);
+		//coin->SetCollected(true);
 		// 例: コイン取得音を再生
 		// SoundManager::GetInstance()->PlaySE("coin");
 	}

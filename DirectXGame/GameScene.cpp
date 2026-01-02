@@ -161,8 +161,10 @@ void GameScene::Update() {
 		}
 	}
 
+#pragma region エネミーの処理まとめ
 	// -----------------------
 	// エネミー更新
+	//------------------------
 	for (auto* enemy : enemies_) {
 		enemy->Update();
 
@@ -193,6 +195,7 @@ void GameScene::Update() {
 			enemy->OnCollision(player_);
 		}
 	}
+#pragma endregion
 
 	// -----------------------
 	// ゴール判定
@@ -246,7 +249,7 @@ void GameScene::Draw() {
 	goal_->Draw(camera_);
 
 	for (auto* coin : coins_) {
-		if (IsNearPlayer(coin->GetPosition(), 25.0f)) {
+		if (IsNearPlayer(coin->GetPosition(), 20.0f)) {
 			coin->Draw(camera_);
 		}
 	}
@@ -373,11 +376,32 @@ void GameScene::UpdateCoins() {
 
 		coin->Update();
 
+		// ==========================
+		// 吸い込み判定（敵と同じ）
+		// ==========================
+		if (player_->GetInhaleHitBox().active) {
+
+			auto hb = player_->GetInhaleHitBox();
+
+			Vector3 c = coin->GetWorldTransform().translation_;
+			Vector3 diff = c - hb.pos;
+
+			float dist = std::sqrtf(diff.x * diff.x + diff.y * diff.y + diff.z * diff.z);
+
+			if (dist < hb.radius) {
+				coin->StartPulled(player_);
+			}
+		}
+
+		// ==========================
+		// 直接ぶつかった時
+		// ==========================
 		if (coin->CheckCollision(player_)) {
-			player_->OnCollision(coin);
+			player_->OnCollision(coin); // スコア加算だけ
 		}
 	}
 }
+
 
 bool GameScene::IsNearPlayer(const Vector3& pos, float range) {
 	Vector3 p = player_->GetWorldTransform().translation_;
