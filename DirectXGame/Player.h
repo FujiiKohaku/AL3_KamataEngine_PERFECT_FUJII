@@ -146,6 +146,7 @@ private:
 	// 02_08 スライド27枚目 壁接触している場合の処理
 	void UpdateOnWall(const CollisionMapInfo& info);
 	void AbsorbEnemy(EnemyBase* enemy);
+
 	// 02_08スライド16枚目 着地時の速度減衰率
 	static inline const float kAttenuationLanding = 0.0f;
 	// 02_08スライド21枚目 微小な数値
@@ -168,10 +169,15 @@ private:
 	bool visible_ = true;
 	float invincibleTimer_ = 0.0f;
 	void TakeDamage(const Vector3& enemyPos);
+	// 左右移動処理（地上・空中共通）
+	
 
 	bool hitEnemy_ = false;
 	float bobbingTime_ = 0.0f;
 	float baseScale = 1.0f;
+	//食べた時の処理数値
+	int vacuumPoint_ = 0; // 0〜2
+	const int kMaxVacuum = 2;
 
 public:
 	const HitBox& GetInhaleHitBox() const { return inhaleHitBox_; }

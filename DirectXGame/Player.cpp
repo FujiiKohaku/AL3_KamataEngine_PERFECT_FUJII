@@ -27,86 +27,358 @@ void Player::Initialize(Model* model, Camera* camera, const Vector3& position) {
 
 void Player::InputMove() {
 
-	// 左右移動処理（地上・空中共通）
-	Vector3 acceleration = {};
-	
-	if (Input::GetInstance()->PushKey(DIK_D)) {
+    Vector3 acceleration{};
 
-		if (velocity_.x < 0.0f) {
-			velocity_.x *= (1.0f - kAttenuation); // 方向転換時の減衰
+    // ========================
+    // 横移動（回転処理は残す）
+    // ========================
+    if (Input::GetInstance()->PushKey(DIK_D)) {
+
+        if (velocity_.x < 0.0f) {
+            velocity_.x *= (1.0f - kAttenuation);
+        }
+
+        acceleration.x += kAcceleration / 60.0f;
+
+        if (lrDirection_ != LRDirection::kRight) {
+            lrDirection_ = LRDirection::kRight;
+            turnFirstRotationY_ = worldTransform_.rotation_.y;
+            turnTimer_ = kTimeTurn;
+        }
+
+    } else if (Input::GetInstance()->PushKey(DIK_A)) {
+
+        if (velocity_.x > 0.0f) {
+            velocity_.x *= (1.0f - kAttenuation);
+        }
+
+        acceleration.x -= kAcceleration / 60.0f;
+
+        if (lrDirection_ != LRDirection::kLeft) {
+            lrDirection_ = LRDirection::kLeft;
+            turnFirstRotationY_ = worldTransform_.rotation_.y;
+            turnTimer_ = kTimeTurn;
+        }
+
+    } else {
+        velocity_.x *= (1.0f - kAttenuation);
+    }
+
+    // ========================
+    // 加速の重さ
+    // ========================
+    if (!onGround_) {
+        acceleration.x *= 0.5f;
+    }
+
+    if (vacuumPoint_ > 0) {
+        acceleration.x *= 0.35f;      // とことこ感
+    }
+
+    // ========================
+    // 速度更新
+    // ========================
+    velocity_ += acceleration;
+
+    float runLimit = kLimitRunSpeed;
+    if (vacuumPoint_ > 0) {
+        runLimit *= 0.18f;            // 最高速度を下げる
+    }
+
+    velocity_.x = std::clamp(velocity_.x, -runLimit, runLimit);
+
+    if (std::abs(velocity_.x) <= 0.0001f) {
+        velocity_.x = 0.0f;
+    }
+
+    // ========================
+    // ジャンプ制限（←ここが本題）
+    // ========================
+    int jumpLimit = kMaxJumpCount;
+
+    if (vacuumPoint_ == 1) {
+        jumpLimit = 1;                 // 1体 → 1段だけ
+    }
+    else if (vacuumPoint_ >= 2) {
+        jumpLimit = 0;                 // 2体 → 完全禁止
+    }
+
+    bool canJump = (jumpCount_ < jumpLimit);
+
+    if (canJump && Input::GetInstance()->TriggerKey(DIK_SPACE)) {
+
+        float jumpPower = kJumpAcceleration;
+
+        if (jumpCount_ > 0) {
+            jumpPower *= kSecondJumpPowerScale;
+            spinActive_ = true;
+            spinTimer_ = 0.0f;
+        }
+
+        velocity_.y = jumpPower / 60.0f;
+        jumpCount_++;
+        onGround_ = false;
+    }
+
+    // ========================
+    // 重力
+    // ========================
+    if (!onGround_) {
+        velocity_ += Vector3(0, -kGravityAcceleration / 60.0f, 0);
+        velocity_.y = std::max(velocity_.y, -kLimitFallSpeed);
+    }
+}
+
+
+void Player::Update() {
+
+	bobbingTime_ += 0.1f;
+	worldTransform_.scale_.y = baseScale + sin(bobbingTime_) * 0.2f;
+	//==========================
+	//  死亡演出状態の処理
+	//==========================
+	if (deathState_ == DeathState::Dying) {
+
+		// 演出時間更新
+		deathTimer_ -= 1.0f / 60.0f;
+
+		// 浮く演出 → 落下
+		worldTransform_.translation_ += deathVelocity_;
+		deathVelocity_.y -= 0.01f;
+
+		// 回転演出
+		worldTransform_.rotation_.z += 0.15f;
+		worldTransform_.rotation_.x += 0.05f;
+
+		// DirectX に転送
+		WorldTransformUpdate(worldTransform_);
+
+		// 演出が終わったら完全死亡
+		if (deathTimer_ <= 0.0f) {
+			deathState_ = DeathState::DeadFinish;
 		}
 
-		acceleration.x += kAcceleration / 60.0f;
+		return;
+	}
 
-		if (lrDirection_ != LRDirection::kRight) {
-			lrDirection_ = LRDirection::kRight;
-			turnFirstRotationY_ = worldTransform_.rotation_.y;
-			turnTimer_ = kTimeTurn;
+	//==========================
+	// ゴール時も通常処理しない
+	//==========================
+	if (isGoal_) {
+		return;
+	}
+
+	//==========================
+	//  生存中の通常処理
+	//==========================
+	InputMove();
+
+	CollisionMapInfo collisionMapInfo = {};
+	collisionMapInfo.move = velocity_;
+	collisionMapInfo.landing = false;
+	collisionMapInfo.hitWall = false;
+
+	CheckMapCollision(collisionMapInfo);
+
+	worldTransform_.translation_ += collisionMapInfo.move;
+
+	if (collisionMapInfo.ceiling) {
+		velocity_.y = 0;
+	}
+	// 無敵中
+	if (invincible_) {
+		invincibleTimer_ -= (1.0f / 60.0f);
+
+		// 点滅（描画スキップ）
+		if (((int)(invincibleTimer_ * 10) % 2) == 0) {
+			visible_ = false;
+		} else {
+			visible_ = true;
 		}
 
-		
-	} else if (Input::GetInstance()->PushKey(DIK_A)) {
-		
-		if (velocity_.x > 0.0f) {
-			velocity_.x *= (1.0f - kAttenuation);
+		if (invincibleTimer_ <= 0) {
+			invincible_ = false;
+			visible_ = true;
 		}
+	}
+	UpdateOnWall(collisionMapInfo);
+	UpdateOnGround(collisionMapInfo);
 
-		acceleration.x -= kAcceleration / 60.0f;
+	if (turnTimer_ > 0.0f) {
+		turnTimer_ = std::max(turnTimer_ - (1.0f / 60.0f), 0.0f);
 
-		if (lrDirection_ != LRDirection::kLeft) {
-			lrDirection_ = LRDirection::kLeft;
-			turnFirstRotationY_ = worldTransform_.rotation_.y;
-			turnTimer_ = kTimeTurn;
+		float destinationRotationYTable[] = {std::numbers::pi_v<float> / 2.0f, std::numbers::pi_v<float> * 3.0f / 2.0f};
+		float destinationRotationY = destinationRotationYTable[static_cast<uint32_t>(lrDirection_)];
+
+		worldTransform_.rotation_.y = EaseInOut(destinationRotationY, turnFirstRotationY_, turnTimer_ / kTimeTurn);
+	}
+
+	//==========================
+	//  落下死を演出に変える
+	//==========================
+	if (worldTransform_.translation_.y < -20.0f) {
+		StartDeath();
+	}
+	//=====================================================
+	// 二段ジャンプ演出： X軸一回転（EaseOut）
+	//=====================================================
+	if (spinActive_) {
+
+		// 経過時間更新
+		spinTimer_ += 1.0f / 60.0f;
+
+		// 0 ~ 1 に正規化
+		float t = std::clamp(spinTimer_ / spinDuration_, 0.0f, 1.0f);
+
+		// イージング適用
+		float eased = EaseOutCubic(t);
+
+		// 1回転分(360°)を X軸回転
+		worldTransform_.rotation_.x = eased * (std::numbers::pi_v<float> * 2.0f);
+
+		if (t >= 1.0f) {
+			spinActive_ = false;
 		}
+	}
+
+	bool now = Input::GetInstance()->PushKey(DIK_W);
+
+	if (now) {
+		StartInhale();
 	} else {
-		// 入力なしなら減速
-		velocity_.x *= (1.0f - kAttenuation);
+		StopInhale();
 	}
 
-	// 空中では操作を少し効きにくくする（自然な慣性）
-	if (!onGround_) {
-		acceleration.x *= 0.5f; // 空中は加速半分
+	inhaling_ = now;
+
+	Vector3 offset;
+
+	if (lrDirection_ == LRDirection::kRight) {
+
+		offset = Vector3(+0.8f, 0, 0);
+	} else {
+
+		offset = Vector3(-0.8f, 0, 0);
 	}
+	inhaleHitBox_.pos = worldTransform_.translation_ + offset;
 
-	// 速度に加算してクランプ
-	velocity_ += acceleration;
-	velocity_.x = std::clamp(velocity_.x, -kLimitRunSpeed, kLimitRunSpeed);
+	WorldTransformUpdate(worldTransform_);
+}
 
-	// ほぼ停止なら0
-	if (std::abs(velocity_.x) <= 0.0001f) {
-		velocity_.x = 0.0f;
-	}
+void Player::Draw() {
+	if (!visible_)
+		return;
 
-	// ==========================
-	//  二段ジャンプ処理（2段目弱くする）
-	// ==========================
-	bool canJump = (jumpCount_ < kMaxJumpCount);
+	model_->Draw(worldTransform_, *camera_);
 
-	if (canJump && Input::GetInstance()->TriggerKey(DIK_SPACE)) {
+}
 
-		float jumpPower = kJumpAcceleration;
-
-		// === 2段目なら弱く＆回転開始 ===
-		if (jumpCount_ > 0) {
-			jumpPower *= kSecondJumpPowerScale;
-
-			//  回転演出開始
-			spinActive_ = true;
-			spinTimer_ = 0.0f;
-		}
-
-		velocity_.y = jumpPower / 60.0f;
-		jumpCount_++;
-		onGround_ = false;
-	}
-
-	// 重力（空中のみ）
-	if (!onGround_) {
-		velocity_ += Vector3(0, -kGravityAcceleration / 60.0f, 0);
-		velocity_.y = std::max(velocity_.y, -kLimitFallSpeed);
+void Player::OnCollision(Coin* coin) {
+	if (coin) {
+		// coin->SetCollected(true);
+		//  例: コイン取得音を再生
+		//  SoundManager::GetInstance()->PlaySE("coin");
 	}
 }
 
+void Player::OnCollision(Spike* spike) {
+	if (spike) {
+		StartDeath();
+	}
+}
+
+void Player::OnCollision(Goal* goal) {
+	if (goal) {
+		isGoal_ = true;
+		// 例: ゴールSE
+		// SoundManager::GetInstance()->PlaySE("goal");
+	}
+}
+
+void Player::OnCollision(EnemyBase* enemy) {
+	if (!enemy)
+		return;
+
+	// 吸われ中の敵は無効（危険判定にしない）
+	if (enemy->IsPulled()) {
+		// 吸い込み状態なら “危険じゃない” だけ扱い続ける
+		if (state_ == PlayerState::Inhale) {
+			AbsorbEnemy(enemy);
+		}
+		return;
+	}
+
+	if (invincible_) {
+		return;
+	}
+
+	switch (state_) {
+	case PlayerState::Normal:
+		TakeDamage(enemy->GetWorldTransform().translation_);
+		break;
+
+	case PlayerState::Inhale:
+		AbsorbEnemy(enemy);
+		break;
+
+	case PlayerState::Swallow:
+		break;
+	}
+}
+
+void Player::AbsorbEnemy(EnemyBase* enemy) {
+	if (!enemy)
+		return;
+
+	enemy->StartPulled(this); // Enemyに吸い寄せを命令
+	vacuumPoint_ = std::min(vacuumPoint_ + 1, kMaxVacuum);
+}
+
+/////////////////////////////////////////////////
+// 死亡開始
+/////////////////////////////////////////////////
+void Player::StartDeath() {
+
+	if (deathState_ != DeathState::Alive)
+		return;
+
+	deathState_ = DeathState::Dying;
+	deathTimer_ = 1.5f;
+	deathVelocity_ = {0, 0.25f, 0};
+	velocity_ = {0, 0, 0}; // ゲーム操作の速度は無効
+}
+float Player::EaseOutCubic(float t) { // t = [0.0f, 1.0f]
+	float inv = 1.0f - t;
+	return 1.0f - inv * inv * inv;
+}
+void Player::TakeDamage(const Vector3& enemyPos) {
+
+	hp_--;
+
+	// ノックバック
+	Vector3 dir = worldTransform_.translation_ - enemyPos;
+	dir.y = 0;
+	dir = Normalize(dir);
+	velocity_ = dir * 0.2f; // ノックバック強さ
+
+	// 無敵開始
+	invincible_ = true;
+	invincibleTimer_ = 1.0f; // 1秒間無敵
+
+	// HP0なら死亡
+	if (hp_ <= 0) {
+		StartDeath();
+	}
+	CameraController::GetInstance()->StartShake(0.5f, 0.1f);
+}
+void Player::StartInhale() {
+	state_ = PlayerState::Inhale;
+	inhaleHitBox_.active = true; // ← ここで有効化
+}
+void Player::StopInhale() {
+	state_ = PlayerState::Normal;
+	inhaleHitBox_.active = false; // ← ここで無効化
+}
 #pragma region マップの当たり判定をまとめたもの
 // 02_07 スライド13枚目
 void Player::CheckMapCollision(CollisionMapInfo& info) {
@@ -471,245 +743,3 @@ Vector3 Player::CornerPosition(const Vector3& center, Corner corner) {
 }
 
 #pragma endregion
-
-void Player::Update() {
-	bobbingTime_ += 0.1f;
-	worldTransform_.scale_.y = baseScale + sin(bobbingTime_) * 0.2f;
-	//==========================
-	//  死亡演出状態の処理
-	//==========================
-	if (deathState_ == DeathState::Dying) {
-
-		// 演出時間更新
-		deathTimer_ -= 1.0f / 60.0f;
-
-		// 浮く演出 → 落下
-		worldTransform_.translation_ += deathVelocity_;
-		deathVelocity_.y -= 0.01f;
-
-		// 回転演出
-		worldTransform_.rotation_.z += 0.15f;
-		worldTransform_.rotation_.x += 0.05f;
-
-		// DirectX に転送
-		WorldTransformUpdate(worldTransform_);
-
-		// 演出が終わったら完全死亡
-		if (deathTimer_ <= 0.0f) {
-			deathState_ = DeathState::DeadFinish;
-		}
-
-		return;
-	}
-
-	//==========================
-	// ゴール時も通常処理しない
-	//==========================
-	if (isGoal_) {
-		return;
-	}
-
-	//==========================
-	//  生存中の通常処理
-	//==========================
-	InputMove();
-
-	CollisionMapInfo collisionMapInfo = {};
-	collisionMapInfo.move = velocity_;
-	collisionMapInfo.landing = false;
-	collisionMapInfo.hitWall = false;
-
-	CheckMapCollision(collisionMapInfo);
-
-	worldTransform_.translation_ += collisionMapInfo.move;
-
-	if (collisionMapInfo.ceiling) {
-		velocity_.y = 0;
-	}
-	// 無敵中
-	if (invincible_) {
-		invincibleTimer_ -= (1.0f / 60.0f);
-
-		// 点滅（描画スキップ）
-		if (((int)(invincibleTimer_ * 10) % 2) == 0) {
-			visible_ = false;
-		} else {
-			visible_ = true;
-		}
-
-		if (invincibleTimer_ <= 0) {
-			invincible_ = false;
-			visible_ = true;
-		}
-	}
-	UpdateOnWall(collisionMapInfo);
-	UpdateOnGround(collisionMapInfo);
-
-	if (turnTimer_ > 0.0f) {
-		turnTimer_ = std::max(turnTimer_ - (1.0f / 60.0f), 0.0f);
-
-		float destinationRotationYTable[] = {std::numbers::pi_v<float> / 2.0f, std::numbers::pi_v<float> * 3.0f / 2.0f};
-		float destinationRotationY = destinationRotationYTable[static_cast<uint32_t>(lrDirection_)];
-
-		worldTransform_.rotation_.y = EaseInOut(destinationRotationY, turnFirstRotationY_, turnTimer_ / kTimeTurn);
-	}
-
-	//==========================
-	//  落下死を演出に変える
-	//==========================
-	if (worldTransform_.translation_.y < -20.0f) {
-		StartDeath();
-	}
-	//=====================================================
-	// 二段ジャンプ演出： X軸一回転（EaseOut）
-	//=====================================================
-	if (spinActive_) {
-
-		// 経過時間更新
-		spinTimer_ += 1.0f / 60.0f;
-
-		// 0 ~ 1 に正規化
-		float t = std::clamp(spinTimer_ / spinDuration_, 0.0f, 1.0f);
-
-		// イージング適用
-		float eased = EaseOutCubic(t);
-
-		// 1回転分(360°)を X軸回転
-		worldTransform_.rotation_.x = eased * (std::numbers::pi_v<float> * 2.0f);
-
-		// 完走した？
-		if (t >= 1.0f) {
-			spinActive_ = false;
-		}
-	}
-
-	bool now = Input::GetInstance()->PushKey(DIK_W);
-
-	if (now) {
-		StartInhale();
-	} else {
-		StopInhale();
-	}
-
-	inhaling_ = now;
-
-	Vector3 offset;
-
-	if (lrDirection_ == LRDirection::kRight) {
-
-		offset = Vector3(+0.8f, 0, 0);
-	} else {
-
-		offset = Vector3(-0.8f, 0, 0);
-	}
-	inhaleHitBox_.pos = worldTransform_.translation_ + offset;
-
-	WorldTransformUpdate(worldTransform_);
-}
-
-void Player::Draw() {
-	if (!visible_)
-		return;
-
-	model_->Draw(worldTransform_, *camera_);
-}
-
-void Player::OnCollision(Coin* coin) {
-	if (coin) {
-		// coin->SetCollected(true);
-		//  例: コイン取得音を再生
-		//  SoundManager::GetInstance()->PlaySE("coin");
-	}
-}
-
-void Player::OnCollision(Spike* spike) {
-	if (spike) {
-		StartDeath();
-	}
-}
-
-void Player::OnCollision(Goal* goal) {
-	if (goal) {
-		isGoal_ = true;
-		// 例: ゴールSE
-		// SoundManager::GetInstance()->PlaySE("goal");
-	}
-}
-
-void Player::OnCollision(EnemyBase* enemy) {
-	if (!enemy)
-		return;
-
-	// 吸われ中の敵は無効（危険判定にしない）
-	if (enemy->IsPulled()) {
-		return;
-	}
-
-	if (invincible_) {
-		return;
-	}
-
-	switch (state_) {
-	case PlayerState::Normal:
-		TakeDamage(enemy->GetWorldTransform().translation_);
-		break;
-
-	case PlayerState::Inhale:
-		AbsorbEnemy(enemy);
-		break;
-
-	case PlayerState::Swallow:
-		break;
-	}
-}
-
-void Player::AbsorbEnemy(EnemyBase* enemy) {
-	if (!enemy)
-		return;
-
-	enemy->StartPulled(this); // Enemyに吸い寄せを命令
-}
-
-// 死亡開始
-void Player::StartDeath() {
-
-	if (deathState_ != DeathState::Alive)
-		return;
-
-	deathState_ = DeathState::Dying;
-	deathTimer_ = 1.5f;
-	deathVelocity_ = {0, 0.25f, 0};
-	velocity_ = {0, 0, 0}; // ゲーム操作の速度は無効
-}
-float Player::EaseOutCubic(float t) { // t = [0.0f, 1.0f]
-	float inv = 1.0f - t;
-	return 1.0f - inv * inv * inv;
-}
-void Player::TakeDamage(const Vector3& enemyPos) {
-
-	hp_--;
-
-	// ノックバック
-	Vector3 dir = worldTransform_.translation_ - enemyPos;
-	dir.y = 0;
-	dir = Normalize(dir);
-	velocity_ = dir * 0.2f; // ノックバック強さ
-
-	// 無敵開始
-	invincible_ = true;
-	invincibleTimer_ = 1.0f; // 1秒間無敵
-
-	// HP0なら死亡
-	if (hp_ <= 0) {
-		StartDeath();
-	}
-	CameraController::GetInstance()->StartShake(0.5f, 0.1f);
-}
-void Player::StartInhale() {
-	state_ = PlayerState::Inhale;
-	inhaleHitBox_.active = true; // ← ここで有効化
-}
-void Player::StopInhale() {
-	state_ = PlayerState::Normal;
-	inhaleHitBox_.active = false; // ← ここで無効化
-}
