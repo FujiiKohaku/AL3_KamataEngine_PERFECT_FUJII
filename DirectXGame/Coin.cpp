@@ -74,6 +74,7 @@ bool Coin::CheckCollision(const Player* player) const {
 void Coin::StartPulled(Player* player) {
 	target_ = player;
 	state_ = State::Pulled;
+	
 }
 
 void Coin::Collect() {

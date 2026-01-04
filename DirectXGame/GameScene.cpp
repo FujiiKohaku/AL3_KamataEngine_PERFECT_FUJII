@@ -14,6 +14,7 @@ GameScene::~GameScene() {
 	delete modelBlock_;
 	delete mapChipField_;
 	delete explanationSprite_;
+
 	for (auto* coin : coins_) {
 		delete coin;
 	}
@@ -167,7 +168,9 @@ void GameScene::Update() {
 	//------------------------
 	for (auto* enemy : enemies_) {
 		enemy->Update();
-
+		if (enemy->IsDead()) {
+			continue;
+		}
 		// ===============================
 		//  吸い込み判定（前にある円）
 		// ===============================
@@ -195,6 +198,35 @@ void GameScene::Update() {
 			enemy->OnCollision(player_);
 		}
 	}
+
+	for (auto& bulletPtr : player_->GetBullets()) {
+
+		if (!bulletPtr)
+			continue; // 念のため
+
+		auto& bullet = *bulletPtr; // 中身を参照で取り出す
+
+		if (!bullet.IsAlive()) {
+			continue;
+		}
+		for (auto* enemy : enemies_) {
+
+			if (enemy->IsDead())
+				continue;
+
+			Vector3 diff = enemy->GetWorldTransform().translation_ - bullet.GetWorld().translation_;
+
+			float dist = std::sqrtf(diff.x * diff.x + diff.y * diff.y + diff.z * diff.z);
+
+			if (dist < enemy->GetRadius() + bullet.GetRadius()) {
+
+				bullet.Kill();
+				enemy->StartDying();  
+				break;
+			}
+		}
+	}
+
 #pragma endregion
 
 	// -----------------------

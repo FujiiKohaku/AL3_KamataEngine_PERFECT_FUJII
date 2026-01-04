@@ -1,9 +1,10 @@
 #pragma once
 #include "KamataEngine.h"
 
-#include "Bullet.h"
+#include <list>
 #include <vector>
-
+#include "PlayerBullet.h"
+#include <memory>
 using namespace KamataEngine;
 
 class MapChipField;
@@ -170,15 +171,21 @@ private:
 	float invincibleTimer_ = 0.0f;
 	void TakeDamage(const Vector3& enemyPos);
 	// 左右移動処理（地上・空中共通）
-	
 
 	bool hitEnemy_ = false;
 	float bobbingTime_ = 0.0f;
 	float baseScale = 1.0f;
-	//食べた時の処理数値
+	// 食べた時の処理数値
 	int vacuumPoint_ = 0; // 0〜2
 	const int kMaxVacuum = 2;
 
+	std::list<std::unique_ptr<PlayerBullet>> bullets_;
+	Model* bulletModel_ = nullptr;
+	void Shoot();
+
 public:
+	std::list<std::unique_ptr<PlayerBullet>>& GetBullets() { return bullets_; }
+
+
 	const HitBox& GetInhaleHitBox() const { return inhaleHitBox_; }
 };

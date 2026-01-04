@@ -18,6 +18,13 @@ public:
 	float GetRadius() const { return kEnemyRadius; }
 	bool IsPulled() const { return state_ == State::Pulled; }
 
+	void Kill() {
+		isDead_ = true;
+		state_ = State::Dead;
+	}
+	void StartDying();
+	void UpdateDying();
+
 protected:
 	// 敵ごとに違う動きだけココで作る
 	virtual void UpdateNormal() {}
@@ -29,9 +36,10 @@ protected:
 	Model* model_ = nullptr;
 	Player* target_ = nullptr;
 
-	enum class State { Normal, Pulled, Dead };
+	enum class State { Normal, Pulled, Dying, Dead };
 	State state_ = State::Normal;
 
 	bool isDead_ = false;
-	float kEnemyRadius= 1.0f;
+	float kEnemyRadius = 1.0f;
+	float deathTimer_ = 0.0f;
 };

@@ -6,6 +6,7 @@
 #include "Goal.h"
 #include "MapChipField.h"
 #include "Math.h"
+#include "PlayerBullet.h"
 #include "Spike.h"
 #include <algorithm>
 #include <cassert>
@@ -23,114 +24,152 @@ void Player::Initialize(Model* model, Camera* camera, const Vector3& position) {
 	worldTransform_.rotation_.y = std::numbers::pi_v<float> / 2.0f;
 
 	camera_ = camera;
+
+
+
+	bulletModel_ = Model::CreateFromOBJ("spike", true);
+	
+}
+void Player::Shoot() {
+
+	if (vacuumPoint_ <= 0) {
+		return;
+	}
+
+	std::unique_ptr<PlayerBullet> bullet = std::make_unique<PlayerBullet>();
+
+	Vector3 dir{};
+	if (lrDirection_ == LRDirection::kRight) {
+		dir.x = 1.0f;
+	} else {
+		dir.x = -1.0f;
+	}
+
+	bullet->Initialize(bulletModel_, worldTransform_.translation_, dir);
+
+	bullets_.push_back(std::move(bullet));
+
+	vacuumPoint_ = 0;
+	jumpCount_ = 0;
 }
 
 void Player::InputMove() {
 
-    Vector3 acceleration{};
+	Vector3 acceleration{};
 
-    // ========================
-    // 横移動（回転処理は残す）
-    // ========================
-    if (Input::GetInstance()->PushKey(DIK_D)) {
+	// ========================
+	// 横移動（回転処理は残す）
+	// ========================
+	if (Input::GetInstance()->PushKey(DIK_D)) {
 
-        if (velocity_.x < 0.0f) {
-            velocity_.x *= (1.0f - kAttenuation);
-        }
+		if (velocity_.x < 0.0f) {
+			velocity_.x *= (1.0f - kAttenuation);
+		}
 
-        acceleration.x += kAcceleration / 60.0f;
+		acceleration.x += kAcceleration / 60.0f;
 
-        if (lrDirection_ != LRDirection::kRight) {
-            lrDirection_ = LRDirection::kRight;
-            turnFirstRotationY_ = worldTransform_.rotation_.y;
-            turnTimer_ = kTimeTurn;
-        }
+		if (lrDirection_ != LRDirection::kRight) {
+			lrDirection_ = LRDirection::kRight;
+			turnFirstRotationY_ = worldTransform_.rotation_.y;
+			turnTimer_ = kTimeTurn;
+		}
 
-    } else if (Input::GetInstance()->PushKey(DIK_A)) {
+	} else if (Input::GetInstance()->PushKey(DIK_A)) {
 
-        if (velocity_.x > 0.0f) {
-            velocity_.x *= (1.0f - kAttenuation);
-        }
+		if (velocity_.x > 0.0f) {
+			velocity_.x *= (1.0f - kAttenuation);
+		}
 
-        acceleration.x -= kAcceleration / 60.0f;
+		acceleration.x -= kAcceleration / 60.0f;
 
-        if (lrDirection_ != LRDirection::kLeft) {
-            lrDirection_ = LRDirection::kLeft;
-            turnFirstRotationY_ = worldTransform_.rotation_.y;
-            turnTimer_ = kTimeTurn;
-        }
+		if (lrDirection_ != LRDirection::kLeft) {
+			lrDirection_ = LRDirection::kLeft;
+			turnFirstRotationY_ = worldTransform_.rotation_.y;
+			turnTimer_ = kTimeTurn;
+		}
 
-    } else {
-        velocity_.x *= (1.0f - kAttenuation);
-    }
+	} else {
+		velocity_.x *= (1.0f - kAttenuation);
+	}
 
-    // ========================
-    // 加速の重さ
-    // ========================
-    if (!onGround_) {
-        acceleration.x *= 0.5f;
-    }
+	// ========================
+	// 加速の重さ
+	// ========================
+	if (!onGround_) {
+		acceleration.x *= 0.5f;
+	}
 
-    if (vacuumPoint_ > 0) {
-        acceleration.x *= 0.35f;      // とことこ感
-    }
+	if (vacuumPoint_ > 0) {
+		acceleration.x *= 0.35f; // とことこ感
+	}
 
-    // ========================
-    // 速度更新
-    // ========================
-    velocity_ += acceleration;
+	// ========================
+	// 速度更新
+	// ========================
+	velocity_ += acceleration;
 
-    float runLimit = kLimitRunSpeed;
-    if (vacuumPoint_ > 0) {
-        runLimit *= 0.18f;            // 最高速度を下げる
-    }
+	float runLimit = kLimitRunSpeed;
+	if (vacuumPoint_ > 0) {
+		runLimit *= 0.18f; // 最高速度を下げる
+	}
 
-    velocity_.x = std::clamp(velocity_.x, -runLimit, runLimit);
+	velocity_.x = std::clamp(velocity_.x, -runLimit, runLimit);
 
-    if (std::abs(velocity_.x) <= 0.0001f) {
-        velocity_.x = 0.0f;
-    }
+	if (std::abs(velocity_.x) <= 0.0001f) {
+		velocity_.x = 0.0f;
+	}
 
-    // ========================
-    // ジャンプ制限（←ここが本題）
-    // ========================
-    int jumpLimit = kMaxJumpCount;
+	// ========================
+	// ジャンプ制限（←ここが本題）
+	// ========================
+	int jumpLimit = kMaxJumpCount;
 
-    if (vacuumPoint_ == 1) {
-        jumpLimit = 1;                 // 1体 → 1段だけ
-    }
-    else if (vacuumPoint_ >= 2) {
-        jumpLimit = 0;                 // 2体 → 完全禁止
-    }
+	if (vacuumPoint_ == 1) {
+		jumpLimit = 1; // 1体 → 1段だけ
+	} else if (vacuumPoint_ >= 2) {
+		jumpLimit = 0; // 2体 → 完全禁止
+	}
 
-    bool canJump = (jumpCount_ < jumpLimit);
+	bool canJump = (jumpCount_ < jumpLimit);
 
-    if (canJump && Input::GetInstance()->TriggerKey(DIK_SPACE)) {
+	if (canJump && Input::GetInstance()->TriggerKey(DIK_SPACE)) {
 
-        float jumpPower = kJumpAcceleration;
+		float jumpPower = kJumpAcceleration;
 
-        if (jumpCount_ > 0) {
-            jumpPower *= kSecondJumpPowerScale;
-            spinActive_ = true;
-            spinTimer_ = 0.0f;
-        }
+		if (jumpCount_ > 0) {
+			jumpPower *= kSecondJumpPowerScale;
+			spinActive_ = true;
+			spinTimer_ = 0.0f;
+		}
 
-        velocity_.y = jumpPower / 60.0f;
-        jumpCount_++;
-        onGround_ = false;
-    }
+		velocity_.y = jumpPower / 60.0f;
+		jumpCount_++;
+		onGround_ = false;
+	}
 
-    // ========================
-    // 重力
-    // ========================
-    if (!onGround_) {
-        velocity_ += Vector3(0, -kGravityAcceleration / 60.0f, 0);
-        velocity_.y = std::max(velocity_.y, -kLimitFallSpeed);
-    }
+	// ========================
+	// 重力
+	// ========================
+	if (!onGround_) {
+		velocity_ += Vector3(0, -kGravityAcceleration / 60.0f, 0);
+		velocity_.y = std::max(velocity_.y, -kLimitFallSpeed);
+	}
 }
 
-
 void Player::Update() {
+	if (Input::GetInstance()->TriggerKey(DIK_R)) {
+		Shoot();
+	}
+	for (auto it = bullets_.begin(); it != bullets_.end();) {
+
+		(*it)->Update();
+
+		if (!(*it)->IsAlive()) {
+			it = bullets_.erase(it);
+		} else {
+			++it;
+		}
+	}
 
 	bobbingTime_ += 0.1f;
 	worldTransform_.scale_.y = baseScale + sin(bobbingTime_) * 0.2f;
@@ -266,11 +305,14 @@ void Player::Update() {
 }
 
 void Player::Draw() {
-	if (!visible_)
-		return;
 
-	model_->Draw(worldTransform_, *camera_);
+	if (visible_) {
+		model_->Draw(worldTransform_, *camera_);
+	}
 
+	for (auto& b : bullets_) {
+		b->Draw(camera_);
+	}
 }
 
 void Player::OnCollision(Coin* coin) {
@@ -301,7 +343,7 @@ void Player::OnCollision(EnemyBase* enemy) {
 
 	// 吸われ中の敵は無効（危険判定にしない）
 	if (enemy->IsPulled()) {
-		// 吸い込み状態なら “危険じゃない” だけ扱い続ける
+
 		if (state_ == PlayerState::Inhale) {
 			AbsorbEnemy(enemy);
 		}
