@@ -15,7 +15,7 @@ GameScene::~GameScene() {
 	delete mapChipField_;
 	delete explanationSprite_;
 
-	for (auto* coin : coins_) {
+	for (Coin* coin : coins_) {
 		delete coin;
 	}
 	coins_.clear();
@@ -34,7 +34,7 @@ GameScene::~GameScene() {
 	for (auto* enemy : enemies_) {
 		delete enemy;
 	}
-	for (auto* h : jumpHoppers_) {
+	for (JumpHopper* h : jumpHoppers_) {
 		delete h;
 	}
 	jumpHoppers_.clear();
@@ -110,8 +110,16 @@ void GameScene::Initialize() {
 	explanationSprite_ = Sprite::Create(textureHandleExp_, {0.0});
 
 	// ジャンプ台
-	jumpHopperModel_ = Model::CreateFromOBJ("block", true);
+	jumpHopperModel_ = Model::CreateFromOBJ("spring", true);
 	CreateJumpHoppersFromMap();
+
+	textureFullHp_ = TextureManager::Load("Full.png");
+	textureEmptyHp_ = TextureManager::Load("empty.png");
+
+	for (int i = 0; i < 3; i++) {
+		heartsFull_.push_back(Sprite::Create(textureFullHp_, {0, 0}));
+		heartsEmpty_.push_back(Sprite::Create(textureEmptyHp_, {0, 0}));
+	}
 }
 
 // 更新
@@ -119,34 +127,25 @@ void GameScene::Update() {
 	player_->Update();
 	skydome_->Update();
 	fade_.Update();
-	// -----------------------
-	// ブロック更新
-	// -----------------------
-	for (auto& blockLine : worldTransformBlocks_) {
-		for (auto* block : blockLine) {
+	//// -----------------------
+	//// ブロック更新
+	//// -----------------------
+	// for (auto& blockLine : worldTransformBlocks_) {
+	//	for (auto* block : blockLine) {
 
-			if (!block)
-				continue; //  nullチェック
+	//		if (!block)
+	//			continue; //  nullチェック
 
-			WorldTransformUpdate(*block);
-		}
-	}
-
+	//		WorldTransformUpdate(*block);
+	//	}
+	//}
+	// WorldTransformUpdate(worldTransformBlocks_);
 	// -----------------------
 	// ジャンプホッパー更新
 	// -----------------------
-	for (auto* h : jumpHoppers_) {
-
-	
-
+	for (JumpHopper* h : jumpHoppers_) {
 		h->Update(player_);
 	}
-
-
-
-
-
-
 
 #ifdef _DEBUG
 	if (Input::GetInstance()->TriggerKey(DIK_C)) {
@@ -309,7 +308,7 @@ void GameScene::Draw() {
 		h->Draw();
 	}
 	for (auto* coin : coins_) {
-		if (IsNearPlayer(coin->GetPosition(), 20.0f)) {
+		if (IsNearPlayer(coin->GetPosition(), 15.0f)) {
 			coin->Draw(camera_);
 		}
 	}
@@ -321,14 +320,47 @@ void GameScene::Draw() {
 	for (auto* enemy : enemies_) {
 		enemy->Draw(camera_);
 	}
-
+	player_->GetInhaleEffect()->Draw(camera_);
 	Model::PostDraw();
 
 	fade_.Draw();
+	
+	
 
 	Sprite::PreDraw(dx->GetCommandList());
 	// Sprite
 	explanationSprite_->Draw();
+
+	int hp = player_->GetHp();
+	int maxHp = 3; // 後で変数にする
+
+
+
+	// 無敵なら点滅タイミングを計算
+	bool flash = false;
+	if (player_->IsInvincible()) {
+		float t = player_->GetInvincibleTimer();
+		flash = (fmodf(t, 0.2f) < 0.1f); 
+	}
+
+	for (int i = 0; i < maxHp; i++) {
+
+		Vector2 pos(20.0f + i * 80.0f, 20.0f);
+
+		if (i < hp) {
+			// 残ってるハート（点滅しない）
+			heartsFull_[i]->SetPosition(pos);
+			heartsFull_[i]->Draw();
+		} else {
+
+			// 減ったハート（ここだけ点滅）
+			if (flash)
+				continue;
+
+			heartsEmpty_[i]->SetPosition(pos);
+			heartsEmpty_[i]->Draw();
+		}
+	}
 
 	Sprite::PostDraw();
 }
@@ -356,6 +388,7 @@ void GameScene::CreateBlocksFromMap() {
 				worldTransform->Initialize();
 				worldTransform->translation_ = mapChipField_->GetMapChipPositionbyIndex(j, i);
 				worldTransformBlocks_[i][j] = worldTransform;
+				WorldTransformUpdate(*worldTransform);
 			} else {
 				worldTransformBlocks_[i][j] = nullptr;
 			}
@@ -429,24 +462,38 @@ void GameScene::CreateSpikesFromMap() {
 	}
 }
 
-// マップからエネミーを生成
 void GameScene::CreateEnemiesFromMap() {
-	for (uint32_t i = 0; i < mapChipField_->GetNumBlockVirtical(); ++i) {
-		for (uint32_t j = 0; j < mapChipField_->GetNumBlockHorizontal(); ++j) {
 
-			if (mapChipField_->GetMapChipTypeByIndex(j, i) != MapChipType::kEnemy) {
-				continue;
-			}
+    for (uint32_t i = 0; i < mapChipField_->GetNumBlockVirtical(); ++i) {
+        for (uint32_t j = 0; j < mapChipField_->GetNumBlockHorizontal(); ++j) {
 
-			Vector3 pos = mapChipField_->GetMapChipPositionbyIndex(j, i);
+            auto type = mapChipField_->GetMapChipTypeByIndex(j, i);
 
-			EnemyBase* enemy = new WalkEnemy();
-			enemy->Initialize(Model::CreateFromOBJ("CircleEnemy"), pos);
+            Vector3 pos = mapChipField_->GetMapChipPositionbyIndex(j, i);
 
-			enemies_.push_back(enemy);
-		}
-	}
+            switch (type) {
+
+            case MapChipType::kEnemy: {
+                EnemyBase* enemy = new WalkEnemy();
+                enemy->Initialize(Model::CreateFromOBJ("CircleEnemy"), pos);
+                enemies_.push_back(enemy);
+                break;
+            }
+
+            case MapChipType::kEnemyFlyer: {
+                EnemyBase* enemy = new EnemyFlyer();
+                enemy->Initialize(Model::CreateFromOBJ("CircleEnemy"), pos);
+                enemies_.push_back(enemy);
+                break;
+            }
+
+            default:
+                break;
+            }
+        }
+    }
 }
+
 #pragma region コイン処理
 void GameScene::UpdateCoins() {
 

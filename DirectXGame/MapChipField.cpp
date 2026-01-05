@@ -12,6 +12,7 @@ std::map<std::string, MapChipType> mapChipTable = {
     {"4", MapChipType::kSpike}, // 壊れるブロックzz
     {"5", MapChipType::kEnemy}, // 敵
     {"6", MapChipType::kJumpPad}, // ジャンプ台
+    {"7", MapChipType::kEnemyFlyer}, // 飛行型エネミー
 };
 }
 

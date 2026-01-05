@@ -9,7 +9,7 @@ void JumpHopper::Initialize(Model* model, Camera* camera, const Vector3& pos, fl
 	worldTransform_.Initialize();
 	worldTransform_.translation_ = pos;
 	worldTransform_.rotation_ = {0, 0, 0};
-	worldTransform_.scale_ = {1, 1, 1};
+	worldTransform_.scale_ = {0.5f, 0.5f, 0.5f};
 
 	WorldTransformUpdate(worldTransform_);
 }
@@ -34,8 +34,6 @@ void JumpHopper::Update(Player* player) {
 	WorldTransformUpdate(worldTransform_);
 }
 
-
-
 void JumpHopper::Draw() { model_->Draw(worldTransform_, *camera_); }
 
 bool JumpHopper::CheckCollision(Player* player) {
@@ -59,7 +57,6 @@ void JumpHopper::Activate(Player* player) {
 	if (cooldown_)
 		return;
 
-	// ★ 落下中（下向き）だけ
 	if (player->GetVelocity().y <= 0.0f) {
 
 		auto v = player->GetVelocity();

@@ -5,6 +5,7 @@
 #include <vector>
 #include "PlayerBullet.h"
 #include <memory>
+#include"InhaleEffect.h"
 using namespace KamataEngine;
 
 class MapChipField;
@@ -57,6 +58,8 @@ public:
 
 	void StopInhale();
 
+	int GetHp() const { return hp_; }
+	int GetMaxHp() const { return maxHp_; }
 
 
 private:
@@ -168,6 +171,7 @@ private:
 	void StartDeath();
 	float EaseOutCubic(float t);
 	int hp_ = 3;
+	int maxHp_ = 3;
 	bool invincible_ = false;
 	bool visible_ = true;
 	float invincibleTimer_ = 0.0f;
@@ -185,9 +189,20 @@ private:
 	Model* bulletModel_ = nullptr;
 	void Shoot();
 
+
+
+
+	InhaleEffect inhaleEffect_;
+
 public:
+	bool IsInvincible() const { return invincible_; }
+	float GetInvincibleTimer() const { return invincibleTimer_; }
+
 	std::list<std::unique_ptr<PlayerBullet>>& GetBullets() { return bullets_; }
 
 
 	const HitBox& GetInhaleHitBox() const { return inhaleHitBox_; }
+
+public:
+	InhaleEffect* GetInhaleEffect() { return &inhaleEffect_; }
 };

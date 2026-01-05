@@ -111,10 +111,12 @@
     <ClCompile Include="ClearScene.cpp" />
     <ClCompile Include="Coin.cpp" />
     <ClCompile Include="EnemyBase.cpp" />
+    <ClCompile Include="EnemyFlyer.cpp" />
     <ClCompile Include="Fade.cpp" />
     <ClCompile Include="GameOverScene.cpp" />
     <ClCompile Include="GameScene.cpp" />
     <ClCompile Include="Goal.cpp" />
+    <ClCompile Include="InhaleEffect.cpp" />
     <ClCompile Include="jumpHopper.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MapChipField.cpp" />
@@ -208,10 +210,12 @@
     <ClInclude Include="ClearScene.h" />
     <ClInclude Include="Coin.h" />
     <ClInclude Include="EnemyBase.h" />
+    <ClInclude Include="EnemyFlyer.h" />
     <ClInclude Include="Fade.h" />
     <ClInclude Include="GameOverScene.h" />
     <ClInclude Include="GameScene.h" />
     <ClInclude Include="Goal.h" />
+    <ClInclude Include="InhaleEffect.h" />
     <ClInclude Include="jumpHopper.h" />
     <ClInclude Include="MapChipField.h" />
     <ClInclude Include="Math.h" />

@@ -25,10 +25,10 @@ void Player::Initialize(Model* model, Camera* camera, const Vector3& position) {
 
 	camera_ = camera;
 
-
-
 	bulletModel_ = Model::CreateFromOBJ("spike", true);
-	
+
+	inhaleEffect_.Initialize();
+
 }
 void Player::Shoot() {
 
@@ -171,6 +171,7 @@ void Player::Update() {
 		}
 	}
 
+	inhaleEffect_.Update(worldTransform_.translation_, state_ == PlayerState::Inhale);
 	bobbingTime_ += 0.1f;
 	worldTransform_.scale_.y = baseScale + sin(bobbingTime_) * 0.2f;
 	//==========================
@@ -309,10 +310,13 @@ void Player::Draw() {
 	if (visible_) {
 		model_->Draw(worldTransform_, *camera_);
 	}
-
+	
 	for (auto& b : bullets_) {
 		b->Draw(camera_);
 	}
+	
+	
+	
 }
 
 void Player::OnCollision(Coin* coin) {
@@ -594,7 +598,7 @@ void Player::UpdateOnGround(const CollisionMapInfo& info) {
 
 	} else {
 
-		// ★ 下から当たった時だけ着地扱い
+		// 下から当たった時だけ着地扱い
 		if (info.landing && velocity_.y <= 0.0f) {
 
 			onGround_ = true;

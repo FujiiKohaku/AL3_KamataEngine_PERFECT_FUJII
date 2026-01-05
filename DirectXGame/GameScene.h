@@ -14,6 +14,9 @@
 
 #include "JumpHopper.h"
 #include "WalkEnemy.h"
+#include"EnemyFlyer.h"
+
+#include "InhaleEffect.h"
 // ゲームシーン
 class GameScene {
 public:
@@ -124,6 +127,7 @@ private:
 	//---------------
 	std::vector<EnemyBase*> enemies_;
 
+
 	// map
 	std::string mapCsvPath_ = "Resources/map/blocks.csv";
 
@@ -135,4 +139,14 @@ private:
 
 	std::vector<JumpHopper*> jumpHoppers_;
 	Model* jumpHopperModel_ = nullptr;
+
+	uint32_t textureFullHp_ = 0;
+	uint32_t textureEmptyHp_ = 0;
+	Sprite* heartFull_ = nullptr;
+	Sprite* heartEmpty_ = nullptr;
+	std::vector<Sprite*> heartsFull_;
+	std::vector<Sprite*> heartsEmpty_;
+
+
+
 };

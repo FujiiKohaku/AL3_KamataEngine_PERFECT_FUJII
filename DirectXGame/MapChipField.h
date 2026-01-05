@@ -15,6 +15,7 @@ enum class MapChipType {
 	kSpike,   // トゲzz
 	kEnemy,   // 敵
 	kJumpPad, // ジャンプ台
+	kEnemyFlyer, // 飛行型エネミー
 };
 
 // マップ全体のデータ構造
