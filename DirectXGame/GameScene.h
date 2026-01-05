@@ -12,6 +12,7 @@
 #include "Spike.h"
 #include <vector>
 
+#include "JumpHopper.h"
 #include "WalkEnemy.h"
 // ゲームシーン
 class GameScene {
@@ -40,7 +41,7 @@ public:
 	void CreateSpikesFromMap();
 
 	void CreateEnemiesFromMap();
-
+	void CreateJumpHoppersFromMap();
 	bool IsHitPlayerEnemy(Player* player, EnemyBase* enemy);
 	void SetMapCsvPath(const std::string& path) { mapCsvPath_ = path; }
 	void UpdateCoins();
@@ -131,4 +132,7 @@ private:
 	uint32_t textureHandleExp_ = 0;
 
 	Sprite* explanationSprite_ = nullptr;
+
+	std::vector<JumpHopper*> jumpHoppers_;
+	Model* jumpHopperModel_ = nullptr;
 };

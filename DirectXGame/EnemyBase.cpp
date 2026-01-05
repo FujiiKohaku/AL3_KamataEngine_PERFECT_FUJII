@@ -68,14 +68,14 @@ void EnemyBase::UpdatePulled() {
 }
 void EnemyBase::StartDying() {
 	state_ = State::Dying;
-	deathTimer_ = 0.5f; // 演出時間(秒) 好きに調整
+	deathTimer_ = 0.5f; 
 }
 void EnemyBase::UpdateDying() {
 
 	deathTimer_ -= 1.0f / 60.0f;
 
 	// ふわっと上に / 回転
-	worldTransform_.translation_.y += 0.03f;
+	worldTransform_.translation_.y -= 0.03f;
 	worldTransform_.rotation_.z += 0.2f;
 	worldTransform_.scale_ *= 0.95f;
 

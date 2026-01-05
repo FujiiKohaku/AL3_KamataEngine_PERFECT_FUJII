@@ -39,7 +39,7 @@ public:
 
 	// 02_06スライド28枚目で追加
 	const Vector3& GetVelocity() const { return velocity_; }
-
+	void SetVelocity(const Vector3& velocity) { velocity_ = velocity; }
 	// 02_07 スライド4枚目
 	void SetMapChipField(MapChipField* mapChipField) { mapChipField_ = mapChipField; }
 	bool IsDead() const { return deathState_ == DeathState::DeadFinish; }
@@ -56,6 +56,8 @@ public:
 	void StartInhale();
 
 	void StopInhale();
+
+
 
 private:
 	struct HitBox {

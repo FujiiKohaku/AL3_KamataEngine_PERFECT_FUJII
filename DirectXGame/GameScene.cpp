@@ -34,6 +34,11 @@ GameScene::~GameScene() {
 	for (auto* enemy : enemies_) {
 		delete enemy;
 	}
+	for (auto* h : jumpHoppers_) {
+		delete h;
+	}
+	jumpHoppers_.clear();
+
 	enemies_.clear();
 	worldTransformBlocks_.clear();
 }
@@ -103,6 +108,10 @@ void GameScene::Initialize() {
 	//-----------------
 	textureHandleExp_ = TextureManager::Load("settingmoce.png");
 	explanationSprite_ = Sprite::Create(textureHandleExp_, {0.0});
+
+	// ジャンプ台
+	jumpHopperModel_ = Model::CreateFromOBJ("axis", true);
+	CreateJumpHoppersFromMap();
 }
 
 // 更新
@@ -122,6 +131,24 @@ void GameScene::Update() {
 			WorldTransformUpdate(*block);
 		}
 	}
+
+	// -----------------------
+	// ジャンプホッパー更新
+	// -----------------------
+	for (auto* h : jumpHoppers_) {
+
+		if (h->CheckCollision(player_)) {
+			h->Activate(player_);
+		}
+
+		h->Update();
+	}
+
+
+
+
+
+
 
 #ifdef _DEBUG
 	if (Input::GetInstance()->TriggerKey(DIK_C)) {
@@ -221,7 +248,7 @@ void GameScene::Update() {
 			if (dist < enemy->GetRadius() + bullet.GetRadius()) {
 
 				bullet.Kill();
-				enemy->StartDying();  
+				enemy->StartDying();
 				break;
 			}
 		}
@@ -279,7 +306,10 @@ void GameScene::Draw() {
 	}
 
 	goal_->Draw(camera_);
-
+	// ホッパー
+	for (auto* h : jumpHoppers_) {
+		h->Draw();
+	}
 	for (auto* coin : coins_) {
 		if (IsNearPlayer(coin->GetPosition(), 20.0f)) {
 			coin->Draw(camera_);
@@ -330,6 +360,24 @@ void GameScene::CreateBlocksFromMap() {
 				worldTransformBlocks_[i][j] = worldTransform;
 			} else {
 				worldTransformBlocks_[i][j] = nullptr;
+			}
+		}
+	}
+}
+// マップからジャンプ台を生成
+void GameScene::CreateJumpHoppersFromMap() {
+
+	for (uint32_t y = 0; y < mapChipField_->GetNumBlockVirtical(); y++) {
+		for (uint32_t x = 0; x < mapChipField_->GetNumBlockHorizontal(); x++) {
+
+			if (mapChipField_->GetMapChipTypeByIndex(x, y) == MapChipType::kJumpPad) {
+
+				Vector3 pos = mapChipField_->GetMapChipPositionbyIndex(x, y);
+
+				JumpHopper* hopper = new JumpHopper();
+				hopper->Initialize(jumpHopperModel_, camera_, pos, 1.0f);
+
+				jumpHoppers_.push_back(hopper);
 			}
 		}
 	}

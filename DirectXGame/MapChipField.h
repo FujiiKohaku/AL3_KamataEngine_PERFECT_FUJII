@@ -8,12 +8,13 @@
 
 // マップチップの種類
 enum class MapChipType {
-	kBlank, // 空白
-	kBlock, // ブロック
-	kGoal,  // ゴール
-	kCoin,  // コイン
-	kSpike, // トゲzz
-	kEnemy, // 敵	
+	kBlank,   // 空白
+	kBlock,   // ブロック
+	kGoal,    // ゴール
+	kCoin,    // コイン
+	kSpike,   // トゲzz
+	kEnemy,   // 敵
+	kJumpPad, // ジャンプ台
 };
 
 // マップ全体のデータ構造
