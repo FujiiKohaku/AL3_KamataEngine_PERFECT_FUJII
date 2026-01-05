@@ -110,7 +110,7 @@ void GameScene::Initialize() {
 	explanationSprite_ = Sprite::Create(textureHandleExp_, {0.0});
 
 	// ジャンプ台
-	jumpHopperModel_ = Model::CreateFromOBJ("axis", true);
+	jumpHopperModel_ = Model::CreateFromOBJ("block", true);
 	CreateJumpHoppersFromMap();
 }
 
@@ -137,11 +137,9 @@ void GameScene::Update() {
 	// -----------------------
 	for (auto* h : jumpHoppers_) {
 
-		if (h->CheckCollision(player_)) {
-			h->Activate(player_);
-		}
+	
 
-		h->Update();
+		h->Update(player_);
 	}
 
 
@@ -375,7 +373,7 @@ void GameScene::CreateJumpHoppersFromMap() {
 				Vector3 pos = mapChipField_->GetMapChipPositionbyIndex(x, y);
 
 				JumpHopper* hopper = new JumpHopper();
-				hopper->Initialize(jumpHopperModel_, camera_, pos, 1.0f);
+				hopper->Initialize(jumpHopperModel_, camera_, pos, 0.3f);
 
 				jumpHoppers_.push_back(hopper);
 			}
