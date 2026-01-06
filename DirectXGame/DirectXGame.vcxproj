@@ -108,6 +108,7 @@
   <ItemGroup>
     <ClCompile Include="BreakBlock.cpp" />
     <ClCompile Include="CameraController.cpp" />
+    <ClCompile Include="ChaserEnemy.cpp" />
     <ClCompile Include="ClearScene.cpp" />
     <ClCompile Include="Coin.cpp" />
     <ClCompile Include="EnemyBase.cpp" />
@@ -207,6 +208,7 @@
   <ItemGroup>
     <ClInclude Include="BreakBlock.h" />
     <ClInclude Include="CameraController.h" />
+    <ClInclude Include="ChaserEnemy.h" />
     <ClInclude Include="ClearScene.h" />
     <ClInclude Include="Coin.h" />
     <ClInclude Include="EnemyBase.h" />

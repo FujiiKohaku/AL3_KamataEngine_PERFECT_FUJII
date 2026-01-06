@@ -17,6 +17,8 @@
 #include"EnemyFlyer.h"
 
 #include "InhaleEffect.h"
+
+#include "ChaserEnemy.h"
 // ゲームシーン
 class GameScene {
 public:

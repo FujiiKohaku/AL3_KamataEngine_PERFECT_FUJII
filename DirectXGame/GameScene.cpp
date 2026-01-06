@@ -69,8 +69,7 @@ void GameScene::Initialize() {
 	CreateCoinsFromMap();
 	// トゲ生成
 	CreateSpikesFromMap();
-	// 敵生成
-	CreateEnemiesFromMap();
+
 	//------------------
 	// プレイヤー関連
 	//------------------
@@ -83,6 +82,10 @@ void GameScene::Initialize() {
 	player_ = new Player();
 	player_->Initialize(model_, camera_, pos_);
 	player_->SetMapChipField(mapChipField_);
+
+
+		// 敵生成
+	CreateEnemiesFromMap();
 	//------------------
 	// スカイドーム
 	//------------------
@@ -464,35 +467,43 @@ void GameScene::CreateSpikesFromMap() {
 
 void GameScene::CreateEnemiesFromMap() {
 
-    for (uint32_t i = 0; i < mapChipField_->GetNumBlockVirtical(); ++i) {
-        for (uint32_t j = 0; j < mapChipField_->GetNumBlockHorizontal(); ++j) {
+	for (uint32_t i = 0; i < mapChipField_->GetNumBlockVirtical(); ++i) {
+		for (uint32_t j = 0; j < mapChipField_->GetNumBlockHorizontal(); ++j) {
 
-            auto type = mapChipField_->GetMapChipTypeByIndex(j, i);
+			auto type = mapChipField_->GetMapChipTypeByIndex(j, i);
+			Vector3 pos = mapChipField_->GetMapChipPositionbyIndex(j, i);
 
-            Vector3 pos = mapChipField_->GetMapChipPositionbyIndex(j, i);
+			switch (type) {
 
-            switch (type) {
+			case MapChipType::kEnemy: {
+				auto enemy = new WalkEnemy();
+				enemy->Initialize(Model::CreateFromOBJ("CircleEnemy"), pos);
+				enemies_.push_back(enemy);
+				break;
+			}
 
-            case MapChipType::kEnemy: {
-                EnemyBase* enemy = new WalkEnemy();
-                enemy->Initialize(Model::CreateFromOBJ("CircleEnemy"), pos);
-                enemies_.push_back(enemy);
-                break;
-            }
+			case MapChipType::kEnemyFlyer: {
+				auto enemy = new EnemyFlyer();
+				enemy->Initialize(Model::CreateFromOBJ("CircleEnemy"), pos);
+				enemies_.push_back(enemy);
+				break;
+			}
 
-            case MapChipType::kEnemyFlyer: {
-                EnemyBase* enemy = new EnemyFlyer();
-                enemy->Initialize(Model::CreateFromOBJ("CircleEnemy"), pos);
-                enemies_.push_back(enemy);
-                break;
-            }
+		
+			case MapChipType::kEnemyChaser: {
+				auto enemy = new ChaserEnemy();
+				enemy->Initialize(Model::CreateFromOBJ("CircleEnemy"), pos, player_);
+				enemies_.push_back(enemy);
+				break;
+			}
 
-            default:
-                break;
-            }
-        }
-    }
+			default:
+				break;
+			}
+		}
+	}
 }
+
 
 #pragma region コイン処理
 void GameScene::UpdateCoins() {
