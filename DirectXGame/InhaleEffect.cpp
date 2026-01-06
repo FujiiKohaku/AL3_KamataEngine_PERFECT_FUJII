@@ -3,7 +3,7 @@
 #include <cmath>
 
 void InhaleEffect::Initialize() {
-	model_ = Model::CreateFromOBJ("Coin", true);
+	model_ = Model::CreateFromOBJ("vacuumParticle", true);
 
 	// 余裕を持って確保（再配置対策）
 	particles_.reserve(256);
@@ -25,7 +25,7 @@ void InhaleEffect::Update(const Vector3& center, bool active) {
 			p->life = 0.2f;
 
 			p->wt.Initialize();
-			p->wt.scale_ = {0.25f, 0.25f, 0.25f};
+			p->wt.scale_ = {0.1f, 0.1f, 0.1f};
 
 			particles_.push_back(std::move(p));
 		}

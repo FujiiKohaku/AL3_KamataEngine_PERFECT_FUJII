@@ -13,7 +13,7 @@ void EnemyFlyer::UpdateNormal() {
 
 	// 円運動（XZ）
 	worldTransform_.translation_.x = center_.x + std::cos(timer_) * radius_;
-	worldTransform_.translation_.z = center_.z + std::sin(timer_) * radius_;
+	
 
 	// 上下ふわふわ
 	worldTransform_.translation_.y = center_.y + std::sin(timer_ * 2.0f) * height_;
