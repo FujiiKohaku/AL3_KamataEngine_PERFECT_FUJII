@@ -49,4 +49,7 @@ private:
 
 	Model* modelB_;
 	WorldTransform worldTransformB_;
+
+	uint32_t bgmHandle_ = 0;
+	uint32_t playBgmHandle_ = 0;
 };

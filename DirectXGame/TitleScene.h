@@ -25,4 +25,11 @@ private:
 	//---------------
 	Skydome* skydome_ = nullptr;
 	Model* modelSkydome_ = nullptr;
+
+
+	// Audio
+	uint32_t bgmHandle_ = 0;
+	uint32_t bgmPlayHandle_ = 0;
+
+	Sprite* seSprite_ = nullptr;
 };

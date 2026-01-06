@@ -17,6 +17,13 @@ void GameOverScene::Initialize() {
 	camera_.Initialize();
 	camera_.translation_ = {0.0f, 0.0f, -15.0f};
 	camera_.UpdateMatrix();
+
+	BgmHandle_ = Audio::GetInstance()->LoadWave("gameover.mp3");
+	Audio::GetInstance()->PlayWave(BgmHandle_);
+	modelSkydome_ = Model::CreateFromOBJ("skydome", true);
+	skydome_ = new Skydome();
+	skydome_->Initialize(modelSkydome_, &camera_);
+	deadSprite_ = Sprite::Create(TextureManager::Load("dead.png"), {400.0f, 0.0f});
 }
 
 void GameOverScene::Update() {
@@ -27,7 +34,7 @@ void GameOverScene::Update() {
 
 	// モデルをゆっくり回転
 	worldTransform_.rotation_.y += 0.01f;
-
+	skydome_->Update();
 	// 行列更新
 	WorldTransformUpdate(worldTransform_);
 	camera_.UpdateMatrix();
@@ -45,7 +52,11 @@ void GameOverScene::Draw() {
 	if (model_) {
 		model_->Draw(worldTransform_, camera_);
 	}
-
+	skydome_->Draw();
 	// 3D描画終了
 	Model::PostDraw();
+
+	Sprite::PreDraw(commandList);
+	deadSprite_->Draw();
+	Sprite::PostDraw();
 }

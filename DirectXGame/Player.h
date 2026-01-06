@@ -194,6 +194,8 @@ private:
 
 	InhaleEffect inhaleEffect_;
 
+	uint32_t shotSeHandle_ = 0;
+
 public:
 	bool IsInvincible() const { return invincible_; }
 	float GetInvincibleTimer() const { return invincibleTimer_; }

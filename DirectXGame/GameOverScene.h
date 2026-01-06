@@ -1,7 +1,6 @@
 #pragma once
 #include "KamataEngine.h"
-
-
+#include "Skydome.h"
 // ゲームオーバーシーン
 class GameOverScene {
 public:
@@ -23,4 +22,14 @@ private:
 	KamataEngine::Model* model_ = nullptr;
 	KamataEngine::WorldTransform worldTransform_;
 	KamataEngine::Camera camera_;
+	//---------------
+	// skydome
+	//---------------
+	Skydome* skydome_ = nullptr;
+	Model* modelSkydome_ = nullptr;
+
+	uint32_t BgmHandle_ = 0;
+
+	
+	Sprite* deadSprite_ = nullptr;
 };

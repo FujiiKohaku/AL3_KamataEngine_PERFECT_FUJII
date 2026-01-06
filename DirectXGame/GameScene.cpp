@@ -41,6 +41,8 @@ GameScene::~GameScene() {
 
 	enemies_.clear();
 	worldTransformBlocks_.clear();
+
+	
 }
 
 // 初期化
@@ -83,8 +85,7 @@ void GameScene::Initialize() {
 	player_->Initialize(model_, camera_, pos_);
 	player_->SetMapChipField(mapChipField_);
 
-
-		// 敵生成
+	// 敵生成
 	CreateEnemiesFromMap();
 	//------------------
 	// スカイドーム
@@ -123,26 +124,21 @@ void GameScene::Initialize() {
 		heartsFull_.push_back(Sprite::Create(textureFullHp_, {0, 0}));
 		heartsEmpty_.push_back(Sprite::Create(textureEmptyHp_, {0, 0}));
 	}
+
+	BgmHandle_ = Audio::GetInstance()->LoadWave("gameScene.mp3");
+	bgmPlayHandle_= Audio::GetInstance()->PlayWave(BgmHandle_,true,0.5f);
+
+	AttackSEHandle_ = Audio::GetInstance()->LoadWave("Attack.mp3");
+	coinSEHandle_ = Audio::GetInstance()->LoadWave("coin.mp3");
 }
 
-// 更新
+// 更新 
 void GameScene::Update() {
 	player_->Update();
 	skydome_->Update();
 	fade_.Update();
-	//// -----------------------
-	//// ブロック更新
-	//// -----------------------
-	// for (auto& blockLine : worldTransformBlocks_) {
-	//	for (auto* block : blockLine) {
 
-	//		if (!block)
-	//			continue; //  nullチェック
 
-	//		WorldTransformUpdate(*block);
-	//	}
-	//}
-	// WorldTransformUpdate(worldTransformBlocks_);
 	// -----------------------
 	// ジャンプホッパー更新
 	// -----------------------
@@ -219,11 +215,18 @@ void GameScene::Update() {
 		// ===============================
 		//  体にぶつかったときの判定（今まで通り）
 		// ===============================
-		if (IsHitPlayerEnemy(player_, enemy)) {
+		if (!player_->IsDead() && IsHitPlayerEnemy(player_, enemy)) {
+
+			if (player_->IsDead()) {
+				return;
+			}
+			if (player_->IsInvincible()) return;
 
 			player_->OnCollision(enemy);
 			enemy->OnCollision(player_);
+			Audio::GetInstance()->PlayWave(AttackSEHandle_);
 		}
+
 	}
 
 	for (auto& bulletPtr : player_->GetBullets()) {
@@ -261,6 +264,7 @@ void GameScene::Update() {
 	// -----------------------
 	if (goal_->CheckCollision(player_)) {
 		player_->OnCollision(goal_);
+		Audio::GetInstance()->StopWave(bgmPlayHandle_);
 	}
 
 	// -----------------------
@@ -268,6 +272,7 @@ void GameScene::Update() {
 	// -----------------------
 	if (player_->IsDead()) {
 		isGameOver_ = true;
+		Audio::GetInstance()->StopWave(bgmPlayHandle_);
 	}
 	// -----------------------
 	// プレイヤークリアチェック
@@ -275,6 +280,7 @@ void GameScene::Update() {
 
 	if (player_->IsGoal()) {
 		finished_ = true;
+		Audio::GetInstance()->StopWave(bgmPlayHandle_);
 	}
 
 	// -----------------------
@@ -327,8 +333,6 @@ void GameScene::Draw() {
 	Model::PostDraw();
 
 	fade_.Draw();
-	
-	
 
 	Sprite::PreDraw(dx->GetCommandList());
 	// Sprite
@@ -337,13 +341,11 @@ void GameScene::Draw() {
 	int hp = player_->GetHp();
 	int maxHp = 3; // 後で変数にする
 
-
-
 	// 無敵なら点滅タイミングを計算
 	bool flash = false;
 	if (player_->IsInvincible()) {
 		float t = player_->GetInvincibleTimer();
-		flash = (fmodf(t, 0.2f) < 0.1f); 
+		flash = (fmodf(t, 0.2f) < 0.1f);
 	}
 
 	for (int i = 0; i < maxHp; i++) {
@@ -489,7 +491,6 @@ void GameScene::CreateEnemiesFromMap() {
 				break;
 			}
 
-		
 			case MapChipType::kEnemyChaser: {
 				auto enemy = new ChaserEnemy();
 				enemy->Initialize(Model::CreateFromOBJ("CircleEnemy"), pos, player_);
@@ -503,7 +504,6 @@ void GameScene::CreateEnemiesFromMap() {
 		}
 	}
 }
-
 
 #pragma region コイン処理
 void GameScene::UpdateCoins() {
@@ -523,12 +523,15 @@ void GameScene::UpdateCoins() {
 
 			if (dist < hb.radius) {
 				coin->StartPulled(player_);
+				
 			}
+		
 		}
 		// 直ぶつかり
 		if (coin->CheckCollision(player_)) {
 			coin->Collect();            // ← 直接取得！
 			player_->OnCollision(coin); // スコア加算だけ
+			Audio::GetInstance()->PlayWave(coinSEHandle_);
 		}
 	}
 }

@@ -29,6 +29,7 @@ void Player::Initialize(Model* model, Camera* camera, const Vector3& position) {
 
 	inhaleEffect_.Initialize();
 
+	shotSeHandle_ = Audio::GetInstance()->LoadWave("shoot.wav");
 }
 void Player::Shoot() {
 
@@ -159,6 +160,7 @@ void Player::InputMove() {
 void Player::Update() {
 	if (Input::GetInstance()->TriggerKey(DIK_R)) {
 		Shoot();
+		Audio::GetInstance()->PlayWave(shotSeHandle_,false,1.0f);
 	}
 	for (auto it = bullets_.begin(); it != bullets_.end();) {
 

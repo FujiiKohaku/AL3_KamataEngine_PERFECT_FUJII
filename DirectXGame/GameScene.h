@@ -12,9 +12,9 @@
 #include "Spike.h"
 #include <vector>
 
+#include "EnemyFlyer.h"
 #include "JumpHopper.h"
 #include "WalkEnemy.h"
-#include"EnemyFlyer.h"
 
 #include "InhaleEffect.h"
 
@@ -129,7 +129,6 @@ private:
 	//---------------
 	std::vector<EnemyBase*> enemies_;
 
-
 	// map
 	std::string mapCsvPath_ = "Resources/map/blocks.csv";
 
@@ -149,6 +148,11 @@ private:
 	std::vector<Sprite*> heartsFull_;
 	std::vector<Sprite*> heartsEmpty_;
 
+	uint32_t BgmHandle_ = 0;
 
+	uint32_t bgmPlayHandle_ = 0;
 
+	uint32_t AttackSEHandle_ = 0;
+
+	uint32_t coinSEHandle_ = 0;
 };

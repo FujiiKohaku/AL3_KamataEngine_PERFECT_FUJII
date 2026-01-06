@@ -53,6 +53,11 @@ void SceneSelectScene::Initialize() {
 	worldTransformB_.translation_.z = -30.0f;
 	worldTransformB_.translation_.y = 0.0f;
 	worldTransformB_.translation_.x = 6.0f;
+
+
+	bgmHandle_ = KamataEngine::Audio::GetInstance()->LoadWave("selectBgm.mp3");
+	playBgmHandle_= Audio::GetInstance()->PlayWave(bgmHandle_, true);
+
 }
 
 void SceneSelectScene::Update() {
@@ -76,6 +81,7 @@ void SceneSelectScene::Update() {
 	if (KamataEngine::Input::GetInstance()->TriggerKey(DIK_SPACE)) {
 		selectedStagePath_ = stagePaths_[selectedIndex_];
 		isFinished_ = true;
+		Audio::GetInstance()->StopWave(playBgmHandle_);
 	}
 	for (int i = 0; i < 3; i++) {
 		// target
