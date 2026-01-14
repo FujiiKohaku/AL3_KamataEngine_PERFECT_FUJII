@@ -18,8 +18,8 @@ private:
 	WorldTransform worldTransformTitle_;
 	Camera camera_;
 	//タイトルロゴ
-	Model* modelGuru_ = nullptr;
-	WorldTransform worldTransformGuruGuru_;
+	WorldTransform worldTransformLogo_;
+	Sprite* titleSprite_ = nullptr;
 	//---------------
 	// skydome
 	//---------------

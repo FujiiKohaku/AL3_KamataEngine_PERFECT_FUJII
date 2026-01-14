@@ -10,9 +10,8 @@ void TitleScene::Initialize() {
 	modelTitle_ = Model::CreateFromOBJ("pushSpace", true);
 	worldTransformTitle_.Initialize();
 	worldTransformTitle_.rotation_.x = std::numbers::pi_v<float> / 2.0f;
-
 	worldTransformTitle_.rotation_.y = std::numbers::pi_v<float>;
-
+	worldTransformTitle_.translation_.y = -4.0f;
 	// カメラ初期化
 	camera_.Initialize();
 	camera_.translation_ = {0.0f, 0.0f, -15.0f};
@@ -20,13 +19,18 @@ void TitleScene::Initialize() {
 	// Initialize
 	basePos_ = worldTransformTitle_.translation_;
 
-	modelGuru_ = Model::CreateFromOBJ("guruguru", true);
-	worldTransformGuruGuru_.Initialize();
-	worldTransformGuruGuru_.rotation_.x = std::numbers::pi_v<float> / 2.0f;
-	worldTransformGuruGuru_.rotation_.y = std::numbers::pi_v<float>;
-	worldTransformGuruGuru_.scale_ = {2.0f, 2.0f, 2.0f};
-	worldTransformGuruGuru_.translation_.y = 2.0f;
-	worldTransformGuruGuru_.translation_.z = -5.0f;
+
+
+	titleSprite_ = Sprite::Create(TextureManager::Load("title.png"), {-100.0f, -170.0f});
+	worldTransformLogo_.Initialize();
+	worldTransformLogo_.rotation_.x = std::numbers::pi_v<float> / 2.0f;
+	worldTransformLogo_.rotation_.y = std::numbers::pi_v<float>;
+	worldTransformLogo_.scale_ = {0.5f, 0.5f, 0.5f};
+	worldTransformLogo_.translation_.y = 2.0f;
+	worldTransformLogo_.translation_.z = -5.0f;
+	WorldTransformUpdate(worldTransformLogo_);
+
+
 
 	modelSkydome_ = Model::CreateFromOBJ("skydome", true);
 	skydome_ = new Skydome();
@@ -46,13 +50,10 @@ void TitleScene::Update() {
 	// Update
 	animTime_ += 0.05f;
 	// 移動する対象　= 移動する対象の初期位置+ sin(対象を上下に)* 上下する幅
-	worldTransformTitle_.translation_.y = basePos_.y + std::sinf(animTime_) * 0.3f;
-	worldTransformGuruGuru_.rotation_.x += 0.02f;
-	worldTransformGuruGuru_.rotation_.y += 0.03f;
-	worldTransformGuruGuru_.rotation_.z += 0.01f;
+
 	// 行列更新
 	WorldTransformUpdate(worldTransformTitle_);
-	WorldTransformUpdate(worldTransformGuruGuru_);
+	WorldTransformUpdate(worldTransformLogo_);
 	camera_.UpdateMatrix();
 
 	skydome_->Update();
@@ -70,13 +71,12 @@ void TitleScene::Draw() {
 
 	// モデル描画
 	modelTitle_->Draw(worldTransformTitle_, camera_);
-	modelGuru_->Draw(worldTransformGuruGuru_, camera_);
 	skydome_->Draw();
 	// 描画終了
 	Model::PostDraw();
 
 	Sprite::PreDraw(dxCommon->GetCommandList());
-
+	titleSprite_->Draw();
 	seSprite_->Draw();
 	Sprite::PostDraw();
 }
