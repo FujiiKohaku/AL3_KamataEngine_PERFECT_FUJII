@@ -1,22 +1,23 @@
 #pragma once
 #include "BreakBlock.h"
 #include "CameraController.h"
+#include "ChaserEnemy.h"
 #include "Coin.h"
 #include "EnemyBase.h"
+#include "EnemyFlyer.h"
 #include "Fade.h"
 #include "Goal.h"
+#include "InhaleEffect.h"
+#include "JumpHopper.h"
 #include "KamataEngine.h"
 #include "MapChipField.h"
 #include "Player.h"
 #include "Skydome.h"
 #include "Spike.h"
-#include <vector>
-#include "EnemyFlyer.h"
-#include "JumpHopper.h"
-#include "WalkEnemy.h"
-#include "InhaleEffect.h"
-#include "ChaserEnemy.h"
 #include "StageState.h"
+#include "WalkEnemy.h"
+#include <numbers>
+#include <vector>
 class GameScene {
 public:
 	// 初期化
@@ -152,8 +153,7 @@ private:
 
 	uint32_t coinSEHandle_ = 0;
 
-	//チュートリアル看板
+	// チュートリアル看板
 	Model* tutorialSignModel_ = nullptr;
 	WorldTransform worldTransformTutorialSign_;
-
 };

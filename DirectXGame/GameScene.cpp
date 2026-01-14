@@ -45,20 +45,24 @@ GameScene::~GameScene() {
 
 // 初期化
 void GameScene::Initialize() {
-	switch (stageState_) {
-	case StageState::Tutorial:
-		//チュートリアル看板
-		//tutorialSignModel_ = Model::CreateFromOBJ("TutorialSign", true);
-		
+	//switch (stageState_) {
+	//case StageState::Tutorial:
+	//	//チュートリアル看板
+	//	tutorialSignModel_ = Model::CreateFromOBJ("kanban", true);
+	//	worldTransformTutorialSign_.Initialize();
 
-		break;
-	case StageState::Stage1:
-		break;
-	case StageState::Stage2:
-		break;
-	default:
-		break;
-	}
+	//	break;
+	//case StageState::Stage1:
+	//	break;
+	//case StageState::Stage2:
+	//	break;
+	//default:
+	//	break;
+	//}
+	tutorialSignModel_ = Model::CreateFromOBJ("kanban", true);
+	worldTransformTutorialSign_.Initialize();
+	worldTransformTutorialSign_.translation_ = {5.0f, 0.0f, 5.0f};
+	worldTransformTutorialSign_.rotation_.y = -std::numbers::pi_v<float>/2.0f;
 	//------------------
 	// マップチップフィールド
 	//------------------
@@ -312,21 +316,14 @@ void GameScene::Update() {
 	// ImGui::Begin("gamePlayScene Debug");
 	// ImGui::Text("This is gamePlayScene!");
 	// ImGui::End();
+
+	//	チュートリアル看板
+	WorldTransformUpdate(worldTransformTutorialSign_);
 }
 
 // 描画
 void GameScene::Draw() {
-	switch (stageState_) {
-	case StageState::Tutorial:
 
-		break;
-	case StageState::Stage1:
-		break;
-	case StageState::Stage2:
-		break;
-	default:
-		break;
-	}
 
 	auto* dx = DirectXCommon::GetInstance();
 
@@ -343,7 +340,18 @@ void GameScene::Draw() {
 			modelBlock_->Draw(*block, *camera_, nullptr);
 		}
 	}
-
+	tutorialSignModel_->Draw(worldTransformTutorialSign_, *camera_, nullptr);
+	//switch (stageState_) {
+	//case StageState::Tutorial:
+	//	
+	//	break;
+	//case StageState::Stage1:
+	//	break;
+	//case StageState::Stage2:
+	//	break;
+	//default:
+	//	break;
+	//}
 	goal_->Draw(camera_);
 	// ホッパー
 	for (auto* h : jumpHoppers_) {
