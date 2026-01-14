@@ -136,7 +136,7 @@ void ChangeScene() {
 				break;
 			case Scene::kGame:
 				gameScene = new GameScene;
-				gameScene->SetMapCsvPath(selectedStagePath);
+				gameScene->SetMapCsvPath(selectedStagePath); 
 				gameScene->Initialize();
 				scene = Scene::kGame;
 				break;
