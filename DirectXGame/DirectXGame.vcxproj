@@ -127,6 +127,7 @@
     <ClCompile Include="SelectScene.cpp" />
     <ClCompile Include="Skydome.cpp" />
     <ClCompile Include="Spike.cpp" />
+    <ClCompile Include="StageState.cpp" />
     <ClCompile Include="TitleScene.cpp" />
     <ClCompile Include="WalkEnemy.cpp" />
   </ItemGroup>
@@ -226,6 +227,7 @@
     <ClInclude Include="SelectScene.h" />
     <ClInclude Include="Skydome.h" />
     <ClInclude Include="Spike.h" />
+    <ClInclude Include="StageState.h" />
     <ClInclude Include="TitleScene.h" />
     <ClInclude Include="WalkEnemy.h" />
   </ItemGroup>
