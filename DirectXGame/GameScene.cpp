@@ -152,7 +152,7 @@ void GameScene::Update() {
 	}
 #endif
 
-	if (isDebugCameraActive_) {
+	if (isDebugCameraActive_) { 
 		debugCamera_->Update();
 		camera_->matView = debugCamera_->GetCamera().matView;
 		camera_->matProjection = debugCamera_->GetCamera().matProjection;
