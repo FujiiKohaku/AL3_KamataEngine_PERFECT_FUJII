@@ -20,6 +20,8 @@
 
 #include "ChaserEnemy.h"
 // ゲームシーン
+#include "StageState.h"
+
 class GameScene {
 public:
 	// 初期化
@@ -52,7 +54,11 @@ public:
 	void UpdateCoins();
 	bool IsNearPlayer(const Vector3& pos, float range);
 
+	// セッター
+	void SetStageState(StageState state) { stageState_ = state; }
+
 private:
+	StageState stageState_ = StageState::Tutorial;
 	//============
 	// 状態管理
 	//============

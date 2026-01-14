@@ -6,6 +6,7 @@
 #include "TitleScene.h"
 #include "SelectScene.h"
 #include <Windows.h>
+#include "StageState.h"
 using namespace KamataEngine;
 
 //===================
@@ -36,6 +37,7 @@ Fade fade;
 bool isSceneChanging = false;
 std::string selectedStagePath = "";
 
+StageState selectedStage = StageState::Tutorial;
 //===================
 // シーン全削除関数
 //===================
@@ -84,7 +86,7 @@ void ChangeScene() {
 			if (selectScene->Finished()) {
 
 				selectedStagePath = selectScene->GetSelectedStagePath();
-
+				selectedStage = selectScene->GetSelectedStage();
 				fade.Start(Fade::Status::FadeOut, 1.0f);
 				isSceneChanging = true;
 				nextScene = Scene::kGame;
@@ -137,6 +139,7 @@ void ChangeScene() {
 			case Scene::kGame:
 				gameScene = new GameScene;
 				gameScene->SetMapCsvPath(selectedStagePath); 
+				gameScene->SetStageState(selectedStage);
 				gameScene->Initialize();
 				scene = Scene::kGame;
 				break;

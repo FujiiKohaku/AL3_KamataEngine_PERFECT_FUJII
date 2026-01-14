@@ -4,6 +4,8 @@
 using namespace KamataEngine;
 
 void SceneSelectScene::Initialize() {
+
+
 	selectedStagePath_.clear();
 	isFinished_ = false;
 	selectedIndex_ = 0;
@@ -84,6 +86,7 @@ void SceneSelectScene::Update() {
 	if (KamataEngine::Input::GetInstance()->TriggerKey(DIK_SPACE)) {
 		selectedStagePath_ = stagePaths_[selectedIndex_];
 		isFinished_ = true;
+		stageState_ = static_cast<StageState>(selectedIndex_);
 		Audio::GetInstance()->StopWave(playBgmHandle_);
 	}
 	for (int i = 0; i < 3; i++) {

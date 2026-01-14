@@ -2,6 +2,7 @@
 #include "KamataEngine.h"
 #include "Skydome.h"
 #include <string>
+#include "StageState.h"
 using namespace KamataEngine;
 
 class SceneSelectScene {
@@ -20,8 +21,10 @@ public:
 
 	// 選択されたステージCSVのパス
 	const std::string& GetSelectedStagePath() const;
+	StageState GetSelectedStage() const { return stageState_; }
 
 private:
+	StageState stageState_ = StageState::Tutorial;
 	bool isFinished_ = false;
 	std::string selectedStagePath_ = "";
 	std::vector<std::string> stagePaths_;

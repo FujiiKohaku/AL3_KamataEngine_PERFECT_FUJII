@@ -41,13 +41,21 @@ GameScene::~GameScene() {
 
 	enemies_.clear();
 	worldTransformBlocks_.clear();
-
-	
 }
 
 // 初期化
 void GameScene::Initialize() {
+	switch (stageState_) {
+	case StageState::Tutorial:
 
+		break;
+	case StageState::Stage1:
+		break;
+	case StageState::Stage2:
+		break;
+	default:
+		break;
+	}
 	//------------------
 	// マップチップフィールド
 	//------------------
@@ -126,18 +134,29 @@ void GameScene::Initialize() {
 	}
 
 	BgmHandle_ = Audio::GetInstance()->LoadWave("gameScene.mp3");
-	bgmPlayHandle_= Audio::GetInstance()->PlayWave(BgmHandle_,true,0.5f);
+	bgmPlayHandle_ = Audio::GetInstance()->PlayWave(BgmHandle_, true, 0.5f);
 
 	AttackSEHandle_ = Audio::GetInstance()->LoadWave("Attack.mp3");
 	coinSEHandle_ = Audio::GetInstance()->LoadWave("coin.mp3");
 }
 
-// 更新 
+// 更新
 void GameScene::Update() {
+
+	switch (stageState_) {
+	case StageState::Tutorial:
+
+		break;
+	case StageState::Stage1:
+		break;
+	case StageState::Stage2:
+		break;
+	default:
+		break;
+	}
 	player_->Update();
 	skydome_->Update();
 	fade_.Update();
-
 
 	// -----------------------
 	// ジャンプホッパー更新
@@ -152,7 +171,7 @@ void GameScene::Update() {
 	}
 #endif
 
-	if (isDebugCameraActive_) { 
+	if (isDebugCameraActive_) {
 		debugCamera_->Update();
 		camera_->matView = debugCamera_->GetCamera().matView;
 		camera_->matProjection = debugCamera_->GetCamera().matProjection;
@@ -220,13 +239,13 @@ void GameScene::Update() {
 			if (player_->IsDead()) {
 				return;
 			}
-			if (player_->IsInvincible()) return;
+			if (player_->IsInvincible())
+				return;
 
 			player_->OnCollision(enemy);
 			enemy->OnCollision(player_);
 			Audio::GetInstance()->PlayWave(AttackSEHandle_);
 		}
-
 	}
 
 	for (auto& bulletPtr : player_->GetBullets()) {
@@ -294,6 +313,17 @@ void GameScene::Update() {
 
 // 描画
 void GameScene::Draw() {
+	switch (stageState_) {
+	case StageState::Tutorial:
+
+		break;
+	case StageState::Stage1:
+		break;
+	case StageState::Stage2:
+		break;
+	default:
+		break;
+	}
 
 	auto* dx = DirectXCommon::GetInstance();
 
@@ -523,9 +553,7 @@ void GameScene::UpdateCoins() {
 
 			if (dist < hb.radius) {
 				coin->StartPulled(player_);
-				
 			}
-		
 		}
 		// 直ぶつかり
 		if (coin->CheckCollision(player_)) {
