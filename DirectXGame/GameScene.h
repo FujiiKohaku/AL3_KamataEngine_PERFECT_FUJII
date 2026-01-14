@@ -19,6 +19,8 @@
 #include "InhaleEffect.h"
 
 #include "ChaserEnemy.h"
+
+#include"SelectScene.h"
 // ゲームシーン
 class GameScene {
 public:
@@ -51,8 +53,10 @@ public:
 	void SetMapCsvPath(const std::string& path) { mapCsvPath_ = path; }
 	void UpdateCoins();
 	bool IsNearPlayer(const Vector3& pos, float range);
+	void SetStageState(StageState state) { stageState_ = state; }
 
 private:
+	StageState stageState_;
 	//============
 	// 状態管理
 	//============
@@ -155,4 +159,7 @@ private:
 	uint32_t AttackSEHandle_ = 0;
 
 	uint32_t coinSEHandle_ = 0;
+
+
+	
 };

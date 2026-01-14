@@ -130,10 +130,23 @@ void GameScene::Initialize() {
 
 	AttackSEHandle_ = Audio::GetInstance()->LoadWave("Attack.mp3");
 	coinSEHandle_ = Audio::GetInstance()->LoadWave("coin.mp3");
+
+	switch (stageState_) {
+	case StageState::Tutorial:
+		break;
+	case StageState::Stage1:
+		break;
+	case StageState::Stage2:
+		break;
+	default:
+		break;
+	}
 }
 
 // 更新 
 void GameScene::Update() {
+
+	
 	player_->Update();
 	skydome_->Update();
 	fade_.Update();
@@ -294,6 +307,20 @@ void GameScene::Update() {
 
 // 描画
 void GameScene::Draw() {
+
+switch (stageState_) {
+	case StageState::Stage1:
+		// Stage1 描画
+		break;
+
+	case StageState::Stage2:
+		// Stage2 描画
+		break;
+
+	case StageState::Tutorial:
+		// チュートリアル描画
+		break;
+	}
 
 	auto* dx = DirectXCommon::GetInstance();
 

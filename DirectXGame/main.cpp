@@ -138,6 +138,7 @@ void ChangeScene() {
 				gameScene = new GameScene;
 				gameScene->SetMapCsvPath(selectedStagePath);
 				gameScene->Initialize();
+				gameScene->SetStageState(selectScene->GetSelectedStage());
 				scene = Scene::kGame;
 				break;
 			case Scene::kGameOver:

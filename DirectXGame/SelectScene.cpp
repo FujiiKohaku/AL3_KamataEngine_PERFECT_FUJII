@@ -69,6 +69,7 @@ void SceneSelectScene::Update() {
 	// ← 上キー
 	if (KamataEngine::Input::GetInstance()->TriggerKey(DIK_A)) {
 		selectedIndex_--;
+		
 		if (selectedIndex_ < 0)
 			selectedIndex_ = (int)stagePaths_.size() - 1;
 	}
@@ -80,12 +81,24 @@ void SceneSelectScene::Update() {
 			selectedIndex_ = 0;
 	}
 
-	// SPACEで決定
-	if (KamataEngine::Input::GetInstance()->TriggerKey(DIK_SPACE)) {
-		selectedStagePath_ = stagePaths_[selectedIndex_];
+if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
+
+		switch (selectedIndex_) {
+		case 0:
+			stageState_ = StageState::Tutorial;
+			break;
+		case 1:
+			stageState_ = StageState::Stage1;
+			break;
+		case 2:
+			stageState_ = StageState::Stage2;
+			break;
+		}
+
 		isFinished_ = true;
 		Audio::GetInstance()->StopWave(playBgmHandle_);
 	}
+
 	for (int i = 0; i < 3; i++) {
 		// target
 		if (i == selectedIndex_) {
