@@ -11,17 +11,12 @@
 #include "Skydome.h"
 #include "Spike.h"
 #include <vector>
-
 #include "EnemyFlyer.h"
 #include "JumpHopper.h"
 #include "WalkEnemy.h"
-
 #include "InhaleEffect.h"
-
 #include "ChaserEnemy.h"
-// ゲームシーン
 #include "StageState.h"
-
 class GameScene {
 public:
 	// 初期化
@@ -103,13 +98,10 @@ private:
 	//---------------
 	// カメラコントローラー
 	//---------------
-
-	// カメラコントローラー
 	CameraController* cController_;
 	//---------------
 	// ゴール
 	//---------------
-
 	Goal* goal_ = nullptr;
 	//---------------
 	// コイン
@@ -134,12 +126,10 @@ private:
 	// エネミー
 	//---------------
 	std::vector<EnemyBase*> enemies_;
-
 	// map
 	std::string mapCsvPath_ = "Resources/map/blocks.csv";
 
 	// textureHandle
-
 	uint32_t textureHandleExp_ = 0;
 
 	Sprite* explanationSprite_ = nullptr;
@@ -161,4 +151,9 @@ private:
 	uint32_t AttackSEHandle_ = 0;
 
 	uint32_t coinSEHandle_ = 0;
+
+	//チュートリアル看板
+	Model* tutorialSignModel_ = nullptr;
+	WorldTransform worldTransformTutorialSign_;
+
 };

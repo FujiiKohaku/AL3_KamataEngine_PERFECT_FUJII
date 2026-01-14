@@ -133,7 +133,7 @@ void Player::InputMove() {
 
 	bool canJump = (jumpCount_ < jumpLimit);
 
-	if (canJump && Input::GetInstance()->TriggerKey(DIK_SPACE)) {
+	if (canJump && Input::GetInstance()->TriggerKey(DIK_W)) {
 
 		float jumpPower = kJumpAcceleration;
 
@@ -283,13 +283,20 @@ void Player::Update() {
 		}
 	}
 
-	bool now = Input::GetInstance()->PushKey(DIK_W);
+	bool now = Input::GetInstance()->PushKey(DIK_SPACE);
 
-	if (now) {
-		StartInhale();
-	} else {
+
+	// すでに何か吸ってたら吸い込み不可
+	if (vacuumPoint_ > 0) {
 		StopInhale();
+	} else {
+		if (now) {
+			StartInhale();
+		} else {
+			StopInhale();
+		}
 	}
+
 
 	inhaling_ = now;
 

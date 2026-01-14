@@ -14,7 +14,7 @@ GameScene::~GameScene() {
 	delete modelBlock_;
 	delete mapChipField_;
 	delete explanationSprite_;
-
+	delete tutorialSignModel_;
 	for (Coin* coin : coins_) {
 		delete coin;
 	}
@@ -47,6 +47,9 @@ GameScene::~GameScene() {
 void GameScene::Initialize() {
 	switch (stageState_) {
 	case StageState::Tutorial:
+		//チュートリアル看板
+		//tutorialSignModel_ = Model::CreateFromOBJ("TutorialSign", true);
+		
 
 		break;
 	case StageState::Stage1:
@@ -84,7 +87,7 @@ void GameScene::Initialize() {
 	// プレイヤー関連
 	//------------------
 	pos_ = {2, 2, 0};
-	model_ = Model::CreateFromOBJ("Alplayer");
+	model_ = Model::CreateFromOBJ("AlPlayer");
 
 	camera_ = new Camera();
 	camera_->Initialize();
