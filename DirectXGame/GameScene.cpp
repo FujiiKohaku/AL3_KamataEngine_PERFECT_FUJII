@@ -411,7 +411,7 @@ void GameScene::CreateJumpHoppersFromMap() {
 				Vector3 pos = mapChipField_->GetMapChipPositionbyIndex(x, y);
 
 				JumpHopper* hopper = new JumpHopper();
-				hopper->Initialize(jumpHopperModel_, camera_, pos, 0.3f);
+				hopper->Initialize(jumpHopperModel_, camera_, pos, 0.5f);
 
 				jumpHoppers_.push_back(hopper);
 			}

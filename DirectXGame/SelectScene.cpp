@@ -16,16 +16,19 @@ void SceneSelectScene::Initialize() {
 	// camera_->translation_.z = -60.0f;
 	worldTransforms_[0].Initialize();
 	worldTransforms_[0].translation_ = {-3, 0, -20};
+	worldTransforms_[0].rotation_.y = -std::numbers::pi_v<float>/2.0f;
 
 	worldTransforms_[1].Initialize();
 	worldTransforms_[1].translation_ = {0, 0, -20};
+	worldTransforms_[1].rotation_.y = -std::numbers::pi_v<float> / 2.0f;
 
 	worldTransforms_[2].Initialize();
 	worldTransforms_[2].translation_ = {3, 0, -20};
+	worldTransforms_[2].rotation_.y = -std::numbers::pi_v<float> / 2.0f;
 
-	stageModel1_ = KamataEngine::Model::CreateFromOBJ("block");
-	stageModel2_ = KamataEngine::Model::CreateFromOBJ("block");
-	stageModel3_ = KamataEngine::Model::CreateFromOBJ("block");
+	stageModel1_ = KamataEngine::Model::CreateFromOBJ("TutorialStage");
+	stageModel2_ = KamataEngine::Model::CreateFromOBJ("Stage1");
+	stageModel3_ = KamataEngine::Model::CreateFromOBJ("Stage2");
 	camera_->TransferMatrix();
 
 	modelSkydome_ = Model::CreateFromOBJ("skydome", true);

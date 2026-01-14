@@ -10,6 +10,10 @@ void Skydome::Initialize(KamataEngine::Model* model, KamataEngine::Camera* camer
 	worldTransform_.Initialize();
 }
 
-void Skydome::Update() { WorldTransformUpdate(worldTransform_); }
+void Skydome::Update() { 
+	
+	worldTransform_.rotation_.y += 0.001f;
+	
+	WorldTransformUpdate(worldTransform_); }
 
 void Skydome::Draw() { model_->Draw(worldTransform_, *camera_); }
