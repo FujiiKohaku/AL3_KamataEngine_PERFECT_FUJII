@@ -33,34 +33,26 @@ void Player::Initialize(Model* model, Camera* camera, const Vector3& position) {
 }
 void Player::Shoot() {
 
-	if (!canShoot_) {
-		return;
-	}
-
 	if (vacuumPoint_ <= 0) {
 		return;
 	}
 
-	for (int i = 0; i < vacuumPoint_; i++) {
+	std::unique_ptr<PlayerBullet> bullet = std::make_unique<PlayerBullet>();
 
-		std::unique_ptr<PlayerBullet> bullet = std::make_unique<PlayerBullet>();
-
-		Vector3 dir{};
-		if (lrDirection_ == LRDirection::kRight) {
-			dir.x = 1.0f;
-		} else {
-			dir.x = -1.0f;
-		}
-
-		bullet->Initialize(bulletModel_, worldTransform_.translation_, dir);
-		bullets_.push_back(std::move(bullet));
+	Vector3 dir{};
+	if (lrDirection_ == LRDirection::kRight) {
+		dir.x = 1.0f;
+	} else {
+		dir.x = -1.0f;
 	}
 
+	bullet->Initialize(bulletModel_, worldTransform_.translation_, dir);
+
+	bullets_.push_back(std::move(bullet));
+
 	vacuumPoint_ = 0;
-	canShoot_ = false;
 	jumpCount_ = 0;
 }
-
 
 void Player::InputMove() {
 
@@ -171,8 +163,6 @@ void Player::Update() {
 	if (deathState_ == DeathState::DeadFinish) {
 		return;
 	}
-
-	absorbedThisFrame_ = false;
 	//==========================
 	//  死亡演出状態の処理
 	//==========================
@@ -199,7 +189,7 @@ void Player::Update() {
 
 		return;
 	}
-	if (canShoot_ && Input::GetInstance()->TriggerKey(DIK_R)) {
+	if (Input::GetInstance()->TriggerKey(DIK_R)) {
 		Shoot();
 		Audio::GetInstance()->PlayWave(shotSeHandle_, false, 1.0f);
 	}
@@ -377,10 +367,11 @@ void Player::OnCollision(EnemyBase* enemy) {
 	Vector3 playerPos = worldTransform_.translation_;
 
 	// =========================
-	// 吸われ中の敵は最優先
+	// すでに吸われ中の敵は最優先で処理
 	// =========================
 	if (enemy->IsPulled()) {
 
+		// 吸い込み中なら確定で取り込む
 		if (state_ == PlayerState::Inhale) {
 			AbsorbEnemy(enemy);
 		}
@@ -390,6 +381,7 @@ void Player::OnCollision(EnemyBase* enemy) {
 
 	// =========================
 	// 吸い込み中：上下からの接触は無視
+	// （まだ吸われていない敵だけ）
 	// =========================
 	if (state_ == PlayerState::Inhale) {
 
@@ -414,22 +406,20 @@ void Player::OnCollision(EnemyBase* enemy) {
 		}
 	}
 
-	// 無敵中はここで終了
-	if (invincible_) {
-		return;
-	}
-
 	// =========================
 	// 後ろから来た敵はダメージ
 	// =========================
 	if (!enemyInFront) {
-		TakeDamage(enemyPos);
+		if (!invincible_) {
+			TakeDamage(enemyPos);
+		}
 		return;
 	}
 
-	// =========================
-	// 状態別処理
-	// =========================
+	if (invincible_) {
+		return;
+	}
+
 	switch (state_) {
 	case PlayerState::Normal:
 		TakeDamage(enemyPos);
@@ -444,25 +434,13 @@ void Player::OnCollision(EnemyBase* enemy) {
 	}
 }
 
-
 void Player::AbsorbEnemy(EnemyBase* enemy) {
-
-	if (!enemy) {
+	if (!enemy)
 		return;
-	}
-	if (absorbedThisFrame_) {
-		return; 
-	}
-	enemy->StartPulled(this);
 
+	enemy->StartPulled(this); // Enemyに吸い寄せを命令
 	vacuumPoint_ = std::min(vacuumPoint_ + 1, kMaxVacuum);
-
-	// 1体以上吸ってたら吐ける
-	canShoot_ = (vacuumPoint_ > 0);
-	absorbedThisFrame_ = true;
 }
-
-
 
 /////////////////////////////////////////////////
 // 死亡開始
@@ -485,25 +463,23 @@ void Player::TakeDamage(const Vector3& enemyPos) {
 
 	hp_--;
 
-	canShoot_ = false; //  追加
-
+	// ノックバック
 	Vector3 dir = worldTransform_.translation_ - enemyPos;
 	dir.y = 0;
 	dir = Normalize(dir);
-	velocity_ = dir * 0.2f;
+	velocity_ = dir * 0.2f; // ノックバック強さ
 
+	// 無敵開始
 	invincible_ = true;
-	invincibleTimer_ = 1.0f;
+	invincibleTimer_ = 1.0f; // 1秒間無敵
 
+	// HP0なら死亡
 	if (hp_ <= 0) {
 		StartDeath();
 	}
+	CameraController::GetInstance()->StartShake(0.5f, 0.1f);
 }
-
 void Player::StartInhale() {
-	if (invincible_) {
-		return; 
-	}
 	state_ = PlayerState::Inhale;
 	inhaleHitBox_.active = true;
 }
