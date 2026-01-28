@@ -1,39 +1,45 @@
 #pragma once
-#include "KamataEngine.h"
+#include <KamataEngine.h>
+#include <vector>
+
 class Fade {
 public:
-	void Initialize();
-
-	void Update();
-
-	void Draw();
-
-	// フェードの状態
 	enum class Status {
-		None,    // フェードなし
-		FadeIn,  // フェードイン中
-		FadeOut, // フェードアウト中
+		FadeIn,
+		FadeOut,
 	};
 
-	// フェード開始関数
-	void Start(Status status, float duratiom);
-	// フェード終了関数
-	void Stop();
+	void Initialize(float fadeSpeed = 1.0f);
+	void Update();
+	void Draw();
 
-	// フェード終了判定
-	bool IsFinished() const;
+	void Start(Status status, float fadeSpeed);
+
+	bool IsFinished() const { return isFinish_; }
 
 private:
-	// Spriteの生成タイミング制御のためポインタで保持
-	KamataEngine::Sprite* sprite_ = nullptr;
+	enum State {
+		kNone,
+		kFadeIn,
+		kFadeOut,
+	};
 
-	static const int kWidth = 1280;
-	static const int kHeight = 720;
+	struct Tile {
+		KamataEngine::Sprite* sprite = nullptr;
+		float delay = 0.0f;
+	};
 
-	// 現在のフェードの状態
-	Status status_ = Status::None;
-	// フェードの持続時間
-	float duration_ = 0.0f;
-	// 経過時間カウンター
-	float counter_ = 0.0f;
+	std::vector<Tile> tiles_;
+
+	State state_ = kNone;
+
+	int tileCountX_ = 0;
+	int tileCountY_ = 0;
+	int tileSize_ = 0;
+
+	float fadeFrame_ = 60.0f;
+	float fadeSpeed_ = 1.0f;
+	int frame_ = 0;
+	uint32_t textureHandle = 0;
+	bool isFinish_ = false;
 };

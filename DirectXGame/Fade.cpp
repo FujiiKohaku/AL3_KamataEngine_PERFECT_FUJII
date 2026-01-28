@@ -1,85 +1,113 @@
 #include "Fade.h"
 #include <algorithm>
+#include <cstdlib>
+#include <ctime>
 
-void Fade::Initialize() {
-	// 02_13_page10
-	// スプライト生成
+using namespace KamataEngine;
 
-	sprite_ = KamataEngine::Sprite::Create(0, KamataEngine::Vector2{});
-	// サイズ指定
-	sprite_->SetSize(KamataEngine::Vector2(1280, 720));
-	// 色指定
-	sprite_->SetColor(KamataEngine::Vector4(0, 0, 0, 1));
+void Fade::Initialize(float fadeSpeed) {
+
+	fadeSpeed_ = fadeSpeed;
+	fadeFrame_ = 60.0f;
+	frame_ = 0;
+	isFinish_ = false;
+	state_ = kNone;
+
+	srand((unsigned int)time(nullptr));
+
+	// 1280x720 / 80
+	tileCountX_ = 16;
+	tileCountY_ = 9;
+	tileSize_ = 80;
+
+	textureHandle = TextureManager::Load("tile.png");
+
+	tiles_.clear();
+
+	for (int y = 0; y < tileCountY_; y++) {
+		for (int x = 0; x < tileCountX_; x++) {
+
+			Vector2 pos = {(float)(x * tileSize_), (float)(y * tileSize_)};
+
+			Sprite* sprite = Sprite::Create(textureHandle, pos);
+			sprite->SetSize({(float)tileSize_, (float)tileSize_});
+			sprite->SetColor({0, 0, 0, 0.0f});
+
+			Tile tile;
+			tile.sprite = sprite;
+			tile.delay = ((rand() % 100) / 100.0f) * fadeFrame_;
+
+			tiles_.push_back(tile);
+		}
+	}
+}
+
+void Fade::Start(Status status, float fadeSpeed) {
+
+	fadeSpeed_ = fadeSpeed;
+	frame_ = 0;
+	isFinish_ = false;
+
+	if (status == Status::FadeIn) {
+		state_ = kFadeIn;
+		for (auto& tile : tiles_) {
+			tile.delay = ((rand() % 100) / 100.0f) * fadeFrame_;
+			tile.sprite->SetColor({0, 0, 0, 0.0f});
+		}
+	} else {
+		state_ = kFadeOut;
+		for (auto& tile : tiles_) {
+			tile.delay = ((rand() % 100) / 100.0f) * fadeFrame_;
+			tile.sprite->SetColor({0, 0, 0, 1.0f});
+		}
+	}
 }
 
 void Fade::Update() {
-	// フェード状態による分岐
-	switch (status_) {
-	case Fade::Status::None:
-		// 何もしない
-		break;
-	case Fade::Status::FadeIn:
-		// フェードイン中の更新処理
-		// 1フレーム分の秒数をカウントアップ
-		counter_ += 1.0f / 60.0f;
-		// フェード継続時間に達したら打ち止め
-		if (counter_ >= duration_) {
-			counter_ = duration_;
-		}
-		// 0.0fから1.0fの間で、経過時間がフェード継続時間に近づくほどアルファ値を大きくする
-		sprite_->SetColor(KamataEngine::Vector4(0, 0, 0, std::clamp(1.0f - counter_ / duration_, 0.0f, 1.0f)));
 
-		break;
-	case Fade::Status::FadeOut:
-		// フェードアウト中の更新処理
-		// 1frame分の秒数をカウントアップ
-		counter_ += 1.0f / 60.0f;
-		// フェードが継続時間に達したら打ち止め
-		if (counter_ >= duration_) {
-			counter_ = duration_;
+	if (state_ == kNone)
+		return;
+
+	frame_++;
+
+	for (auto& tile : tiles_) {
+
+		if (frame_ < tile.delay)
+			continue;
+
+		float t = (frame_ - tile.delay) / fadeFrame_;
+		t = std::clamp(t, 0.0f, 1.0f);
+
+		float alpha = 0.0f;
+
+		if (state_ == kFadeIn) {
+			alpha = t;
+		} else {
+			alpha = 1.0f - t;
 		}
-		// 0.0fから1.0fの間で経過時間がフェード継続時間に近づくほどアルファ値を大きくする
-		sprite_->SetColor(KamataEngine::Vector4(0, 0, 0, std::clamp(counter_ / duration_, 0.0f, 1.0f)));
-		break;
-	default:
-		break;
+
+		tile.sprite->SetColor({0, 0, 0, alpha});
+	}
+
+	if (frame_ >= fadeFrame_ + 60) {
+
+		if (state_ == kFadeIn) {
+			for (auto& tile : tiles_) {
+				tile.sprite->SetColor({0, 0, 0, 1.0f});
+			}
+		}
+
+		isFinish_ = true;
 	}
 }
 
 void Fade::Draw() {
-
-	// 02_13 24枚目
-	if (status_ == Status::None) {
+	auto* dx = DirectXCommon::GetInstance();
+	if (state_ == kNone)
 		return;
+	Sprite::PreDraw(dx->GetCommandList());
+	for (auto& tile : tiles_) {
+		tile.sprite->Draw();
 	}
-	// よくわからんがなんかPSOセットしてシグネチャセットして設定をコマンドリストに反映
-	KamataEngine::Sprite::PreDraw(KamataEngine::DirectXCommon::GetInstance()->GetCommandList());
-
-	sprite_->Draw();
-
-	KamataEngine::Sprite::PostDraw();
-}
-void Fade::Start(Status status, float duration) {
-	status_ = status;
-	duration_ = duration;
-	counter_ = 0.0f;
-}
-// フェード停止関数
-void Fade::Stop() { status_ = Status::None; }
-
-bool Fade::IsFinished() const {
-
-	switch (status_) {
-	case Status::FadeIn:
-	case Fade::Status::FadeOut:
-
-		if (counter_ >= duration_) {
-			return true;
-		} else {
-
-			return false;
-		}
-	}
-
-	return true;
+	Sprite::PostDraw();
 }

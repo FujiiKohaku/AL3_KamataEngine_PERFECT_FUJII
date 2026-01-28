@@ -520,21 +520,22 @@ void GameScene::CreateEnemiesFromMap() {
 
 			case MapChipType::kEnemy: {
 				auto enemy = new WalkEnemy();
-				enemy->Initialize(Model::CreateFromOBJ("CircleEnemy"), pos);
+				enemy->Initialize(Model::CreateFromOBJ("baikinMusi"), pos);
 				enemies_.push_back(enemy);
+	
 				break;
 			}
 
 			case MapChipType::kEnemyFlyer: {
 				auto enemy = new EnemyFlyer();
-				enemy->Initialize(Model::CreateFromOBJ("CircleEnemy"), pos);
+				enemy->Initialize(Model::CreateFromOBJ("baikinMusi"), pos);
 				enemies_.push_back(enemy);
 				break;
 			}
 
 			case MapChipType::kEnemyChaser: {
 				auto enemy = new ChaserEnemy();
-				enemy->Initialize(Model::CreateFromOBJ("CircleEnemy"), pos, player_);
+				enemy->Initialize(Model::CreateFromOBJ("baikinMusi"), pos, player_);
 				enemies_.push_back(enemy);
 				break;
 			}
