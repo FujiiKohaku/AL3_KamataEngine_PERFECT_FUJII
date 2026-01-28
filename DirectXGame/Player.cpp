@@ -161,6 +161,7 @@ void Player::Update() {
 
 	// 完全死亡後は何もしない
 	if (deathState_ == DeathState::DeadFinish) {
+
 		return;
 	}
 	//==========================
@@ -172,12 +173,12 @@ void Player::Update() {
 		deathTimer_ -= 1.0f / 60.0f;
 
 		// 浮く演出 → 落下
-		worldTransform_.translation_ += deathVelocity_;
+		worldTransform_.translation_ += deathVelocity_ * gTimeScale;
 		deathVelocity_.y -= 0.01f;
 
 		// 回転演出
-		worldTransform_.rotation_.z += 0.15f;
-		worldTransform_.rotation_.x += 0.05f;
+		worldTransform_.rotation_.z += 0.15f * gTimeScale;
+		worldTransform_.rotation_.x += 0.05f * gTimeScale;
 
 		// DirectX に転送
 		WorldTransformUpdate(worldTransform_);
@@ -185,6 +186,7 @@ void Player::Update() {
 		// 演出が終わったら完全死亡
 		if (deathTimer_ <= 0.0f) {
 			deathState_ = DeathState::DeadFinish;
+			gTimeScale = 1.0f;
 		}
 
 		return;
@@ -454,6 +456,7 @@ void Player::StartDeath() {
 	deathTimer_ = 1.5f;
 	deathVelocity_ = {0, 0.25f, 0};
 	velocity_ = {0, 0, 0}; // ゲーム操作の速度は無効
+	gTimeScale = 0.25f;//遅くなるスロー
 }
 float Player::EaseOutCubic(float t) { // t = [0.0f, 1.0f]
 	float inv = 1.0f - t;

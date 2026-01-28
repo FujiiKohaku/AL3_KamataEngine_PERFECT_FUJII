@@ -196,6 +196,7 @@ private:
 	InhaleEffect inhaleEffect_;
 
 	uint32_t shotSeHandle_ = 0;
+	float gTimeScale;
 
 public:
 	bool IsInvincible() const { return invincible_; }
