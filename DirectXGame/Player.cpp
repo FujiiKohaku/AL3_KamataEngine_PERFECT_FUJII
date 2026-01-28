@@ -173,7 +173,16 @@ void Player::Update() {
 		}
 	}
 
-	inhaleEffect_.Update(worldTransform_.translation_, state_ == PlayerState::Inhale);
+	Vector3 inhaleCenter = worldTransform_.translation_;
+
+	if (lrDirection_ == LRDirection::kRight) {
+		inhaleCenter.x += 1.0f;
+	} else {
+		inhaleCenter.x -= 1.0f;
+	}
+
+	inhaleEffect_.Update(inhaleCenter, state_ == PlayerState::Inhale);
+
 	bobbingTime_ += 0.1f;
 	worldTransform_.scale_.y = baseScale + sin(bobbingTime_) * 0.2f;
 	//==========================
@@ -351,70 +360,80 @@ void Player::OnCollision(Goal* goal) {
 }
 
 void Player::OnCollision(EnemyBase* enemy) {
-    if (!enemy)
-        return;
+	if (!enemy)
+		return;
 
-    Vector3 enemyPos = enemy->GetWorldTransform().translation_;
-    Vector3 playerPos = worldTransform_.translation_;
+	Vector3 enemyPos = enemy->GetWorldTransform().translation_;
+	Vector3 playerPos = worldTransform_.translation_;
 
-    // =========================
-    // 向き判定（最優先）
-    // =========================
-    bool enemyInFront = false;
+	// =========================
+	// すでに吸われ中の敵は最優先で処理
+	// =========================
+	if (enemy->IsPulled()) {
 
-    if (lrDirection_ == LRDirection::kRight) {
-        if (enemyPos.x > playerPos.x) {
-            enemyInFront = true;
-        }
-    } else {
-        if (enemyPos.x < playerPos.x) {
-            enemyInFront = true;
-        }
-    }
+		// 吸い込み中なら確定で取り込む
+		if (state_ == PlayerState::Inhale) {
+			AbsorbEnemy(enemy);
+		}
 
-    // =========================
-    // 後ろから来た敵は必ずダメージ
-    // =========================
-    if (!enemyInFront) {
+		return;
+	}
 
-        if (!invincible_) {
-            TakeDamage(enemyPos);
-        }
+	// =========================
+	// 吸い込み中：上下からの接触は無視
+	// （まだ吸われていない敵だけ）
+	// =========================
+	if (state_ == PlayerState::Inhale) {
 
-        return;
-    }
+		float dy = enemyPos.y - playerPos.y;
+		if (std::abs(dy) > 0.5f) {
+			return;
+		}
+	}
 
-    // =========================
-    // ここから「前にいる敵」だけ
-    // =========================
+	// =========================
+	// 向き判定
+	// =========================
+	bool enemyInFront = false;
 
-    // すでに吸われ中の敵
-    if (enemy->IsPulled()) {
+	if (lrDirection_ == LRDirection::kRight) {
+		if (enemyPos.x > playerPos.x) {
+			enemyInFront = true;
+		}
+	} else {
+		if (enemyPos.x < playerPos.x) {
+			enemyInFront = true;
+		}
+	}
 
-        if (state_ == PlayerState::Inhale) {
-            AbsorbEnemy(enemy);
-        }
+	// =========================
+	// 後ろから来た敵はダメージ
+	// =========================
+	if (!enemyInFront) {
+		if (!invincible_) {
+			TakeDamage(enemyPos);
+		}
+		return;
+	}
 
-        return;
-    }
+	if (invincible_) {
+		return;
+	}
 
-    if (invincible_) {
-        return;
-    }
+	switch (state_) {
+	case PlayerState::Normal:
+		TakeDamage(enemyPos);
+		break;
 
-    switch (state_) {
-    case PlayerState::Normal:
-        TakeDamage(enemyPos);
-        break;
+	case PlayerState::Inhale:
+		AbsorbEnemy(enemy);
+		break;
 
-    case PlayerState::Inhale:
-        AbsorbEnemy(enemy);
-        break;
-
-    case PlayerState::Swallow:
-        break;
-    }
+	case PlayerState::Swallow:
+		break;
+	}
 }
+
 
 
 void Player::AbsorbEnemy(EnemyBase* enemy) {
@@ -464,11 +483,11 @@ void Player::TakeDamage(const Vector3& enemyPos) {
 }
 void Player::StartInhale() {
 	state_ = PlayerState::Inhale;
-	inhaleHitBox_.active = true; // ← ここで有効化
+	inhaleHitBox_.active = true; 
 }
 void Player::StopInhale() {
 	state_ = PlayerState::Normal;
-	inhaleHitBox_.active = false; // ← ここで無効化
+	inhaleHitBox_.active = false; 
 }
 #pragma region マップの当たり判定をまとめたもの
 // 02_07 スライド13枚目
