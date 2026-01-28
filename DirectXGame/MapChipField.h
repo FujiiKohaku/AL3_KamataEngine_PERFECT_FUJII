@@ -57,6 +57,7 @@ public:
 	IndexSet GetMapChipIndexSetByPosition(const KamataEngine::Vector3& position);
 	// 指定インデックスのマップチップ中心座標から、ブロック幅と高さを用いて当たり判定用の矩形(Rect)を生成して返す
 	Rect GetRectByIndex(uint32_t xIndex, uint32_t yIndex);
+	void SetMapChipTypeByIndex(uint32_t xIndex, uint32_t yIndex, MapChipType type);
 
 private:
 	// === 内部処理 ===

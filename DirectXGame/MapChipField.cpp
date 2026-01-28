@@ -100,6 +100,18 @@ MapChipType MapChipField::GetMapChipTypeByIndex(uint32_t xIndex, uint32_t yIndex
 	return mapChipData_.data[yIndex][xIndex];
 }
 
+void MapChipField::SetMapChipTypeByIndex(uint32_t xIndex, uint32_t yIndex, MapChipType type) {
+
+	if (yIndex >= mapChipData_.data.size()) {
+		return;
+	}
+
+	if (xIndex >= mapChipData_.data[yIndex].size()) {
+		return;
+	}
+
+	mapChipData_.data[yIndex][xIndex] = type;
+}
 
 // マップ配列のインデックスからワールド座標を計算
 KamataEngine::Vector3 MapChipField::GetMapChipPositionbyIndex(uint32_t xIndex, uint32_t yIndex) {

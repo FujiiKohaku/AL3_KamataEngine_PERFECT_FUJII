@@ -23,7 +23,7 @@ void EnemyBase::Update() {
 		break;
 
 	case State::Dying:
-		UpdateDying(); 
+		UpdateDying();
 		break;
 
 	case State::Dead:
@@ -43,12 +43,11 @@ void EnemyBase::Draw(Camera* camera) {
 void EnemyBase::StartPulled(Player* player) {
 	target_ = player;
 	state_ = State::Pulled;
-
 }
 
 void EnemyBase::UpdatePulled() {
 
-	Vector3 dir = Normalize(target_->GetWorldTransform().translation_ - worldTransform_.translation_); 
+	Vector3 dir = Normalize(target_->GetWorldTransform().translation_ - worldTransform_.translation_);
 
 	worldTransform_.translation_ += dir * 0.12f;
 
@@ -68,7 +67,7 @@ void EnemyBase::UpdatePulled() {
 }
 void EnemyBase::StartDying() {
 	state_ = State::Dying;
-	deathTimer_ = 0.5f; 
+	deathTimer_ = 0.5f;
 }
 void EnemyBase::UpdateDying() {
 
@@ -83,4 +82,7 @@ void EnemyBase::UpdateDying() {
 		isDead_ = true;
 		state_ = State::Dead;
 	}
+
+	
 }
+void EnemyBase::SetMapChipField(MapChipField* mapChipField) { mapChipField_ = mapChipField; }

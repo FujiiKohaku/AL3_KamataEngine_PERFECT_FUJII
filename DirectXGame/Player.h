@@ -188,7 +188,7 @@ private:
 	std::list<std::unique_ptr<PlayerBullet>> bullets_;
 	Model* bulletModel_ = nullptr;
 	void Shoot();
-
+	bool canShoot_ = false;
 
 
 

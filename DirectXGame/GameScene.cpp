@@ -258,13 +258,16 @@ void GameScene::Update() {
 	for (auto& bulletPtr : player_->GetBullets()) {
 
 		if (!bulletPtr)
-			continue; // 念のため
-
-		auto& bullet = *bulletPtr; // 中身を参照で取り出す
-
-		if (!bullet.IsAlive()) {
 			continue;
-		}
+
+		auto& bullet = *bulletPtr;
+
+		if (!bullet.IsAlive())
+			continue;
+
+		// ===============================
+		// 弾 × 敵
+		// ===============================
 		for (auto* enemy : enemies_) {
 
 			if (enemy->IsDead())
@@ -279,6 +282,54 @@ void GameScene::Update() {
 				bullet.Kill();
 				enemy->StartDying();
 				break;
+			}
+		}
+
+		// ===============================
+		// 弾 × 壊れるブロック ← ここ
+		// ===============================
+		Vector3 bulletPos = bullet.GetWorld().translation_;
+		float bulletRadius = bullet.GetRadius();
+
+		for (auto& line : blocks_) {
+			for (auto* block : line) {
+
+				if (!block)
+					continue;
+
+				if (block->IsBroken())
+					continue;
+
+				if (!block->IsBreakable())
+					continue;
+
+				if (block->CheckHitSphere(bulletPos, bulletRadius)) {
+
+					block->Break();
+					bullet.Kill();
+
+					mapChipField_->SetMapChipTypeByIndex(block->GetMapX(), block->GetMapY(), MapChipType::kBlank);
+
+					break;
+				}
+			}
+		}
+	}
+	for (auto& line : blocks_) {
+		for (auto* block : line) {
+
+			if (!block) {
+				continue;
+			}
+
+			if (block->IsJustBroken()) {
+
+				Vector3 pos = block->GetWorldTransform().translation_;
+
+				
+
+				// フラグを戻す（ここ重要）
+				block->ClearJustBroken();
 			}
 		}
 	}
@@ -438,7 +489,7 @@ void GameScene::CreateBlocksFromMap() {
 
 				Block* block = new Block();
 				block->Initialize(modelBlock_, pos, false); // 壊れない
-
+				block->SetMapIndex(j, i);
 				blocks_[i][j] = block;
 			} else if (type == MapChipType::kBreakBlock) {
 
@@ -446,7 +497,7 @@ void GameScene::CreateBlocksFromMap() {
 
 				Block* block = new Block();
 				block->Initialize(modelBlock_, pos, true); // 壊れる
-
+				block->SetMapIndex(j, i);
 				blocks_[i][j] = block;
 			} else {
 				blocks_[i][j] = nullptr;
@@ -535,6 +586,7 @@ void GameScene::CreateEnemiesFromMap() {
 			case MapChipType::kEnemy: {
 				auto enemy = new WalkEnemy();
 				enemy->Initialize(Model::CreateFromOBJ("baikinMusi"), pos);
+				enemy->SetMapChipField(mapChipField_);
 				enemies_.push_back(enemy);
 
 				break;
@@ -543,6 +595,7 @@ void GameScene::CreateEnemiesFromMap() {
 			case MapChipType::kEnemyFlyer: {
 				auto enemy = new EnemyFlyer();
 				enemy->Initialize(Model::CreateFromOBJ("baikinMusi"), pos);
+				enemy->SetMapChipField(mapChipField_);
 				enemies_.push_back(enemy);
 				break;
 			}
@@ -550,6 +603,7 @@ void GameScene::CreateEnemiesFromMap() {
 			case MapChipType::kEnemyChaser: {
 				auto enemy = new ChaserEnemy();
 				enemy->Initialize(Model::CreateFromOBJ("baikinMusi"), pos, player_);
+				enemy->SetMapChipField(mapChipField_);
 				enemies_.push_back(enemy);
 				break;
 			}
@@ -583,7 +637,7 @@ void GameScene::UpdateCoins() {
 		}
 		// 直ぶつかり
 		if (coin->CheckCollision(player_)) {
-			coin->Collect();            // ← 直接取得！
+			coin->Collect();            // 直接取得！
 			player_->OnCollision(coin); // スコア加算だけ
 			Audio::GetInstance()->PlayWave(coinSEHandle_);
 		}

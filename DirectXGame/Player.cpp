@@ -33,26 +33,34 @@ void Player::Initialize(Model* model, Camera* camera, const Vector3& position) {
 }
 void Player::Shoot() {
 
+	if (!canShoot_) {
+		return;
+	}
+
 	if (vacuumPoint_ <= 0) {
 		return;
 	}
 
-	std::unique_ptr<PlayerBullet> bullet = std::make_unique<PlayerBullet>();
+	for (int i = 0; i < vacuumPoint_; i++) {
 
-	Vector3 dir{};
-	if (lrDirection_ == LRDirection::kRight) {
-		dir.x = 1.0f;
-	} else {
-		dir.x = -1.0f;
+		std::unique_ptr<PlayerBullet> bullet = std::make_unique<PlayerBullet>();
+
+		Vector3 dir{};
+		if (lrDirection_ == LRDirection::kRight) {
+			dir.x = 1.0f;
+		} else {
+			dir.x = -1.0f;
+		}
+
+		bullet->Initialize(bulletModel_, worldTransform_.translation_, dir);
+		bullets_.push_back(std::move(bullet));
 	}
 
-	bullet->Initialize(bulletModel_, worldTransform_.translation_, dir);
-
-	bullets_.push_back(std::move(bullet));
-
 	vacuumPoint_ = 0;
+	canShoot_ = false;
 	jumpCount_ = 0;
 }
+
 
 void Player::InputMove() {
 
@@ -189,7 +197,7 @@ void Player::Update() {
 
 		return;
 	}
-	if (Input::GetInstance()->TriggerKey(DIK_R)) {
+	if (canShoot_ && Input::GetInstance()->TriggerKey(DIK_R)) {
 		Shoot();
 		Audio::GetInstance()->PlayWave(shotSeHandle_, false, 1.0f);
 	}
@@ -367,11 +375,10 @@ void Player::OnCollision(EnemyBase* enemy) {
 	Vector3 playerPos = worldTransform_.translation_;
 
 	// =========================
-	// すでに吸われ中の敵は最優先で処理
+	// 吸われ中の敵は最優先
 	// =========================
 	if (enemy->IsPulled()) {
 
-		// 吸い込み中なら確定で取り込む
 		if (state_ == PlayerState::Inhale) {
 			AbsorbEnemy(enemy);
 		}
@@ -381,7 +388,6 @@ void Player::OnCollision(EnemyBase* enemy) {
 
 	// =========================
 	// 吸い込み中：上下からの接触は無視
-	// （まだ吸われていない敵だけ）
 	// =========================
 	if (state_ == PlayerState::Inhale) {
 
@@ -407,19 +413,23 @@ void Player::OnCollision(EnemyBase* enemy) {
 	}
 
 	// =========================
-	// 後ろから来た敵はダメージ
+	// 無敵中はダメージ処理だけ無視
 	// =========================
-	if (!enemyInFront) {
-		if (!invincible_) {
-			TakeDamage(enemyPos);
-		}
-		return;
-	}
-
 	if (invincible_) {
 		return;
 	}
 
+	// =========================
+	// 後ろから来た敵はダメージ
+	// =========================
+	if (!enemyInFront) {
+		TakeDamage(enemyPos);
+		return;
+	}
+
+	// =========================
+	// 状態別処理
+	// =========================
 	switch (state_) {
 	case PlayerState::Normal:
 		TakeDamage(enemyPos);
@@ -434,13 +444,22 @@ void Player::OnCollision(EnemyBase* enemy) {
 	}
 }
 
-void Player::AbsorbEnemy(EnemyBase* enemy) {
-	if (!enemy)
-		return;
 
-	enemy->StartPulled(this); // Enemyに吸い寄せを命令
+void Player::AbsorbEnemy(EnemyBase* enemy) {
+
+	if (!enemy) {
+		return;
+	}
+
+	enemy->StartPulled(this);
+
 	vacuumPoint_ = std::min(vacuumPoint_ + 1, kMaxVacuum);
+
+	// 1体以上吸ってたら吐ける
+	canShoot_ = (vacuumPoint_ > 0);
 }
+
+
 
 /////////////////////////////////////////////////
 // 死亡開始
@@ -463,22 +482,21 @@ void Player::TakeDamage(const Vector3& enemyPos) {
 
 	hp_--;
 
-	// ノックバック
+	canShoot_ = false; //  追加
+
 	Vector3 dir = worldTransform_.translation_ - enemyPos;
 	dir.y = 0;
 	dir = Normalize(dir);
-	velocity_ = dir * 0.2f; // ノックバック強さ
+	velocity_ = dir * 0.2f;
 
-	// 無敵開始
 	invincible_ = true;
-	invincibleTimer_ = 1.0f; // 1秒間無敵
+	invincibleTimer_ = 1.0f;
 
-	// HP0なら死亡
 	if (hp_ <= 0) {
 		StartDeath();
 	}
-	CameraController::GetInstance()->StartShake(0.5f, 0.1f);
 }
+
 void Player::StartInhale() {
 	state_ = PlayerState::Inhale;
 	inhaleHitBox_.active = true;
@@ -525,7 +543,7 @@ void Player::CheckMapCollisionUp(CollisionMapInfo& info) {
 	indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionsNew[kLeftTop]);
 	mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
 
-	if (mapChipType == MapChipType::kBlock) {
+if (mapChipType == MapChipType::kBlock || mapChipType == MapChipType::kBreakBlock) {
 		hit = true;
 	}
 
@@ -533,7 +551,7 @@ void Player::CheckMapCollisionUp(CollisionMapInfo& info) {
 	indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionsNew[kRightTop]);
 	mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
 
-	if (mapChipType == MapChipType::kBlock) {
+if (mapChipType == MapChipType::kBlock || mapChipType == MapChipType::kBreakBlock) {
 		hit = true;
 	}
 
@@ -583,7 +601,7 @@ void Player::CheckMapCollisionDown(CollisionMapInfo& info) {
 	indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionsNew[kRightBottom]);
 	mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
 
-	if (mapChipType == MapChipType::kBlock) {
+if (mapChipType == MapChipType::kBlock || mapChipType == MapChipType::kBreakBlock) {
 		hit = true;
 	}
 
@@ -591,7 +609,7 @@ void Player::CheckMapCollisionDown(CollisionMapInfo& info) {
 	indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionsNew[kLeftBottom]);
 	mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
 
-	if (mapChipType == MapChipType::kBlock) {
+if (mapChipType == MapChipType::kBlock || mapChipType == MapChipType::kBreakBlock) {
 		hit = true;
 	}
 
@@ -726,7 +744,7 @@ void Player::CheckMapCollisionRight(CollisionMapInfo& info) {
 	indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionsNew[kRightTop]);
 	mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
 
-	if (mapChipType == MapChipType::kBlock) {
+	if (mapChipType == MapChipType::kBlock || mapChipType == MapChipType::kBreakBlock) {
 		hit = true;
 	}
 
@@ -734,7 +752,7 @@ void Player::CheckMapCollisionRight(CollisionMapInfo& info) {
 	indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionsNew[kRightBottom]);
 	mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
 
-	if (mapChipType == MapChipType::kBlock) {
+if (mapChipType == MapChipType::kBlock || mapChipType == MapChipType::kBreakBlock) {
 		hit = true;
 	}
 
@@ -791,7 +809,7 @@ void Player::CheckMapCollisionLeft(CollisionMapInfo& info) {
 	indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionsNew[kLeftTop]);
 	mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
 
-	if (mapChipType == MapChipType::kBlock) {
+if (mapChipType == MapChipType::kBlock || mapChipType == MapChipType::kBreakBlock) {
 		hit = true;
 	}
 
@@ -799,7 +817,7 @@ void Player::CheckMapCollisionLeft(CollisionMapInfo& info) {
 	indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionsNew[kLeftBottom]);
 	mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
 
-	if (mapChipType == MapChipType::kBlock) {
+if (mapChipType == MapChipType::kBlock || mapChipType == MapChipType::kBreakBlock) {
 		hit = true;
 	}
 

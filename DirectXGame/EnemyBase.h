@@ -1,6 +1,8 @@
 #pragma once
 #include "KamataEngine.h"
 #include "Player.h"
+
+#include"MapChipField.h"
 using namespace KamataEngine;
 
 class EnemyBase {
@@ -24,6 +26,7 @@ public:
 	}
 	void StartDying();
 	void UpdateDying();
+	void SetMapChipField(MapChipField* mapChipField);
 
 protected:
 	// 敵ごとに違う動きだけココで作る
@@ -42,4 +45,8 @@ protected:
 	bool isDead_ = false;
 	float kEnemyRadius = 1.0f;
 	float deathTimer_ = 0.0f;
+	
+
+protected:
+	MapChipField* mapChipField_ = nullptr;
 };
