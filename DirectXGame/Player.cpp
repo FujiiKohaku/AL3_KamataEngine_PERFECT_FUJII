@@ -171,6 +171,8 @@ void Player::Update() {
 	if (deathState_ == DeathState::DeadFinish) {
 		return;
 	}
+
+	absorbedThisFrame_ = false;
 	//==========================
 	//  死亡演出状態の処理
 	//==========================
@@ -412,9 +414,7 @@ void Player::OnCollision(EnemyBase* enemy) {
 		}
 	}
 
-	// =========================
-	// 無敵中はダメージ処理だけ無視
-	// =========================
+	// 無敵中はここで終了
 	if (invincible_) {
 		return;
 	}
@@ -450,13 +450,16 @@ void Player::AbsorbEnemy(EnemyBase* enemy) {
 	if (!enemy) {
 		return;
 	}
-
+	if (absorbedThisFrame_) {
+		return; 
+	}
 	enemy->StartPulled(this);
 
 	vacuumPoint_ = std::min(vacuumPoint_ + 1, kMaxVacuum);
 
 	// 1体以上吸ってたら吐ける
 	canShoot_ = (vacuumPoint_ > 0);
+	absorbedThisFrame_ = true;
 }
 
 
@@ -498,6 +501,9 @@ void Player::TakeDamage(const Vector3& enemyPos) {
 }
 
 void Player::StartInhale() {
+	if (invincible_) {
+		return; 
+	}
 	state_ = PlayerState::Inhale;
 	inhaleHitBox_.active = true;
 }

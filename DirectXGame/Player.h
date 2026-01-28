@@ -125,6 +125,7 @@ private:
 	static inline const float kHeight = 0.8f;
 	// 02_07スライド34枚目
 	static inline const float kBlank = 0.04f;
+	bool absorbedThisFrame_ = false;
 
 	float radius_ = 0.4f;
 	// 02_07スライド10枚目 移動入力
