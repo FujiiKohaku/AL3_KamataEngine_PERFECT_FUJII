@@ -12,14 +12,16 @@ public:
 	void Draw(Camera* camera);
 
 private:
-struct Particle {
-    Vector3 pos;
-    Vector3 vel;
-    float life = 0.0f;
-    WorldTransform wt;
-};
+	struct Particle {
+		Vector3 pos;
+		Vector3 vel;
+		float life = 0.0f;
+		WorldTransform wt;
+	};
 
-std::vector<std::unique_ptr<Particle>> particles_;
-	Model* model_ = nullptr; 
+	std::vector<std::unique_ptr<Particle>> particles_;
+	Model* model_ = nullptr;
 	std::mt19937 rng_{std::random_device{}()};
+	float spawnTimer_ = 0.0f;
+	static const int kMaxParticles = 128;
 };

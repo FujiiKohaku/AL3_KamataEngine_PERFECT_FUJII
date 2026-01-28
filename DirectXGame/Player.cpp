@@ -25,7 +25,7 @@ void Player::Initialize(Model* model, Camera* camera, const Vector3& position) {
 
 	camera_ = camera;
 
-	bulletModel_ = Model::CreateFromOBJ("spike", true);
+	bulletModel_ = Model::CreateFromOBJ("star", true);
 
 	inhaleEffect_.Initialize();
 
@@ -351,35 +351,71 @@ void Player::OnCollision(Goal* goal) {
 }
 
 void Player::OnCollision(EnemyBase* enemy) {
-	if (!enemy)
-		return;
+    if (!enemy)
+        return;
 
-	// 吸われ中の敵は無効（危険判定にしない）
-	if (enemy->IsPulled()) {
+    Vector3 enemyPos = enemy->GetWorldTransform().translation_;
+    Vector3 playerPos = worldTransform_.translation_;
 
-		if (state_ == PlayerState::Inhale) {
-			AbsorbEnemy(enemy);
-		}
-		return;
-	}
+    // =========================
+    // 向き判定（最優先）
+    // =========================
+    bool enemyInFront = false;
 
-	if (invincible_) {
-		return;
-	}
+    if (lrDirection_ == LRDirection::kRight) {
+        if (enemyPos.x > playerPos.x) {
+            enemyInFront = true;
+        }
+    } else {
+        if (enemyPos.x < playerPos.x) {
+            enemyInFront = true;
+        }
+    }
 
-	switch (state_) {
-	case PlayerState::Normal:
-		TakeDamage(enemy->GetWorldTransform().translation_);
-		break;
+    // =========================
+    // 後ろから来た敵は必ずダメージ
+    // =========================
+    if (!enemyInFront) {
 
-	case PlayerState::Inhale:
-		AbsorbEnemy(enemy);
-		break;
+        if (!invincible_) {
+            TakeDamage(enemyPos);
+        }
 
-	case PlayerState::Swallow:
-		break;
-	}
+        return;
+    }
+
+    // =========================
+    // ここから「前にいる敵」だけ
+    // =========================
+
+    // すでに吸われ中の敵
+    if (enemy->IsPulled()) {
+
+        if (state_ == PlayerState::Inhale) {
+            AbsorbEnemy(enemy);
+        }
+
+        return;
+    }
+
+    if (invincible_) {
+        return;
+    }
+
+    switch (state_) {
+    case PlayerState::Normal:
+        TakeDamage(enemyPos);
+        break;
+
+    case PlayerState::Inhale:
+        AbsorbEnemy(enemy);
+        break;
+
+    case PlayerState::Swallow:
+        break;
+    }
 }
+
 
 void Player::AbsorbEnemy(EnemyBase* enemy) {
 	if (!enemy)
