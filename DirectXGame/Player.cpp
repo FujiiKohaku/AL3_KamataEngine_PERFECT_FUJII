@@ -158,33 +158,11 @@ void Player::InputMove() {
 }
 
 void Player::Update() {
-	if (Input::GetInstance()->TriggerKey(DIK_R)) {
-		Shoot();
-		Audio::GetInstance()->PlayWave(shotSeHandle_,false,1.0f);
+
+	// 完全死亡後は何もしない
+	if (deathState_ == DeathState::DeadFinish) {
+		return;
 	}
-	for (auto it = bullets_.begin(); it != bullets_.end();) {
-
-		(*it)->Update();
-
-		if (!(*it)->IsAlive()) {
-			it = bullets_.erase(it);
-		} else {
-			++it;
-		}
-	}
-
-	Vector3 inhaleCenter = worldTransform_.translation_;
-
-	if (lrDirection_ == LRDirection::kRight) {
-		inhaleCenter.x += 1.0f;
-	} else {
-		inhaleCenter.x -= 1.0f;
-	}
-
-	inhaleEffect_.Update(inhaleCenter, state_ == PlayerState::Inhale);
-
-	bobbingTime_ += 0.1f;
-	worldTransform_.scale_.y = baseScale + sin(bobbingTime_) * 0.2f;
 	//==========================
 	//  死亡演出状態の処理
 	//==========================
@@ -211,6 +189,33 @@ void Player::Update() {
 
 		return;
 	}
+	if (Input::GetInstance()->TriggerKey(DIK_R)) {
+		Shoot();
+		Audio::GetInstance()->PlayWave(shotSeHandle_, false, 1.0f);
+	}
+	for (auto it = bullets_.begin(); it != bullets_.end();) {
+
+		(*it)->Update();
+
+		if (!(*it)->IsAlive()) {
+			it = bullets_.erase(it);
+		} else {
+			++it;
+		}
+	}
+
+	Vector3 inhaleCenter = worldTransform_.translation_;
+
+	if (lrDirection_ == LRDirection::kRight) {
+		inhaleCenter.x += 1.0f;
+	} else {
+		inhaleCenter.x -= 1.0f;
+	}
+
+	inhaleEffect_.Update(inhaleCenter, state_ == PlayerState::Inhale);
+
+	bobbingTime_ += 0.1f;
+	worldTransform_.scale_.y = baseScale + sin(bobbingTime_) * 0.2f;
 
 	//==========================
 	// ゴール時も通常処理しない
@@ -294,7 +299,6 @@ void Player::Update() {
 
 	bool now = Input::GetInstance()->PushKey(DIK_SPACE);
 
-
 	// すでに何か吸ってたら吸い込み不可
 	if (vacuumPoint_ > 0) {
 		StopInhale();
@@ -305,7 +309,6 @@ void Player::Update() {
 			StopInhale();
 		}
 	}
-
 
 	inhaling_ = now;
 
@@ -328,13 +331,10 @@ void Player::Draw() {
 	if (visible_) {
 		model_->Draw(worldTransform_, *camera_);
 	}
-	
+
 	for (auto& b : bullets_) {
 		b->Draw(camera_);
 	}
-	
-	
-	
 }
 
 void Player::OnCollision(Coin* coin) {
@@ -434,8 +434,6 @@ void Player::OnCollision(EnemyBase* enemy) {
 	}
 }
 
-
-
 void Player::AbsorbEnemy(EnemyBase* enemy) {
 	if (!enemy)
 		return;
@@ -483,11 +481,11 @@ void Player::TakeDamage(const Vector3& enemyPos) {
 }
 void Player::StartInhale() {
 	state_ = PlayerState::Inhale;
-	inhaleHitBox_.active = true; 
+	inhaleHitBox_.active = true;
 }
 void Player::StopInhale() {
 	state_ = PlayerState::Normal;
-	inhaleHitBox_.active = false; 
+	inhaleHitBox_.active = false;
 }
 #pragma region マップの当たり判定をまとめたもの
 // 02_07 スライド13枚目
