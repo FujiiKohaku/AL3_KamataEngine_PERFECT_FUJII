@@ -20,12 +20,13 @@ GameScene::~GameScene() {
 	}
 	coins_.clear();
 
-	// ブロック（2次元配列）の解放
-	for (auto& line : worldTransformBlocks_) {
+	// ブロック解放
+	for (auto& line : blocks_) {
 		for (auto* block : line) {
 			delete block;
 		}
 	}
+	blocks_.clear();
 	// スパイクの解放
 	for (auto* spike : spikes_) {
 		delete spike;
@@ -40,29 +41,28 @@ GameScene::~GameScene() {
 	jumpHoppers_.clear();
 
 	enemies_.clear();
-	worldTransformBlocks_.clear();
 }
 
 // 初期化
 void GameScene::Initialize() {
-	//switch (stageState_) {
-	//case StageState::Tutorial:
+	// switch (stageState_) {
+	// case StageState::Tutorial:
 	//	//チュートリアル看板
 	//	tutorialSignModel_ = Model::CreateFromOBJ("kanban", true);
 	//	worldTransformTutorialSign_.Initialize();
 
 	//	break;
-	//case StageState::Stage1:
+	// case StageState::Stage1:
 	//	break;
-	//case StageState::Stage2:
+	// case StageState::Stage2:
 	//	break;
-	//default:
+	// default:
 	//	break;
 	//}
 	tutorialSignModel_ = Model::CreateFromOBJ("kanban", true);
 	worldTransformTutorialSign_.Initialize();
 	worldTransformTutorialSign_.translation_ = {5.0f, 0.0f, 5.0f};
-	worldTransformTutorialSign_.rotation_.y = -std::numbers::pi_v<float>/2.0f;
+	worldTransformTutorialSign_.rotation_.y = -std::numbers::pi_v<float> / 2.0f;
 	//------------------
 	// マップチップフィールド
 	//------------------
@@ -324,7 +324,6 @@ void GameScene::Update() {
 // 描画
 void GameScene::Draw() {
 
-
 	auto* dx = DirectXCommon::GetInstance();
 
 	Model::PreDraw(dx->GetCommandList());
@@ -333,25 +332,27 @@ void GameScene::Draw() {
 	player_->Draw();
 	skydome_->Draw();
 
-	for (auto& blockLine : worldTransformBlocks_) {
-		for (auto* block : blockLine) {
-			if (!block)
+	for (auto& line : blocks_) {
+		for (auto* block : line) {
+			if (!block) {
 				continue;
-			modelBlock_->Draw(*block, *camera_, nullptr);
+			}
+			block->Draw(camera_);
 		}
 	}
+
 	tutorialSignModel_->Draw(worldTransformTutorialSign_, *camera_, nullptr);
-	//switch (stageState_) {
-	//case StageState::Tutorial:
-	//	
+	// switch (stageState_) {
+	// case StageState::Tutorial:
+	//
 	//	break;
-	//case StageState::Stage1:
+	// case StageState::Stage1:
 	//	break;
-	//case StageState::Stage2:
+	// case StageState::Stage2:
 	//	break;
-	//default:
+	// default:
 	//	break;
-	//}
+	// }
 	goal_->Draw(camera_);
 	// ホッパー
 	for (auto* h : jumpHoppers_) {
@@ -377,7 +378,7 @@ void GameScene::Draw() {
 
 	Sprite::PreDraw(dx->GetCommandList());
 	// Sprite
-	explanationSprite_->Draw();
+	//explanationSprite_->Draw();
 
 	int hp = player_->GetHp();
 	int maxHp = 3; // 後で変数にする
@@ -418,9 +419,9 @@ void GameScene::GenerateBlocks() {
 	uint32_t numBlockVirtical = mapChipField_->GetNumBlockVirtical();
 	uint32_t numBlockHorizontal = mapChipField_->GetNumBlockHorizontal();
 
-	worldTransformBlocks_.resize(numBlockVirtical);
+	blocks_.resize(numBlockVirtical);
 	for (uint32_t i = 0; i < numBlockVirtical; ++i) {
-		worldTransformBlocks_[i].resize(numBlockHorizontal);
+		blocks_[i].resize(numBlockHorizontal);
 	}
 }
 
@@ -429,18 +430,31 @@ void GameScene::CreateBlocksFromMap() {
 	for (uint32_t i = 0; i < mapChipField_->GetNumBlockVirtical(); ++i) {
 		for (uint32_t j = 0; j < mapChipField_->GetNumBlockHorizontal(); ++j) {
 
-			if (mapChipField_->GetMapChipTypeByIndex(j, i) == MapChipType::kBlock) {
-				WorldTransform* worldTransform = new WorldTransform();
-				worldTransform->Initialize();
-				worldTransform->translation_ = mapChipField_->GetMapChipPositionbyIndex(j, i);
-				worldTransformBlocks_[i][j] = worldTransform;
-				WorldTransformUpdate(*worldTransform);
+			auto type = mapChipField_->GetMapChipTypeByIndex(j, i);
+
+			if (type == MapChipType::kBlock) {
+
+				Vector3 pos = mapChipField_->GetMapChipPositionbyIndex(j, i);
+
+				Block* block = new Block();
+				block->Initialize(modelBlock_, pos, false); // 壊れない
+
+				blocks_[i][j] = block;
+			} else if (type == MapChipType::kBreakBlock) {
+
+				Vector3 pos = mapChipField_->GetMapChipPositionbyIndex(j, i);
+
+				Block* block = new Block();
+				block->Initialize(modelBlock_, pos, true); // 壊れる
+
+				blocks_[i][j] = block;
 			} else {
-				worldTransformBlocks_[i][j] = nullptr;
+				blocks_[i][j] = nullptr;
 			}
 		}
 	}
 }
+
 // マップからジャンプ台を生成
 void GameScene::CreateJumpHoppersFromMap() {
 
@@ -522,7 +536,7 @@ void GameScene::CreateEnemiesFromMap() {
 				auto enemy = new WalkEnemy();
 				enemy->Initialize(Model::CreateFromOBJ("baikinMusi"), pos);
 				enemies_.push_back(enemy);
-	
+
 				break;
 			}
 

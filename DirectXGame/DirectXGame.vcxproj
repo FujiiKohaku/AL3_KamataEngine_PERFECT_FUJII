@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
@@ -106,7 +106,7 @@
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="BreakBlock.cpp" />
+    <ClCompile Include="Block.cpp" />
     <ClCompile Include="CameraController.cpp" />
     <ClCompile Include="ChaserEnemy.cpp" />
     <ClCompile Include="ClearScene.cpp" />
@@ -207,7 +207,7 @@
     <None Include="Resources\shaders\Sprite.hlsli" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="BreakBlock.h" />
+    <ClInclude Include="Block.h" />
     <ClInclude Include="CameraController.h" />
     <ClInclude Include="ChaserEnemy.h" />
     <ClInclude Include="ClearScene.h" />

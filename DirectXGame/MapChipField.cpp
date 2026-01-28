@@ -9,11 +9,12 @@ std::map<std::string, MapChipType> mapChipTable = {
     {"1", MapChipType::kBlock},
     {"2", MapChipType::kGoal }, // ゴール
     {"3", MapChipType::kCoin }, // コイン
-    {"4", MapChipType::kSpike}, // 壊れるブロックzz
+    {"4", MapChipType::kSpike}, // スパイク
     {"5", MapChipType::kEnemy}, // 敵
     {"6", MapChipType::kJumpPad}, // ジャンプ台
     {"7", MapChipType::kEnemyFlyer}, // 飛行型エネミー
     {"8", MapChipType::kEnemyChaser}, // 分裂型エネミー
+    {"9", MapChipType::kBreakBlock},//破壊できるブロック
 };
 }
 
