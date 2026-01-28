@@ -208,4 +208,6 @@ public:
 
 public:
 	InhaleEffect* GetInhaleEffect() { return &inhaleEffect_; }
+
+	
 };

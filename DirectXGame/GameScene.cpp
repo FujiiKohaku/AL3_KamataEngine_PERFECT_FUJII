@@ -224,7 +224,7 @@ void GameScene::Update() {
 		//  吸い込み判定（前にある円）
 		// ===============================
 		if (player_->GetInhaleHitBox().active) {
-
+		
 			auto hb = player_->GetInhaleHitBox();
 
 			Vector3 e = enemy->GetWorldTransform().translation_;
@@ -246,11 +246,22 @@ void GameScene::Update() {
 			if (player_->IsDead()) {
 				return;
 			}
+
+			// 吸い込み中は攻撃SEを鳴らさない
+			if (player_->GetInhaleHitBox().active) {
+				player_->OnCollision(enemy);
+				enemy->OnCollision(player_);
+				return;
+			}
+
 			if (player_->IsInvincible())
 				return;
 
 			player_->OnCollision(enemy);
 			enemy->OnCollision(player_);
+			if (enemy->IsPulled()) {
+				continue;
+			}
 			Audio::GetInstance()->PlayWave(AttackSEHandle_);
 		}
 	}
@@ -325,8 +336,6 @@ void GameScene::Update() {
 			if (block->IsJustBroken()) {
 
 				Vector3 pos = block->GetWorldTransform().translation_;
-
-				
 
 				// フラグを戻す（ここ重要）
 				block->ClearJustBroken();
@@ -429,7 +438,7 @@ void GameScene::Draw() {
 
 	Sprite::PreDraw(dx->GetCommandList());
 	// Sprite
-	//explanationSprite_->Draw();
+	// explanationSprite_->Draw();
 
 	int hp = player_->GetHp();
 	int maxHp = 3; // 後で変数にする

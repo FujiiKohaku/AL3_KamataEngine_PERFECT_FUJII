@@ -1,5 +1,6 @@
 #pragma once
 #include "KamataEngine.h"
+#include <memory>
 #include <random>
 #include <vector>
 
@@ -15,13 +16,23 @@ private:
 	struct Particle {
 		Vector3 pos;
 		Vector3 vel;
-		float life = 0.0f;
+		float life;
+		bool alive;
 		WorldTransform wt;
 	};
 
-	std::vector<std::unique_ptr<Particle>> particles_;
+	void CleanupDeadParticles();
+
+private:
 	Model* model_ = nullptr;
+
+	std::vector<std::unique_ptr<Particle>> particles_;
+
 	std::mt19937 rng_{std::random_device{}()};
+
 	float spawnTimer_ = 0.0f;
-	static const int kMaxParticles = 128;
+	int cleanupTimer_ = 0;
+	int frameCount_ = 0;
+
+	static constexpr int kMaxParticles = 128;
 };
