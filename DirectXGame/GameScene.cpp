@@ -76,7 +76,7 @@ void GameScene::Initialize() {
 
 	// ブロックモデルのロード
 	modelBlock_ = Model::CreateFromOBJ("block", true);
-
+	modelBreakBlock_ = Model::CreateFromOBJ("breakBlock", true);
 	// ブロック生成
 	CreateBlocksFromMap();
 	// ゴール生成
@@ -496,7 +496,7 @@ void GameScene::CreateBlocksFromMap() {
 				Vector3 pos = mapChipField_->GetMapChipPositionbyIndex(j, i);
 
 				Block* block = new Block();
-				block->Initialize(modelBlock_, pos, true); // 壊れる
+				block->Initialize(modelBreakBlock_, pos, true); // 壊れる
 				block->SetMapIndex(j, i);
 				blocks_[i][j] = block;
 			} else {

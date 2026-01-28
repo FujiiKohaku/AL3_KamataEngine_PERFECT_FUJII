@@ -1,4 +1,5 @@
 #pragma once
+#include "Block.h"
 #include "CameraController.h"
 #include "ChaserEnemy.h"
 #include "Coin.h"
@@ -17,7 +18,6 @@
 #include "WalkEnemy.h"
 #include <numbers>
 #include <vector>
-#include"Block.h"
 class GameScene {
 public:
 	// 初期化
@@ -87,9 +87,10 @@ private:
 	//---------------
 
 	KamataEngine::Model* modelBlock_;
+
+	KamataEngine::Model* modelBreakBlock_;
 	// 変更後
 	std::vector<std::vector<Block*>> blocks_;
-
 
 	//---------------
 	// MapChipField
