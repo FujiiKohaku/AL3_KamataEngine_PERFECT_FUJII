@@ -48,7 +48,7 @@ void EnemyBase::StartPulled(Player* player) {
 
 void EnemyBase::UpdatePulled() {
 
-	Vector3 dir = Normalize(target_->GetWorldTransform().translation_ - worldTransform_.translation_);
+	Vector3 dir = Normalize(target_->GetWorldTransform().translation_ - worldTransform_.translation_); 
 
 	worldTransform_.translation_ += dir * 0.12f;
 
