@@ -45,24 +45,31 @@ GameScene::~GameScene() {
 
 // 初期化
 void GameScene::Initialize() {
-	// switch (stageState_) {
-	// case StageState::Tutorial:
-	//	//チュートリアル看板
-	//	tutorialSignModel_ = Model::CreateFromOBJ("kanban", true);
-	//	worldTransformTutorialSign_.Initialize();
+	 switch (stageState_) {
+	 case StageState::Tutorial:
 
-	//	break;
-	// case StageState::Stage1:
-	//	break;
-	// case StageState::Stage2:
-	//	break;
-	// default:
-	//	break;
-	//}
+		
+	// チュートリアルモデルAD移動
+	tutorialModelMove_ = Model::CreateFromOBJ("ADBoard", true);
+	worldTransformTutorialMove_.Initialize();
+	worldTransformTutorialMove_.translation_ = {5.0f, 4.0f, 5.0f};
+	worldTransformTutorialMove_.rotation_.y = -std::numbers::pi_v<float> / 2.0f;
+
+		break;
+	 case StageState::Stage1:
+		break;
+	 case StageState::Stage2:
+		break;
+	 default:
+		break;
+	}
+	// チュートリアルモデル
 	tutorialSignModel_ = Model::CreateFromOBJ("kanban", true);
 	worldTransformTutorialSign_.Initialize();
 	worldTransformTutorialSign_.translation_ = {5.0f, 0.0f, 5.0f};
 	worldTransformTutorialSign_.rotation_.y = -std::numbers::pi_v<float> / 2.0f;
+
+
 	//------------------
 	// マップチップフィールド
 	//------------------
@@ -152,7 +159,7 @@ void GameScene::Update() {
 
 	switch (stageState_) {
 	case StageState::Tutorial:
-
+		WorldTransformUpdate(worldTransformTutorialMove_);
 		break;
 	case StageState::Stage1:
 		break;
@@ -224,7 +231,7 @@ void GameScene::Update() {
 		//  吸い込み判定（前にある円）
 		// ===============================
 		if (player_->GetInhaleHitBox().active) {
-		
+
 			auto hb = player_->GetInhaleHitBox();
 
 			Vector3 e = enemy->GetWorldTransform().translation_;
@@ -379,6 +386,7 @@ void GameScene::Update() {
 
 	//	チュートリアル看板
 	WorldTransformUpdate(worldTransformTutorialSign_);
+	
 }
 
 // 描画
@@ -401,18 +409,20 @@ void GameScene::Draw() {
 		}
 	}
 
-	tutorialSignModel_->Draw(worldTransformTutorialSign_, *camera_, nullptr);
-	// switch (stageState_) {
-	// case StageState::Tutorial:
-	//
-	//	break;
-	// case StageState::Stage1:
-	//	break;
-	// case StageState::Stage2:
-	//	break;
-	// default:
-	//	break;
-	// }
+//	tutorialSignModel_->Draw(worldTransformTutorialSign_, *camera_, nullptr);
+
+
+	 switch (stageState_) {
+	 case StageState::Tutorial:
+		 tutorialModelMove_->Draw(worldTransformTutorialMove_, *camera_, nullptr);	
+		break;
+	 case StageState::Stage1:
+		break;
+	 case StageState::Stage2:
+		break;
+	 default:
+		break;
+	 }
 	goal_->Draw(camera_);
 	// ホッパー
 	for (auto* h : jumpHoppers_) {

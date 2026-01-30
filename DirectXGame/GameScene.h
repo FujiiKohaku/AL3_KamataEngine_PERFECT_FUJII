@@ -156,4 +156,8 @@ private:
 	// チュートリアル看板
 	Model* tutorialSignModel_ = nullptr;
 	WorldTransform worldTransformTutorialSign_;
+	// チュートリアル看板移動
+	Model* tutorialModelMove_ = nullptr;
+	WorldTransform worldTransformTutorialMove_;
+
 };
