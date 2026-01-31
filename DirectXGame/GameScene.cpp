@@ -15,6 +15,7 @@ GameScene::~GameScene() {
 	delete mapChipField_;
 	delete explanationSprite_;
 	delete tutorialSignModel_;
+	delete pauseMenuSprite_;
 	for (Coin* coin : coins_) {
 		delete coin;
 	}
@@ -151,10 +152,30 @@ void GameScene::Initialize() {
 
 	AttackSEHandle_ = Audio::GetInstance()->LoadWave("Attack.mp3");
 	coinSEHandle_ = Audio::GetInstance()->LoadWave("coin.mp3");
+
+
+	pauseTExture_ = TextureManager::Load("menuSprite.png");
+
+
+	 pauseMenuSprite_->Create();
 }
 
 // 更新
 void GameScene::Update() {
+
+	// --- TABでポーズ切り替え ---
+	if (Input::GetInstance()->TriggerKey(DIK_TAB)) {
+		if (gameState_ == GameState::Playing) {
+			gameState_ = GameState::Paused;
+		} else {
+			gameState_ = GameState::Playing;
+		}
+	}
+	// --- ポーズ中 ---
+	if (gameState_ == GameState::Paused) {
+		UpdatePauseMenu();
+		return; //  ここで止めるのが超重要
+	}
 
 	switch (stageState_) {
 	case StageState::Tutorial:
@@ -445,6 +466,11 @@ void GameScene::Draw() {
 
 	Sprite::PreDraw(dx->GetCommandList());
 	// Sprite
+	// ===== ポーズメニュー =====
+	if (gameState_ == GameState::Paused) {
+
+		pauseMenuSprite_->Draw();
+	}
 	explanationSprite_->Draw();
 
 	int hp = player_->GetHp();
@@ -679,4 +705,16 @@ bool GameScene::IsHitPlayerEnemy(Player* player, EnemyBase* enemy) {
 	float r = player->GetRadius() + enemy->GetRadius();
 
 	return dist < r;
+}
+void GameScene::UpdatePauseMenu() {
+
+	// Enterでゲームに戻る
+	if (Input::GetInstance()->TriggerKey(DIK_RETURN)) {
+		gameState_ = GameState::Playing;
+	}
+
+	// Tキーでタイトルに戻る
+	if (Input::GetInstance()->TriggerKey(DIK_T)) {
+		returnToTitle_ = true;
+	}
 }

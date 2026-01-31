@@ -18,6 +18,7 @@
 #include "WalkEnemy.h"
 #include <numbers>
 #include <vector>
+
 class GameScene {
 public:
 	// 初期化
@@ -52,9 +53,17 @@ public:
 
 	// セッター
 	void SetStageState(StageState state) { stageState_ = state; }
+	void UpdatePauseMenu();
+	bool IsReturnToTitle() const { return returnToTitle_; }
 
 private:
+	enum class GameState { Playing, Paused };
+	GameState gameState_ = GameState::Playing;
 	StageState stageState_ = StageState::Tutorial;
+
+	// ポーズ画面
+	Sprite* pauseMenuSprite_ = nullptr;
+	uint32_t pauseTExture_;
 	//============
 	// 状態管理
 	//============
@@ -68,7 +77,7 @@ private:
 	Player* player_ = nullptr;             // 自キャラ
 
 	KamataEngine::Vector3 pos_;
-
+	bool returnToTitle_ = false;
 	//---------------
 	// skydome
 	//---------------
@@ -159,5 +168,4 @@ private:
 	// チュートリアル看板移動
 	Model* tutorialModelMove_ = nullptr;
 	WorldTransform worldTransformTutorialMove_;
-
 };
