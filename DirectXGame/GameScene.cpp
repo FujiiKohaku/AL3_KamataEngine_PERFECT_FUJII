@@ -45,22 +45,22 @@ GameScene::~GameScene() {
 
 // 初期化
 void GameScene::Initialize() {
-	 switch (stageState_) {
-	 case StageState::Tutorial:
+	switch (stageState_) {
+	case StageState::Tutorial:
 
-		
-	// チュートリアルモデルAD移動
-	tutorialModelMove_ = Model::CreateFromOBJ("ADBoard", true);
-	worldTransformTutorialMove_.Initialize();
-	worldTransformTutorialMove_.translation_ = {5.0f, 4.0f, 5.0f};
-	worldTransformTutorialMove_.rotation_.y = -std::numbers::pi_v<float> / 2.0f;
+		// チュートリアルモデルAD移動
+		tutorialModelMove_ = Model::CreateFromOBJ("ADBoard", true);
+		worldTransformTutorialMove_.Initialize();
+		worldTransformTutorialMove_.translation_ = {10.0f, 4.0f, 5.0f};
+		worldTransformTutorialMove_.scale_ = {2.0f, 2.0f, 2.0f};
+		worldTransformTutorialMove_.rotation_.y = -std::numbers::pi_v<float> / 2.0f;
 
 		break;
-	 case StageState::Stage1:
+	case StageState::Stage1:
 		break;
-	 case StageState::Stage2:
+	case StageState::Stage2:
 		break;
-	 default:
+	default:
 		break;
 	}
 	// チュートリアルモデル
@@ -68,7 +68,6 @@ void GameScene::Initialize() {
 	worldTransformTutorialSign_.Initialize();
 	worldTransformTutorialSign_.translation_ = {5.0f, 0.0f, 5.0f};
 	worldTransformTutorialSign_.rotation_.y = -std::numbers::pi_v<float> / 2.0f;
-
 
 	//------------------
 	// マップチップフィールド
@@ -386,7 +385,6 @@ void GameScene::Update() {
 
 	//	チュートリアル看板
 	WorldTransformUpdate(worldTransformTutorialSign_);
-	
 }
 
 // 描画
@@ -409,20 +407,19 @@ void GameScene::Draw() {
 		}
 	}
 
-//	tutorialSignModel_->Draw(worldTransformTutorialSign_, *camera_, nullptr);
+	tutorialSignModel_->Draw(worldTransformTutorialSign_, *camera_, nullptr);
 
-
-	 switch (stageState_) {
-	 case StageState::Tutorial:
-		 tutorialModelMove_->Draw(worldTransformTutorialMove_, *camera_, nullptr);	
+	switch (stageState_) {
+	case StageState::Tutorial:
+		tutorialModelMove_->Draw(worldTransformTutorialMove_, *camera_, nullptr);
 		break;
-	 case StageState::Stage1:
+	case StageState::Stage1:
 		break;
-	 case StageState::Stage2:
+	case StageState::Stage2:
 		break;
-	 default:
+	default:
 		break;
-	 }
+	}
 	goal_->Draw(camera_);
 	// ホッパー
 	for (auto* h : jumpHoppers_) {
@@ -448,7 +445,7 @@ void GameScene::Draw() {
 
 	Sprite::PreDraw(dx->GetCommandList());
 	// Sprite
-	// explanationSprite_->Draw();
+	explanationSprite_->Draw();
 
 	int hp = player_->GetHp();
 	int maxHp = 3; // 後で変数にする
