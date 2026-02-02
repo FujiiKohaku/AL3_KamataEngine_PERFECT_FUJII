@@ -33,10 +33,13 @@ void Player::Initialize(Model* model, Camera* camera, const Vector3& position) {
 }
 void Player::Shoot() {
 
-	if (vacuumPoint_ <= 0) {
-		return;
-	}
 
+	if (!isRapidShot_) {
+		if (vacuumPoint_ <= 0) {
+			return;
+		}
+		vacuumPoint_ = 0;
+	}
 	std::unique_ptr<PlayerBullet> bullet = std::make_unique<PlayerBullet>();
 
 	Vector3 dir{};
@@ -203,6 +206,13 @@ void Player::Update() {
 			it = bullets_.erase(it);
 		} else {
 			++it;
+		}
+	}
+	//ラピッドショット！！！
+	if (isRapidShot_) {
+		rapidShotTimer_ -= 1.0f / 60.0f;
+		if (rapidShotTimer_ <= 0.0f) {
+			isRapidShot_ = false;
 		}
 	}
 
@@ -855,3 +865,9 @@ Vector3 Player::CornerPosition(const Vector3& center, Corner corner) {
 }
 
 #pragma endregion
+
+void Player::ActivateRapidShot(float time) {
+
+	isRapidShot_ = true;
+	rapidShotTimer_ = time;
+}

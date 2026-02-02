@@ -12,13 +12,13 @@
 #include "KamataEngine.h"
 #include "MapChipField.h"
 #include "Player.h"
+#include "RapidShotItem.h"
 #include "Skydome.h"
 #include "Spike.h"
 #include "StageState.h"
 #include "WalkEnemy.h"
 #include <numbers>
 #include <vector>
-
 class GameScene {
 public:
 	// 初期化
@@ -50,7 +50,8 @@ public:
 	void SetMapCsvPath(const std::string& path) { mapCsvPath_ = path; }
 	void UpdateCoins();
 	bool IsNearPlayer(const Vector3& pos, float range);
-
+	void CreateRapidShotItemsFromMap();
+	bool IsHitPlayerItem(Player* player, RapidShotItem* item);
 	// セッター
 	void SetStageState(StageState state) { stageState_ = state; }
 	void UpdatePauseMenu();
@@ -131,7 +132,8 @@ private:
 	//---------------
 	Fade fade_;                // フェードクラス
 	bool isFadingOut_ = false; // フェードアウト中かどうか
-
+	// 連射アイテム
+	std::vector<RapidShotItem*> rapidShotItems_;
 	//---------------
 	// エネミー
 	//---------------
@@ -165,9 +167,6 @@ private:
 	uint32_t tabMenuHandle_ = 0;
 
 	Sprite* tabMenu_ = nullptr;
-
-
-
 
 	// チュートリアル看板
 	Model* tutorialSignModel_ = nullptr;

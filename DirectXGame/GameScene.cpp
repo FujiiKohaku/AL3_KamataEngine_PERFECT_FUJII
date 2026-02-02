@@ -106,7 +106,7 @@ void GameScene::Initialize() {
 	player_ = new Player();
 	player_->Initialize(model_, camera_, pos_);
 	player_->SetMapChipField(mapChipField_);
-
+	CreateRapidShotItemsFromMap();
 	// 敵生成
 	CreateEnemiesFromMap();
 	//------------------
@@ -156,11 +156,8 @@ void GameScene::Initialize() {
 	pauseTExture_ = TextureManager::Load("menu.png");
 	pauseMenuSprite_ = Sprite::Create(pauseTExture_, {0.0f, 0.0f});
 
-
 	tabMenuHandle_ = TextureManager::Load("tabmenu.png");
 	tabMenu_ = Sprite::Create(tabMenuHandle_, {0.0f, 140.0f});
-
-
 }
 
 // 更新
@@ -195,6 +192,19 @@ void GameScene::Update() {
 	player_->Update();
 	skydome_->Update();
 	fade_.Update();
+
+	for (RapidShotItem* item : rapidShotItems_) {
+
+		item->Update();
+		if (item->IsCollected()) {
+			continue;
+		}
+
+		if (IsHitPlayerItem(player_, item)) {
+			item->OnCollision(player_);
+		}
+	}
+
 	// -----------------------
 	// ジャンプホッパー更新
 	// -----------------------
@@ -462,13 +472,18 @@ void GameScene::Draw() {
 	for (auto* enemy : enemies_) {
 		enemy->Draw(camera_);
 	}
+	for (auto* items_ : rapidShotItems_) {
+		items_->Draw(camera_);
+	}
 	player_->GetInhaleEffect()->Draw(camera_);
 	Model::PostDraw();
 
 	fade_.Draw();
 
-	Sprite::PreDraw(dx->GetCommandList());
 
+	
+
+	Sprite::PreDraw(dx->GetCommandList());
 
 	// explanationSprite_->Draw();
 
@@ -622,6 +637,24 @@ void GameScene::CreateSpikesFromMap() {
 	}
 }
 
+void GameScene::CreateRapidShotItemsFromMap() {
+
+	for (uint32_t i = 0; i < mapChipField_->GetNumBlockVirtical(); ++i) {
+		for (uint32_t j = 0; j < mapChipField_->GetNumBlockHorizontal(); ++j) {
+
+			if (mapChipField_->GetMapChipTypeByIndex(j, i) == MapChipType::kRapidShotItem) {
+
+				Vector3 pos = mapChipField_->GetMapChipPositionbyIndex(j, i);
+
+				RapidShotItem* item = new RapidShotItem();
+				item->Initialize(Model::CreateFromOBJ("spike"), pos);
+
+				rapidShotItems_.push_back(item);
+			}
+		}
+	}
+}
+
 void GameScene::CreateEnemiesFromMap() {
 
 	for (uint32_t i = 0; i < mapChipField_->GetNumBlockVirtical(); ++i) {
@@ -724,4 +757,17 @@ void GameScene::UpdatePauseMenu() {
 	if (Input::GetInstance()->TriggerKey(DIK_T)) {
 		returnToTitle_ = true;
 	}
+}
+bool GameScene::IsHitPlayerItem(Player* player, RapidShotItem* item) {
+
+	Vector3 p = player->GetWorldTransform().translation_;
+	Vector3 i = item->GetWorldTransform().translation_;
+
+	Vector3 diff = p - i;
+
+	float dist = std::sqrtf(diff.x * diff.x + diff.y * diff.y + diff.z * diff.z);
+
+	float r = player->GetRadius() + item->GetRadius();
+
+	return dist < r;
 }

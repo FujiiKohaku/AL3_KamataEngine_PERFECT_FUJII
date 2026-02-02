@@ -1,11 +1,11 @@
 #pragma once
 #include "KamataEngine.h"
 
-#include <list>
-#include <vector>
+#include "InhaleEffect.h"
 #include "PlayerBullet.h"
+#include <list>
 #include <memory>
-#include"InhaleEffect.h"
+#include <vector>
 using namespace KamataEngine;
 
 class MapChipField;
@@ -61,8 +61,11 @@ public:
 	int GetHp() const { return hp_; }
 	int GetMaxHp() const { return maxHp_; }
 
+	void ActivateRapidShot(float time);
 
 private:
+	bool isRapidShot_ = true;
+	float rapidShotTimer_;
 	struct HitBox {
 		Vector3 pos;
 		float radius = 1.0f; // 吸い込み範囲
@@ -191,8 +194,6 @@ private:
 	void Shoot();
 	bool canShoot_ = false;
 
-
-
 	InhaleEffect inhaleEffect_;
 
 	uint32_t shotSeHandle_ = 0;
@@ -204,11 +205,8 @@ public:
 
 	std::list<std::unique_ptr<PlayerBullet>>& GetBullets() { return bullets_; }
 
-
 	const HitBox& GetInhaleHitBox() const { return inhaleHitBox_; }
 
 public:
 	InhaleEffect* GetInhaleEffect() { return &inhaleEffect_; }
-
-	
 };
