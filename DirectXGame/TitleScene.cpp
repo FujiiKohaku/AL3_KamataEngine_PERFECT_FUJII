@@ -19,25 +19,22 @@ void TitleScene::Initialize() {
 	// Initialize
 	basePos_ = worldTransformTitle_.translation_;
 
-
-
-	titleSprite_ = Sprite::Create(TextureManager::Load("title.png"), {-100.0f, -170.0f});
+	titleSprite_ = Sprite::Create(TextureManager::Load("title.png"), {-10.0f, -170.0f});
 	worldTransformLogo_.Initialize();
 	worldTransformLogo_.rotation_.x = std::numbers::pi_v<float> / 2.0f;
 	worldTransformLogo_.rotation_.y = std::numbers::pi_v<float>;
 	worldTransformLogo_.scale_ = {0.5f, 0.5f, 0.5f};
 	worldTransformLogo_.translation_.y = 2.0f;
 	worldTransformLogo_.translation_.z = -5.0f;
+	worldTransformLogo_.translation_.x = 20.0f;
 	WorldTransformUpdate(worldTransformLogo_);
-
-
 
 	modelSkydome_ = Model::CreateFromOBJ("skydome", true);
 	skydome_ = new Skydome();
 	skydome_->Initialize(modelSkydome_, &camera_);
 
 	bgmHandle_ = Audio::GetInstance()->LoadWave("title.mp3");
-	bgmPlayHandle_=Audio::GetInstance()->PlayWave(bgmHandle_, true);
+	bgmPlayHandle_ = Audio::GetInstance()->PlayWave(bgmHandle_, true);
 }
 
 void TitleScene::Update() {
