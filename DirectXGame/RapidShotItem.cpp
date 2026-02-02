@@ -1,11 +1,12 @@
 #include "RapidShotItem.h"
+#include "Math.h"
 #include "Player.h"
-#include"Math.h"
 void RapidShotItem::Initialize(Model* model, const Vector3& pos) {
 
 	model_ = model;
 
 	worldTransform_.Initialize();
+	worldTransform_.scale_ = {0.5f, 0.5f, 0.5f};
 	worldTransform_.translation_ = pos;
 }
 
@@ -15,7 +16,7 @@ void RapidShotItem::Update() {
 		return;
 	}
 
- WorldTransformUpdate(worldTransform_);
+	WorldTransformUpdate(worldTransform_);
 }
 
 void RapidShotItem::Draw(Camera* camera) {
