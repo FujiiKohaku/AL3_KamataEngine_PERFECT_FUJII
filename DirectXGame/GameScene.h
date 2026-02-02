@@ -162,6 +162,10 @@ private:
 
 	uint32_t coinSEHandle_ = 0;
 
+	uint32_t tabMenuHandle_ = 0;
+
+	Sprite* tabMenu_ = nullptr;
+
 	// チュートリアル看板
 	Model* tutorialSignModel_ = nullptr;
 	WorldTransform worldTransformTutorialSign_;
