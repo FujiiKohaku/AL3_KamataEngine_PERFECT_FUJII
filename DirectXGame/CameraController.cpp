@@ -19,6 +19,32 @@ void CameraController::Finalize() {
 void CameraController::Initialize(KamataEngine::Camera* camera) { camera_ = camera; }
 
 void CameraController::Update() {
+
+
+		// =========================
+	// ラピッドショット・カットイン中
+	// =========================
+	    if (state_ == CameraState::RapidShotCutIn) {
+
+		    cutInTimer_ -= 1.0f / 60.0f;
+
+		    float t = 1.0f - (cutInTimer_ / cutInDuration_);
+		    t = std::clamp(t, 0.0f, 1.0f);
+
+		    // EaseOutCubic（気持ちいい）
+		    float eased = 1.0f - (1.0f - t) * (1.0f - t) * (1.0f - t);
+
+		    camera_->translation_ = Lerp(cutInStartPos_, cutInTargetPos_, eased);
+
+		    camera_->UpdateMatrix();
+
+		    if (cutInTimer_ <= 0.0f) {
+			    state_ = CameraState::Normal;
+		    }
+
+		    return;
+	    }
+
 	// プレイヤーの現在位置を取得
 	const WorldTransform& targetWorldTransform = target_->GetWorldTransform();
 
@@ -69,4 +95,17 @@ void CameraController::Reset() {
 void CameraController::StartShake(float power, float time) {
 	shakePower_ = power;
 	shakeTimer_ = time;
+}
+void CameraController::StartRapidShotCutIn() {
+
+	state_ = CameraState::RapidShotCutIn;
+	cutInTimer_ = cutInDuration_;
+
+	// 開始位置を保存
+	cutInStartPos_ = camera_->translation_;
+
+	// プレイヤー位置 + 少し上 + 寄る
+	const WorldTransform& targetWorldTransform = target_->GetWorldTransform();
+	cutInTargetPos_ = targetWorldTransform.translation_ + Vector3(0.0f, 0.6f, -3.5f);
+	
 }

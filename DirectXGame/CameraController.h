@@ -59,4 +59,22 @@ private:
 	static inline const float kinterpolationRate = 0.1f;
 	static inline const float kVelocityBias = 20.0f;
 	static inline const Rect targetMargin = {-9.0f, 9.0f, -5.0f, 5.0f};
+	enum class CameraState {
+		Normal,
+		RapidShotCutIn,
+	};
+
+	
+	public:
+		void StartRapidShotCutIn();
+
+	private:
+		CameraState state_ = CameraState::Normal;
+
+		float cutInTimer_ = 0.0f;
+		const float cutInDuration_ = 0.35f;
+
+		Vector3 cutInOffset_;
+	    Vector3 cutInStartPos_;  // カットイン開始時のカメラ位置
+	    Vector3 cutInTargetPos_; // カットインの最終位置
 };

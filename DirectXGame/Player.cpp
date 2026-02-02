@@ -870,4 +870,5 @@ void Player::ActivateRapidShot(float time) {
 
 	isRapidShot_ = true;
 	rapidShotTimer_ = time;
+	CameraController::GetInstance()->StartRapidShotCutIn();
 }
