@@ -13,8 +13,9 @@ std::map<std::string, MapChipType> mapChipTable = {
     {"5", MapChipType::kEnemy}, // 敵
     {"6", MapChipType::kJumpPad}, // ジャンプ台
     {"7", MapChipType::kEnemyFlyer}, // 飛行型エネミー
-    {"8", MapChipType::kEnemyChaser}, // 分裂型エネミー
+    {"8", MapChipType::kEnemyChaser}, // 追跡エネミー
     {"9", MapChipType::kBreakBlock},//破壊できるブロック
+    {"10",MapChipType::kRapidShotItem},//吐き出し無限アイテム
 };
 }
 

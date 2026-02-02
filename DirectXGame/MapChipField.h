@@ -18,6 +18,8 @@ enum class MapChipType {
 	kEnemyFlyer, // 飛行型エネミー
 	kEnemyChaser, //追尾エネミー
 	kBreakBlock, //破壊できるブロック
+	kRapidShotItem, //吐き出し放題アイテム
+
 };
 
 // マップ全体のデータ構造
