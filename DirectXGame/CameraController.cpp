@@ -20,30 +20,43 @@ void CameraController::Initialize(KamataEngine::Camera* camera) { camera_ = came
 
 void CameraController::Update() {
 
-
-		// =========================
-	// ラピッドショット・カットイン中
+// =========================
+	// ラピッドショット・カットイン
 	// =========================
-	    if (state_ == CameraState::RapidShotCutIn) {
+	if (state_ == CameraState::RapidShotCutInIn || state_ == CameraState::RapidShotCutInOut) {
 
-		    cutInTimer_ -= 1.0f / 60.0f;
+		cutInTimer_ -= 1.0f / 60.0f;
 
-		    float t = 1.0f - (cutInTimer_ / cutInDuration_);
-		    t = std::clamp(t, 0.0f, 1.0f);
+		float t = 1.0f - (cutInTimer_ / cutInDuration_);
+		t = std::clamp(t, 0.0f, 1.0f);
 
-		    // EaseOutCubic（気持ちいい）
-		    float eased = 1.0f - (1.0f - t) * (1.0f - t) * (1.0f - t);
+		// EaseOutCubic
+		float eased = 1.0f - (1.0f - t) * (1.0f - t) * (1.0f - t);
 
-		    camera_->translation_ = Lerp(cutInStartPos_, cutInTargetPos_, eased);
+		if (state_ == CameraState::RapidShotCutInIn) {
+			// 元 → 寄る
+			camera_->translation_ = Lerp(cutInStartPos_, cutInTargetPos_, eased);
+		} else {
+			// 寄る → 元
+			camera_->translation_ = Lerp(cutInTargetPos_, cutInStartPos_, eased);
+		}
 
-		    camera_->UpdateMatrix();
+		camera_->UpdateMatrix();
 
-		    if (cutInTimer_ <= 0.0f) {
-			    state_ = CameraState::Normal;
-		    }
+		if (cutInTimer_ <= 0.0f) {
 
-		    return;
-	    }
+			if (state_ == CameraState::RapidShotCutInIn) {
+				// 後半（戻り）へ
+				state_ = CameraState::RapidShotCutInOut;
+				cutInTimer_ = cutInDuration_;
+			} else {
+				// 完全終了
+				state_ = CameraState::Normal;
+			}
+		}
+
+		return;
+	}
 
 	// プレイヤーの現在位置を取得
 	const WorldTransform& targetWorldTransform = target_->GetWorldTransform();
@@ -98,14 +111,13 @@ void CameraController::StartShake(float power, float time) {
 }
 void CameraController::StartRapidShotCutIn() {
 
-	state_ = CameraState::RapidShotCutIn;
+	state_ = CameraState::RapidShotCutInIn;
 	cutInTimer_ = cutInDuration_;
 
-	// 開始位置を保存
+	// 元の位置を保存
 	cutInStartPos_ = camera_->translation_;
 
-	// プレイヤー位置 + 少し上 + 寄る
+	// 寄る先
 	const WorldTransform& targetWorldTransform = target_->GetWorldTransform();
 	cutInTargetPos_ = targetWorldTransform.translation_ + Vector3(0.0f, 0.6f, -3.5f);
-	
 }

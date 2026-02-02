@@ -61,8 +61,10 @@ private:
 	static inline const Rect targetMargin = {-9.0f, 9.0f, -5.0f, 5.0f};
 	enum class CameraState {
 		Normal,
-		RapidShotCutIn,
+		RapidShotCutInIn,  // 寄る
+		RapidShotCutInOut, // 戻る
 	};
+
 
 	
 	public:
