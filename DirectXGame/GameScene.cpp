@@ -152,12 +152,9 @@ void GameScene::Initialize() {
 
 	AttackSEHandle_ = Audio::GetInstance()->LoadWave("Attack.mp3");
 	coinSEHandle_ = Audio::GetInstance()->LoadWave("coin.mp3");
-
-
-	pauseTExture_ = TextureManager::Load("menuSprite.png");
-
-
-	 pauseMenuSprite_->Create();
+	// テクスチャを作成スプライトへ
+	pauseTExture_ = TextureManager::Load("menu.png");
+	pauseMenuSprite_ = Sprite::Create(pauseTExture_, {0.0f, 0.0f});
 }
 
 // 更新
@@ -171,6 +168,7 @@ void GameScene::Update() {
 			gameState_ = GameState::Playing;
 		}
 	}
+
 	// --- ポーズ中 ---
 	if (gameState_ == GameState::Paused) {
 		UpdatePauseMenu();
@@ -191,7 +189,6 @@ void GameScene::Update() {
 	player_->Update();
 	skydome_->Update();
 	fade_.Update();
-
 	// -----------------------
 	// ジャンプホッパー更新
 	// -----------------------
@@ -465,13 +462,9 @@ void GameScene::Draw() {
 	fade_.Draw();
 
 	Sprite::PreDraw(dx->GetCommandList());
-	// Sprite
-	// ===== ポーズメニュー =====
-	if (gameState_ == GameState::Paused) {
 
-		pauseMenuSprite_->Draw();
-	}
-	explanationSprite_->Draw();
+
+	// explanationSprite_->Draw();
 
 	int hp = player_->GetHp();
 	int maxHp = 3; // 後で変数にする
@@ -500,6 +493,12 @@ void GameScene::Draw() {
 			heartsEmpty_[i]->SetPosition(pos);
 			heartsEmpty_[i]->Draw();
 		}
+	}
+	// Sprite
+	// ===== ポーズメニュー =====
+	if (gameState_ == GameState::Paused) {
+
+		pauseMenuSprite_->Draw();
 	}
 
 	Sprite::PostDraw();

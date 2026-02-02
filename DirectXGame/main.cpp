@@ -3,10 +3,11 @@
 #include "GameOverScene.h"
 #include "GameScene.h"
 #include "KamataEngine.h"
-#include "TitleScene.h"
 #include "SelectScene.h"
-#include <Windows.h>
 #include "StageState.h"
+#include "TitleScene.h"
+#include <Windows.h>
+
 using namespace KamataEngine;
 
 //===================
@@ -99,6 +100,10 @@ void ChangeScene() {
 				fade.Start(Fade::Status::FadeIn, 1.0f);
 				isSceneChanging = true;
 				nextScene = Scene::kClear;
+			} else if (gameScene->IsReturnToTitle()) {
+				fade.Start(Fade::Status::FadeIn, 0.3f);
+				isSceneChanging = true;
+				nextScene = Scene::kTitle;
 			}
 			break;
 
@@ -161,7 +166,6 @@ void ChangeScene() {
 		isSceneChanging = false;
 	}
 }
-
 
 //===================
 // シーン更新関数
@@ -227,25 +231,21 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	titleScene->Initialize();
 
 	fade.Initialize();
-	fade.Start(Fade::Status::FadeOut,1.0f);
+	fade.Start(Fade::Status::FadeOut, 1.0f);
 
 	while (true) {
 
 		if (KamataEngine::Update())
 			break;
 
-		
-
 		ChangeScene();
 		UpdateScene();
 		fade.Update();
 
-	
-
 		dxCommon->PreDraw();
 		DrawScene();
 		fade.Draw();
-	
+
 		dxCommon->PostDraw();
 	}
 
