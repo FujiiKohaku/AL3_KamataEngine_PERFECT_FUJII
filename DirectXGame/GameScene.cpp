@@ -155,6 +155,12 @@ void GameScene::Initialize() {
 	// テクスチャを作成スプライトへ
 	pauseTExture_ = TextureManager::Load("menu.png");
 	pauseMenuSprite_ = Sprite::Create(pauseTExture_, {0.0f, 0.0f});
+
+
+	tabMenuHandle_ = TextureManager::Load("tabmenu.png");
+	tabMenu_ = Sprite::Create(tabMenuHandle_, {0.0f, 140.0f});
+
+
 }
 
 // 更新
@@ -494,6 +500,8 @@ void GameScene::Draw() {
 			heartsEmpty_[i]->Draw();
 		}
 	}
+
+	tabMenu_->Draw();
 	// Sprite
 	// ===== ポーズメニュー =====
 	if (gameState_ == GameState::Paused) {

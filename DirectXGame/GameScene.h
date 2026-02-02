@@ -166,6 +166,9 @@ private:
 
 	Sprite* tabMenu_ = nullptr;
 
+
+
+
 	// チュートリアル看板
 	Model* tutorialSignModel_ = nullptr;
 	WorldTransform worldTransformTutorialSign_;
