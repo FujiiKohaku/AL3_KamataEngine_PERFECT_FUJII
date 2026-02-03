@@ -40,7 +40,7 @@ GameScene::~GameScene() {
 	for (JumpHopper* h : jumpHoppers_) {
 		delete h;
 	}
-	
+
 	jumpHoppers_.clear();
 
 	enemies_.clear();
@@ -154,6 +154,9 @@ void GameScene::Initialize() {
 
 	AttackSEHandle_ = Audio::GetInstance()->LoadWave("Attack.mp3");
 	coinSEHandle_ = Audio::GetInstance()->LoadWave("coin.mp3");
+
+	breakBlockSEHandle_ = Audio::GetInstance()->LoadWave("maou_se_battle18.wav");
+
 	// テクスチャを作成スプライトへ
 	pauseTExture_ = TextureManager::Load("menu.png");
 	pauseMenuSprite_ = Sprite::Create(pauseTExture_, {0.0f, 0.0f});
@@ -164,10 +167,10 @@ void GameScene::Initialize() {
 	// 説明看板
 	rapidBoardModel_ = Model::CreateFromOBJ("kanban2");
 	worldTransformRapid_.Initialize();
-	worldTransformRapid_.translation_ = {80.0f,5.0f,2.0f};
-	worldTransformRapid_.rotation_.y = - std::numbers::pi_v<float> / 2.0f;
+	worldTransformRapid_.translation_ = {80.0f, 5.0f, 2.0f};
+	worldTransformRapid_.rotation_.y = -std::numbers::pi_v<float> / 2.0f;
 
-	//ブロック破壊エフェクト
+	// ブロック破壊エフェクト
 	blockBreakModel_ = Model::CreateFromOBJ("breakBlock", false);
 }
 
@@ -251,7 +254,7 @@ void GameScene::Update() {
 		// -----------------------
 		CameraController::GetInstance()->Update();
 	}
-	
+
 	WorldTransformUpdate(worldTransformRapid_);
 	// -----------------------
 	// ゴール更新
@@ -354,6 +357,7 @@ void GameScene::Update() {
 
 				bullet.Kill();
 				enemy->OnHit();
+
 				break;
 			}
 		}
@@ -381,6 +385,7 @@ void GameScene::Update() {
 					block->Break();
 					bullet.Kill();
 
+					Audio::GetInstance()->PlayWave(breakBlockSEHandle_);
 					mapChipField_->SetMapChipTypeByIndex(block->GetMapX(), block->GetMapY(), MapChipType::kBlank);
 
 					break;
@@ -395,11 +400,10 @@ void GameScene::Update() {
 				continue;
 			}
 
-		if (block->IsJustBroken()) {
+			if (block->IsJustBroken()) {
 
 				Vector3 pos = block->GetWorldTransform().translation_;
 
-				
 				const int kPieceCount = 6;
 				for (int i = 0; i < kPieceCount; i++) {
 
@@ -410,7 +414,6 @@ void GameScene::Update() {
 
 				block->ClearJustBroken();
 			}
-
 		}
 	}
 
@@ -439,8 +442,6 @@ void GameScene::Update() {
 		finished_ = true;
 		Audio::GetInstance()->StopWave(bgmPlayHandle_);
 	}
-
-
 
 	//	チュートリアル看板
 	WorldTransformUpdate(worldTransformTutorialSign_);
@@ -482,7 +483,7 @@ void GameScene::Draw() {
 		effect->Draw(camera_);
 	}
 	tutorialSignModel_->Draw(worldTransformTutorialSign_, *camera_, nullptr);
-	
+
 	switch (stageState_) {
 	case StageState::Tutorial:
 		tutorialModelMove_->Draw(worldTransformTutorialMove_, *camera_, nullptr);
@@ -806,6 +807,7 @@ void GameScene::UpdatePauseMenu() {
 	// Tキーでタイトルに戻る
 	if (Input::GetInstance()->TriggerKey(DIK_T)) {
 		returnToTitle_ = true;
+		Audio::GetInstance()->StopWave(bgmPlayHandle_);
 	}
 }
 bool GameScene::IsHitPlayerItem(Player* player, RapidShotItem* item) {

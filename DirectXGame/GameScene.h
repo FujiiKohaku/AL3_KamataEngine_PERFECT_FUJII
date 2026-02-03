@@ -172,6 +172,7 @@ private:
 
 	uint32_t AttackSEHandle_ = 0;
 
+	uint32_t breakBlockSEHandle_ = 0;
 	uint32_t coinSEHandle_ = 0;
 
 	uint32_t tabMenuHandle_ = 0;
@@ -189,8 +190,7 @@ private:
 	Model* rapidBoardModel_ = nullptr;
 	WorldTransform worldTransformRapid_;
 
-
-	//エフェクト
+	// エフェクト
 	std::vector<std::unique_ptr<BlockBreakEffect>> blockBreakEffects_;
 	Model* blockBreakModel_ = nullptr;
 };
