@@ -80,7 +80,7 @@ void GameScene::Initialize() {
 	// ブロック配列の生成（要素サイズだけ確保）
 	//------------------
 	GenerateBlocks();
-
+	rapidCutInSprite_ = Sprite::Create(TextureManager::Load("rapidCutIn.png"), {0.0f, 0.0f});
 	// ブロックモデルのロード
 	modelBlock_ = Model::CreateFromOBJ("block", true);
 	modelBreakBlock_ = Model::CreateFromOBJ("breakBlock", true);
@@ -192,7 +192,15 @@ void GameScene::Update() {
 	player_->Update();
 	skydome_->Update();
 	fade_.Update();
+	if (rapidCutInActive_) {
 
+		rapidCutInTimer_ -= 1.0f / 60.0f;
+
+		if (rapidCutInTimer_ <= 0.0f) {
+			rapidCutInActive_ = false;
+			gTimeScale = 1.0f;
+		}
+	}
 	for (RapidShotItem* item : rapidShotItems_) {
 
 		item->Update();
@@ -202,6 +210,7 @@ void GameScene::Update() {
 
 		if (IsHitPlayerItem(player_, item)) {
 			item->OnCollision(player_);
+			StartRapidCutIn();
 		}
 	}
 
@@ -429,7 +438,10 @@ void GameScene::Draw() {
 	Model::PreDraw(dx->GetCommandList());
 
 	// ---- 描画したいもの全部 ----
+
+	// player
 	player_->Draw();
+
 	skydome_->Draw();
 
 	for (auto& line : blocks_) {
@@ -480,9 +492,6 @@ void GameScene::Draw() {
 
 	fade_.Draw();
 
-
-	
-
 	Sprite::PreDraw(dx->GetCommandList());
 
 	// explanationSprite_->Draw();
@@ -522,6 +531,14 @@ void GameScene::Draw() {
 	if (gameState_ == GameState::Paused) {
 
 		pauseMenuSprite_->Draw();
+	}
+	if (rapidCutInActive_) {
+
+		float alpha = rapidCutInTimer_ / kRapidCutInTime;
+		alpha = std::clamp(alpha, 0.0f, 1.0f);
+
+		rapidCutInSprite_->SetColor({1.0f, 1.0f, 1.0f, alpha});
+		rapidCutInSprite_->Draw();
 	}
 
 	Sprite::PostDraw();
@@ -770,4 +787,12 @@ bool GameScene::IsHitPlayerItem(Player* player, RapidShotItem* item) {
 	float r = player->GetRadius() + item->GetRadius();
 
 	return dist < r;
+}
+void GameScene::StartRapidCutIn() {
+
+	rapidCutInActive_ = true;
+	rapidCutInTimer_ = kRapidCutInTime;
+
+	// 一瞬スロー（気持ちいい）
+	gTimeScale = 0.2f;
 }

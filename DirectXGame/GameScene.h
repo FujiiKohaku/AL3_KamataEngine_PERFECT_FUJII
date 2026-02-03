@@ -56,11 +56,18 @@ public:
 	void SetStageState(StageState state) { stageState_ = state; }
 	void UpdatePauseMenu();
 	bool IsReturnToTitle() const { return returnToTitle_; }
+	void StartRapidCutIn();
 
 private:
 	enum class GameState { Playing, Paused };
 	GameState gameState_ = GameState::Playing;
 	StageState stageState_ = StageState::Tutorial;
+	// カットイン
+	Sprite* rapidCutInSprite_ = nullptr;
+	bool rapidCutInActive_ = false;
+	float rapidCutInTimer_ = 0.0f;
+	float gTimeScale;
+	static constexpr float kRapidCutInTime = 1.5f;
 
 	// ポーズ画面
 	Sprite* pauseMenuSprite_ = nullptr;

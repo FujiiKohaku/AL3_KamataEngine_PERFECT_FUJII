@@ -12,7 +12,7 @@ void WalkEnemy::Initialize(Model* model, const Vector3& pos) {
 
 void WalkEnemy::UpdateNormal() {
 
-	    // =========================
+	// =========================
 	// よろめき中の演出
 	// =========================
 	if (isStaggering_) {

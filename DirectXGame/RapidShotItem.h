@@ -1,8 +1,10 @@
 #pragma once
 #include <KamataEngine.h>
 
+
 using namespace KamataEngine;
 class Player;
+class GameScene;
 class RapidShotItem {
 public:
 	void Initialize(Model* model, const Vector3& pos);
@@ -17,6 +19,7 @@ private:
 	Model* model_ = nullptr;
 	bool collected_ = false;
 	float radius_ = 0.5f;
+	
 
 public:
 	const WorldTransform& GetWorldTransform() const { return worldTransform_; }

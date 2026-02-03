@@ -2,6 +2,8 @@
 #include "Math.h"
 #include "Player.h"
 #include <numbers>
+
+#include "GameScene.h"
 void RapidShotItem::Initialize(Model* model, const Vector3& pos) {
 
 	model_ = model;
@@ -40,6 +42,9 @@ void RapidShotItem::OnCollision(Player* player) {
 
 	collected_ = true;
 
-	//効果適用
+	
+	// 効果適用
 	player->ActivateRapidShot(9999.0f);
+
+	
 }
