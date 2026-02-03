@@ -175,6 +175,10 @@ private:
 	uint32_t breakBlockSEHandle_ = 0;
 	uint32_t coinSEHandle_ = 0;
 
+	uint32_t bulletToEnemySEHandle_ = 0;
+
+	uint32_t cutInSEHandle = 0;
+
 	uint32_t tabMenuHandle_ = 0;
 
 	Sprite* tabMenu_ = nullptr;

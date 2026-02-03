@@ -17,6 +17,7 @@ GameScene::~GameScene() {
 	delete tutorialSignModel_;
 	delete pauseMenuSprite_;
 	delete rapidBoardModel_;
+
 	for (Coin* coin : coins_) {
 		delete coin;
 	}
@@ -151,12 +152,13 @@ void GameScene::Initialize() {
 
 	BgmHandle_ = Audio::GetInstance()->LoadWave("gameScene.mp3");
 	bgmPlayHandle_ = Audio::GetInstance()->PlayWave(BgmHandle_, true, 0.5f);
-
+	bulletToEnemySEHandle_ = Audio::GetInstance()->LoadWave("maou_se_battle16.wav");
 	AttackSEHandle_ = Audio::GetInstance()->LoadWave("Attack.mp3");
 	coinSEHandle_ = Audio::GetInstance()->LoadWave("coin.mp3");
 
 	breakBlockSEHandle_ = Audio::GetInstance()->LoadWave("maou_se_battle18.wav");
 
+	cutInSEHandle = Audio::GetInstance()->LoadWave("maou_se_battle10.wav");
 	// テクスチャを作成スプライトへ
 	pauseTExture_ = TextureManager::Load("menu.png");
 	pauseMenuSprite_ = Sprite::Create(pauseTExture_, {0.0f, 0.0f});
@@ -225,6 +227,7 @@ void GameScene::Update() {
 
 		if (IsHitPlayerItem(player_, item)) {
 			item->OnCollision(player_);
+
 			StartRapidCutIn();
 		}
 	}
@@ -357,7 +360,9 @@ void GameScene::Update() {
 
 				bullet.Kill();
 				enemy->OnHit();
+				enemy->StartDying();
 
+				Audio::GetInstance()->PlayWave(bulletToEnemySEHandle_);
 				break;
 			}
 		}
@@ -827,7 +832,7 @@ void GameScene::StartRapidCutIn() {
 
 	rapidCutInActive_ = true;
 	rapidCutInTimer_ = kRapidCutInTime;
-
+	Audio::GetInstance()->PlayWave(cutInSEHandle);
 	// 一瞬スロー（気持ちいい）
-	gTimeScale = 0.2f;
+	gTimeScale = 0.4f;
 }
