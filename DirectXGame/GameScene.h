@@ -181,4 +181,8 @@ private:
 	// チュートリアル看板移動
 	Model* tutorialModelMove_ = nullptr;
 	WorldTransform worldTransformTutorialMove_;
+
+	// 無敵モード看板
+	Model* rapidBoardModel_ = nullptr;
+	WorldTransform worldTransformRapid_;
 };

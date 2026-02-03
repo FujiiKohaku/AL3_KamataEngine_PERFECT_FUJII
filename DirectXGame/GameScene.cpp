@@ -16,6 +16,7 @@ GameScene::~GameScene() {
 	delete explanationSprite_;
 	delete tutorialSignModel_;
 	delete pauseMenuSprite_;
+	delete rapidBoardModel_;
 	for (Coin* coin : coins_) {
 		delete coin;
 	}
@@ -158,6 +159,12 @@ void GameScene::Initialize() {
 
 	tabMenuHandle_ = TextureManager::Load("tabmenu.png");
 	tabMenu_ = Sprite::Create(tabMenuHandle_, {0.0f, 140.0f});
+
+	// 説明看板
+	rapidBoardModel_ = Model::CreateFromOBJ("kanban2");
+	worldTransformRapid_.Initialize();
+	worldTransformRapid_.translation_ = {};
+	worldTransformRapid_.rotation_.y = - std::numbers::pi_v<float> / 2.0f;
 }
 
 // 更新
@@ -201,6 +208,7 @@ void GameScene::Update() {
 			gTimeScale = 1.0f;
 		}
 	}
+
 	for (RapidShotItem* item : rapidShotItems_) {
 
 		item->Update();
@@ -239,7 +247,7 @@ void GameScene::Update() {
 		// -----------------------
 		CameraController::GetInstance()->Update();
 	}
-
+	WorldTransformUpdate(worldTransformRapid_);
 	// -----------------------
 	// ゴール更新
 	// -----------------------
@@ -454,6 +462,8 @@ void GameScene::Draw() {
 	}
 
 	tutorialSignModel_->Draw(worldTransformTutorialSign_, *camera_, nullptr);
+	//無限発射モード描画看板
+	rapidBoardModel_->Draw(worldTransformRapid_, *camera_, nullptr);
 
 	switch (stageState_) {
 	case StageState::Tutorial:
@@ -467,6 +477,7 @@ void GameScene::Draw() {
 		break;
 	}
 	goal_->Draw(camera_);
+
 	// ホッパー
 	for (auto* h : jumpHoppers_) {
 		h->Draw();
@@ -487,6 +498,7 @@ void GameScene::Draw() {
 	for (auto* items_ : rapidShotItems_) {
 		items_->Draw(camera_);
 	}
+
 	player_->GetInhaleEffect()->Draw(camera_);
 	Model::PostDraw();
 
