@@ -23,7 +23,7 @@ void GameOverScene::Initialize() {
 	modelSkydome_ = Model::CreateFromOBJ("skydome", true);
 	skydome_ = new Skydome();
 	skydome_->Initialize(modelSkydome_, &camera_);
-	deadSprite_ = Sprite::Create(TextureManager::Load("dead.png"), {400.0f, 0.0f});
+	deadSprite_ = Sprite::Create(TextureManager::Load("gameover.png"), {0.0f, 0.0f});
 }
 
 void GameOverScene::Update() {

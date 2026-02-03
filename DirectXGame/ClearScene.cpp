@@ -24,7 +24,7 @@ void ClearScene::Initialize() {
 	skydome_ = new Skydome();
 	skydome_->Initialize(modelSkydome_, &camera_);
 
-	clearSprite_ = Sprite::Create(TextureManager::Load("clear.png"), {400.0f, 100.0f});
+	clearSprite_ = Sprite::Create(TextureManager::Load("clear.png"), {0.0f, 0.0f});
 
 }
 
