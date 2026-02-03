@@ -163,7 +163,7 @@ void GameScene::Initialize() {
 	// 説明看板
 	rapidBoardModel_ = Model::CreateFromOBJ("kanban2");
 	worldTransformRapid_.Initialize();
-	worldTransformRapid_.translation_ = {};
+	worldTransformRapid_.translation_ = {80.0f,5.0f,2.0f};
 	worldTransformRapid_.rotation_.y = - std::numbers::pi_v<float> / 2.0f;
 }
 
@@ -247,6 +247,7 @@ void GameScene::Update() {
 		// -----------------------
 		CameraController::GetInstance()->Update();
 	}
+	
 	WorldTransformUpdate(worldTransformRapid_);
 	// -----------------------
 	// ゴール更新
@@ -426,13 +427,7 @@ void GameScene::Update() {
 		Audio::GetInstance()->StopWave(bgmPlayHandle_);
 	}
 
-	// -----------------------
-	// ImGuiデバッグ表示
-	// -----------------------
 
-	// ImGui::Begin("gamePlayScene Debug");
-	// ImGui::Text("This is gamePlayScene!");
-	// ImGui::End();
 
 	//	チュートリアル看板
 	WorldTransformUpdate(worldTransformTutorialSign_);
@@ -462,12 +457,13 @@ void GameScene::Draw() {
 	}
 
 	tutorialSignModel_->Draw(worldTransformTutorialSign_, *camera_, nullptr);
-	//無限発射モード描画看板
-	rapidBoardModel_->Draw(worldTransformRapid_, *camera_, nullptr);
-
+	
 	switch (stageState_) {
 	case StageState::Tutorial:
 		tutorialModelMove_->Draw(worldTransformTutorialMove_, *camera_, nullptr);
+		// 無限発射モード描画看板
+		rapidBoardModel_->Draw(worldTransformRapid_, *camera_, nullptr);
+
 		break;
 	case StageState::Stage1:
 		break;
