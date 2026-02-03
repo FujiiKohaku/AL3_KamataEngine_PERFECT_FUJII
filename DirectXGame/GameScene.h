@@ -19,6 +19,9 @@
 #include "WalkEnemy.h"
 #include <numbers>
 #include <vector>
+
+#include "BlockBreakEffect.h"
+
 class GameScene {
 public:
 	// 初期化
@@ -185,4 +188,9 @@ private:
 	// 無敵モード看板
 	Model* rapidBoardModel_ = nullptr;
 	WorldTransform worldTransformRapid_;
+
+
+	//エフェクト
+	std::vector<std::unique_ptr<BlockBreakEffect>> blockBreakEffects_;
+	Model* blockBreakModel_ = nullptr;
 };

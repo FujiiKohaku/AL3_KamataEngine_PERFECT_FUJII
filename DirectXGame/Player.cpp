@@ -33,6 +33,8 @@ void Player::Initialize(Model* model, Camera* camera, const Vector3& position) {
 }
 void Player::Shoot() {
 
+	//  これを一番最初に入れる
+	StopInhale();
 
 	if (!isRapidShot_) {
 		if (vacuumPoint_ <= 0) {
@@ -40,6 +42,7 @@ void Player::Shoot() {
 		}
 		vacuumPoint_ = 0;
 	}
+
 	std::unique_ptr<PlayerBullet> bullet = std::make_unique<PlayerBullet>();
 
 	Vector3 dir{};
@@ -50,7 +53,6 @@ void Player::Shoot() {
 	}
 
 	bullet->Initialize(bulletModel_, worldTransform_.translation_, dir);
-
 	bullets_.push_back(std::move(bullet));
 
 	vacuumPoint_ = 0;
@@ -208,7 +210,7 @@ void Player::Update() {
 			++it;
 		}
 	}
-	//ラピッドショット！！！
+	// ラピッドショット！！！
 	if (isRapidShot_) {
 		rapidShotTimer_ -= 1.0f / 60.0f;
 		if (rapidShotTimer_ <= 0.0f) {
@@ -312,8 +314,9 @@ void Player::Update() {
 	bool now = Input::GetInstance()->PushKey(DIK_SPACE);
 
 	// すでに何か吸ってたら吸い込み不可
-	if (vacuumPoint_ > 0) {
+	if (vacuumPoint_ > 0 && state_ != PlayerState::Inhale) {
 		StopInhale();
+
 	} else {
 		if (now) {
 			StartInhale();
@@ -346,28 +349,6 @@ void Player::Draw() {
 
 	for (auto& b : bullets_) {
 		b->Draw(camera_);
-	}
-}
-
-void Player::OnCollision(Coin* coin) {
-	if (coin) {
-		// coin->SetCollected(true);
-		//  例: コイン取得音を再生
-		//  SoundManager::GetInstance()->PlaySE("coin");
-	}
-}
-
-void Player::OnCollision(Spike* spike) {
-	if (spike) {
-		StartDeath();
-	}
-}
-
-void Player::OnCollision(Goal* goal) {
-	if (goal) {
-		isGoal_ = true;
-		// 例: ゴールSE
-		// SoundManager::GetInstance()->PlaySE("goal");
 	}
 }
 
@@ -466,7 +447,7 @@ void Player::StartDeath() {
 	deathTimer_ = 1.5f;
 	deathVelocity_ = {0, 0.25f, 0};
 	velocity_ = {0, 0, 0}; // ゲーム操作の速度は無効
-	gTimeScale = 0.25f;//遅くなるスロー
+	gTimeScale = 0.25f;    // 遅くなるスロー
 }
 float Player::EaseOutCubic(float t) { // t = [0.0f, 1.0f]
 	float inv = 1.0f - t;
@@ -499,6 +480,34 @@ void Player::StartInhale() {
 void Player::StopInhale() {
 	state_ = PlayerState::Normal;
 	inhaleHitBox_.active = false;
+}
+
+void Player::OnCollision(Coin* coin) {
+	if (coin) {
+		// coin->SetCollected(true);
+		//  例: コイン取得音を再生
+		//  SoundManager::GetInstance()->PlaySE("coin");
+	}
+}
+
+void Player::OnCollision(Spike* spike) {
+	if (spike) {
+		StartDeath();
+	}
+}
+
+void Player::OnCollision(Goal* goal) {
+	if (goal) {
+		isGoal_ = true;
+		// 例: ゴールSE
+		// SoundManager::GetInstance()->PlaySE("goal");
+	}
+}
+void Player::ActivateRapidShot(float time) {
+
+	isRapidShot_ = true;
+	rapidShotTimer_ = time;
+	CameraController::GetInstance()->StartRapidShotCutIn();
 }
 #pragma region マップの当たり判定をまとめたもの
 // 02_07 スライド13枚目
@@ -538,7 +547,7 @@ void Player::CheckMapCollisionUp(CollisionMapInfo& info) {
 	indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionsNew[kLeftTop]);
 	mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
 
-if (mapChipType == MapChipType::kBlock || mapChipType == MapChipType::kBreakBlock) {
+	if (mapChipType == MapChipType::kBlock || mapChipType == MapChipType::kBreakBlock) {
 		hit = true;
 	}
 
@@ -546,7 +555,7 @@ if (mapChipType == MapChipType::kBlock || mapChipType == MapChipType::kBreakBloc
 	indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionsNew[kRightTop]);
 	mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
 
-if (mapChipType == MapChipType::kBlock || mapChipType == MapChipType::kBreakBlock) {
+	if (mapChipType == MapChipType::kBlock || mapChipType == MapChipType::kBreakBlock) {
 		hit = true;
 	}
 
@@ -596,7 +605,7 @@ void Player::CheckMapCollisionDown(CollisionMapInfo& info) {
 	indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionsNew[kRightBottom]);
 	mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
 
-if (mapChipType == MapChipType::kBlock || mapChipType == MapChipType::kBreakBlock) {
+	if (mapChipType == MapChipType::kBlock || mapChipType == MapChipType::kBreakBlock) {
 		hit = true;
 	}
 
@@ -604,7 +613,7 @@ if (mapChipType == MapChipType::kBlock || mapChipType == MapChipType::kBreakBloc
 	indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionsNew[kLeftBottom]);
 	mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
 
-if (mapChipType == MapChipType::kBlock || mapChipType == MapChipType::kBreakBlock) {
+	if (mapChipType == MapChipType::kBlock || mapChipType == MapChipType::kBreakBlock) {
 		hit = true;
 	}
 
@@ -747,7 +756,7 @@ void Player::CheckMapCollisionRight(CollisionMapInfo& info) {
 	indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionsNew[kRightBottom]);
 	mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
 
-if (mapChipType == MapChipType::kBlock || mapChipType == MapChipType::kBreakBlock) {
+	if (mapChipType == MapChipType::kBlock || mapChipType == MapChipType::kBreakBlock) {
 		hit = true;
 	}
 
@@ -804,7 +813,7 @@ void Player::CheckMapCollisionLeft(CollisionMapInfo& info) {
 	indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionsNew[kLeftTop]);
 	mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
 
-if (mapChipType == MapChipType::kBlock || mapChipType == MapChipType::kBreakBlock) {
+	if (mapChipType == MapChipType::kBlock || mapChipType == MapChipType::kBreakBlock) {
 		hit = true;
 	}
 
@@ -812,7 +821,7 @@ if (mapChipType == MapChipType::kBlock || mapChipType == MapChipType::kBreakBloc
 	indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionsNew[kLeftBottom]);
 	mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
 
-if (mapChipType == MapChipType::kBlock || mapChipType == MapChipType::kBreakBlock) {
+	if (mapChipType == MapChipType::kBlock || mapChipType == MapChipType::kBreakBlock) {
 		hit = true;
 	}
 
@@ -847,7 +856,6 @@ if (mapChipType == MapChipType::kBlock || mapChipType == MapChipType::kBreakBloc
 	}
 }
 
-
 #pragma endregion
 
 #pragma region 角の位置を取得
@@ -865,10 +873,3 @@ Vector3 Player::CornerPosition(const Vector3& center, Corner corner) {
 }
 
 #pragma endregion
-
-void Player::ActivateRapidShot(float time) {
-
-	isRapidShot_ = true;
-	rapidShotTimer_ = time;
-	CameraController::GetInstance()->StartRapidShotCutIn();
-}

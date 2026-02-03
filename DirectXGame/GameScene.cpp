@@ -40,6 +40,7 @@ GameScene::~GameScene() {
 	for (JumpHopper* h : jumpHoppers_) {
 		delete h;
 	}
+	
 	jumpHoppers_.clear();
 
 	enemies_.clear();
@@ -165,6 +166,9 @@ void GameScene::Initialize() {
 	worldTransformRapid_.Initialize();
 	worldTransformRapid_.translation_ = {80.0f,5.0f,2.0f};
 	worldTransformRapid_.rotation_.y = - std::numbers::pi_v<float> / 2.0f;
+
+	//ブロック破壊エフェクト
+	blockBreakModel_ = Model::CreateFromOBJ("breakBlock", false);
 }
 
 // 更新
@@ -391,13 +395,22 @@ void GameScene::Update() {
 				continue;
 			}
 
-			if (block->IsJustBroken()) {
+		if (block->IsJustBroken()) {
 
 				Vector3 pos = block->GetWorldTransform().translation_;
 
-				// フラグを戻す（ここ重要）
+				
+				const int kPieceCount = 6;
+				for (int i = 0; i < kPieceCount; i++) {
+
+					auto effect = std::make_unique<BlockBreakEffect>();
+					effect->Initialize(blockBreakModel_, pos);
+					blockBreakEffects_.push_back(std::move(effect));
+				}
+
 				block->ClearJustBroken();
 			}
+
 		}
 	}
 
@@ -431,6 +444,16 @@ void GameScene::Update() {
 
 	//	チュートリアル看板
 	WorldTransformUpdate(worldTransformTutorialSign_);
+	for (auto it = blockBreakEffects_.begin(); it != blockBreakEffects_.end();) {
+
+		(*it)->Update();
+
+		if (!(*it)->IsAlive()) {
+			it = blockBreakEffects_.erase(it);
+		} else {
+			++it;
+		}
+	}
 }
 
 // 描画
@@ -455,7 +478,9 @@ void GameScene::Draw() {
 			block->Draw(camera_);
 		}
 	}
-
+	for (auto& effect : blockBreakEffects_) {
+		effect->Draw(camera_);
+	}
 	tutorialSignModel_->Draw(worldTransformTutorialSign_, *camera_, nullptr);
 	
 	switch (stageState_) {

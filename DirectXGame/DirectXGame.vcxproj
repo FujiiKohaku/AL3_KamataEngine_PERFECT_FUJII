@@ -107,6 +107,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Block.cpp" />
+    <ClCompile Include="BlockBreakEffect.cpp" />
     <ClCompile Include="CameraController.cpp" />
     <ClCompile Include="ChaserEnemy.cpp" />
     <ClCompile Include="ClearScene.cpp" />
@@ -209,6 +210,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Block.h" />
+    <ClInclude Include="BlockBreakEffect.h" />
     <ClInclude Include="CameraController.h" />
     <ClInclude Include="ChaserEnemy.h" />
     <ClInclude Include="ClearScene.h" />
