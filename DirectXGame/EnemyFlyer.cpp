@@ -7,7 +7,15 @@ void EnemyFlyer::Initialize(Model* model, const Vector3& pos) {
 	center_ = pos; // ここを基準に飛び回る
 	timer_ = 0.0f;
 }
+void EnemyFlyer::OnHit() {
 
+	if (state_ == State::Dying || state_ == State::Pulled) {
+		return;
+	}
+
+	// 飛行敵は1発で死亡にするなら
+	StartDying();
+}
 void EnemyFlyer::UpdateNormal() {
 	timer_ += 0.02f; // 速度（大きくすると速くなる）
 

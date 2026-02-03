@@ -360,7 +360,7 @@ void GameScene::Update() {
 
 				bullet.Kill();
 				enemy->OnHit();
-				enemy->StartDying();
+			
 
 				Audio::GetInstance()->PlayWave(bulletToEnemySEHandle_);
 				break;

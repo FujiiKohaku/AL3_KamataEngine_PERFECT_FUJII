@@ -25,7 +25,8 @@ private:
 	//---------------
 	Skydome* skydome_ = nullptr;
 	Model* modelSkydome_ = nullptr;
-
+	float spriteBaseY_ = 0.0f;
+	float spriteAnimTime_ = 0.0f;
 
 	// Audio
 	uint32_t bgmHandle_ = 0;

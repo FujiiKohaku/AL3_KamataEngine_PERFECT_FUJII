@@ -20,6 +20,8 @@ void TitleScene::Initialize() {
 	basePos_ = worldTransformTitle_.translation_;
 
 	titleSprite_ = Sprite::Create(TextureManager::Load("title.png"), {-10.0f, -170.0f});
+	spriteBaseY_ = -170.0f;
+	spriteAnimTime_ = 0.0f;
 	worldTransformLogo_.Initialize();
 	worldTransformLogo_.rotation_.x = std::numbers::pi_v<float> / 2.0f;
 	worldTransformLogo_.rotation_.y = std::numbers::pi_v<float>;
@@ -54,8 +56,13 @@ void TitleScene::Update() {
 	camera_.UpdateMatrix();
 
 	skydome_->Update();
+	spriteAnimTime_ += 0.05f;
 
+	float offsetY = std::sinf(spriteAnimTime_) * 10.0f;
+
+	titleSprite_->SetPosition({-10.0f, spriteBaseY_ + offsetY});
 	seSprite_ = Sprite::Create(TextureManager::Load("magou.png"), {0.0f, 0.0f});
+
 }
 
 void TitleScene::Draw() {

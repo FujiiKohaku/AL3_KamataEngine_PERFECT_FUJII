@@ -4,6 +4,7 @@
 class ChaserEnemy : public EnemyBase {
 public:
 	void Initialize(Model* model, const Vector3& pos, Player* player);
+	void OnHit() override;
 
 protected:
 	void UpdateNormal() override; // 待機 or 追尾処理

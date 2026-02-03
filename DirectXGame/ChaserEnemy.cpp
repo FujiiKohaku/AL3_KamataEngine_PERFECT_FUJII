@@ -7,6 +7,16 @@ void ChaserEnemy::Initialize(Model* model, const Vector3& pos, Player* player) {
 	player_ = player;
 }
 
+void ChaserEnemy::OnHit() {
+
+	if (state_ == State::Dying || state_ == State::Pulled) {
+		return;
+	}
+
+	// 飛行敵は1発で死亡にするなら
+	StartDying();
+}
+
 void ChaserEnemy::UpdateNormal() {
 	if (!player_)
 		return;

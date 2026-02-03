@@ -4,6 +4,7 @@
 class EnemyFlyer : public EnemyBase {
 public:
 	void Initialize(Model* model, const Vector3& pos) override;
+	void OnHit() override;
 
 protected:
 	void UpdateNormal() override; // 通常時の動き
