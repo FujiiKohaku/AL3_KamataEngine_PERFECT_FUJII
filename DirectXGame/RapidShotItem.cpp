@@ -1,6 +1,7 @@
 #include "RapidShotItem.h"
 #include "Math.h"
 #include "Player.h"
+#include <numbers>
 void RapidShotItem::Initialize(Model* model, const Vector3& pos) {
 
 	model_ = model;
@@ -8,6 +9,7 @@ void RapidShotItem::Initialize(Model* model, const Vector3& pos) {
 	worldTransform_.Initialize();
 	worldTransform_.scale_ = {0.5f, 0.5f, 0.5f};
 	worldTransform_.translation_ = pos;
+
 }
 
 void RapidShotItem::Update() {
@@ -15,6 +17,8 @@ void RapidShotItem::Update() {
 	if (collected_) {
 		return;
 	}
+
+	worldTransform_.rotation_.y += 0.01f;
 
 	WorldTransformUpdate(worldTransform_);
 }
@@ -36,6 +40,6 @@ void RapidShotItem::OnCollision(Player* player) {
 
 	collected_ = true;
 
-	// 効果付与（3秒撃ち放題）
+	//効果適用
 	player->ActivateRapidShot(9999.0f);
 }

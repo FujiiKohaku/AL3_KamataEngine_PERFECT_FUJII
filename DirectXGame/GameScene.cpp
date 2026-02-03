@@ -331,7 +331,7 @@ void GameScene::Update() {
 			if (dist < enemy->GetRadius() + bullet.GetRadius()) {
 
 				bullet.Kill();
-				enemy->StartDying();
+				enemy->OnHit();
 				break;
 			}
 		}
@@ -647,7 +647,7 @@ void GameScene::CreateRapidShotItemsFromMap() {
 				Vector3 pos = mapChipField_->GetMapChipPositionbyIndex(j, i);
 
 				RapidShotItem* item = new RapidShotItem();
-				item->Initialize(Model::CreateFromOBJ("spike"), pos);
+				item->Initialize(Model::CreateFromOBJ("Candy"), pos);
 
 				rapidShotItems_.push_back(item);
 			}

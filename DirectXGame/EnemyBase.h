@@ -14,7 +14,7 @@ public:
 	void Draw(Camera* camera);
 	void OnCollision(Player* player);
 	void StartPulled(Player* player);
-
+	virtual void OnHit() {}
 	bool IsDead() const { return isDead_; }
 	const WorldTransform& GetWorldTransform() const { return worldTransform_; }
 	float GetRadius() const { return kEnemyRadius; }
