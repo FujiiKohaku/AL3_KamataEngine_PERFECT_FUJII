@@ -335,7 +335,7 @@ void GameScene::Update() {
 	}
 
 	for (auto& bulletPtr : player_->GetBullets()) {
-
+		　
 		if (!bulletPtr)
 			continue;
 
